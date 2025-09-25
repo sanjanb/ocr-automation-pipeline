@@ -51,6 +51,10 @@ Document Upload → Classification → OCR Processing → Entity Extraction → 
     Web UI         (Vision ML)     (OCR Engines)     (spaCy + Regex)  Validation    + Metadata
 ```
 
+---
+
+## ![howitlooks](D:\Projects\MIT Hackathon\ocr-automation-pipeline\assets\look.png)
+
 ## Project Structure
 
 ```
