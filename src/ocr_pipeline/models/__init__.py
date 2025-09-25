@@ -78,11 +78,11 @@ class BaseDocumentData(BaseModel):
 
 class MarksheetData(BaseDocumentData):
     """Data model for marksheet documents"""
-    roll_number: str = Field(..., regex=r"^\d{6,12}$")
+    roll_number: str = Field(..., pattern=r"^\d{6,12}$")
     board: str
     year: int = Field(..., ge=1990, le=datetime.now().year)
     school_name: Optional[str] = None
-    dob: Optional[str] = Field(None, regex=r"^\d{4}-\d{2}-\d{2}$")
+    dob: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     father_name: Optional[str] = None
     subjects: Dict[str, int] = Field(..., description="Subject-wise marks")
     total_marks: Optional[int] = None
@@ -105,19 +105,19 @@ class Marksheet10thData(MarksheetData):
 class Marksheet12thData(MarksheetData):
     """Specific model for 12th marksheet"""
     document_type: DocumentType = DocumentType.MARKSHEET_12TH
-    stream: str = Field(..., regex=r"^(Science|Commerce|Arts|Humanities)$")
+    stream: str = Field(..., pattern=r"^(Science|Commerce|Arts|Humanities)$")
 
 class EntranceScorecardData(BaseDocumentData):
     """Data model for entrance exam scorecard"""
     document_type: DocumentType = DocumentType.ENTRANCE_SCORECARD
-    roll_number: str = Field(..., regex=r"^[A-Z0-9]{8,15}$")
+    roll_number: str = Field(..., pattern=r"^[A-Z0-9]{8,15}$")
     exam_name: str
     rank: int = Field(..., ge=1, le=10000000)
     category_rank: Optional[int] = Field(None, ge=1)
     score: int = Field(..., ge=0)
     percentile: Optional[float] = Field(None, ge=0, le=100)
     category: Optional[str] = None
-    exam_date: Optional[str] = Field(None, regex=r"^\d{4}-\d{2}-\d{2}$")
+    exam_date: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     qualifying_marks: Optional[int] = Field(None, ge=0)
     
     @validator('category_rank')
@@ -129,24 +129,24 @@ class EntranceScorecardData(BaseDocumentData):
 class CasteCertificateData(BaseDocumentData):
     """Data model for caste certificate"""
     document_type: DocumentType = DocumentType.CASTE_CERTIFICATE
-    category: str = Field(..., regex=r"^(SC|ST|OBC|EWS)$")
+    category: str = Field(..., pattern=r"^(SC|ST|OBC|EWS)$")
     caste: str = Field(..., max_length=100)
     issuing_authority: str = Field(..., max_length=200)
-    certificate_number: Optional[str] = Field(None, regex=r"^[A-Z0-9/-]+$")
-    issue_date: Optional[str] = Field(None, regex=r"^\d{4}-\d{2}-\d{2}$")
-    validity_date: Optional[str] = Field(None, regex=r"^\d{4}-\d{2}-\d{2}$")
+    certificate_number: Optional[str] = Field(None, pattern=r"^[A-Z0-9/-]+$")
+    issue_date: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    validity_date: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     father_name: Optional[str] = None
     address: Optional[Dict[str, str]] = None
 
 class AadharCardData(BaseDocumentData):
     """Data model for Aadhar card"""
     document_type: DocumentType = DocumentType.AADHAR_CARD
-    aadhar_number: str = Field(..., regex=r"^\d{4}\s*\d{4}\s*\d{4}$")
-    dob: str = Field(..., regex=r"^\d{4}-\d{2}-\d{2}$")
-    gender: Optional[str] = Field(None, regex=r"^(Male|Female|Other)$")
+    aadhar_number: str = Field(..., pattern=r"^\d{4}\s*\d{4}\s*\d{4}$")
+    dob: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    gender: Optional[str] = Field(None, pattern=r"^(Male|Female|Other)$")
     father_name: Optional[str] = None
     address: Optional[Dict[str, str]] = None
-    mobile: Optional[str] = Field(None, regex=r"^[6-9]\d{9}$")
+    mobile: Optional[str] = Field(None, pattern=r"^[6-9]\d{9}$")
     email: Optional[str] = None
 
 # Processing result models
