@@ -1,18 +1,18 @@
-# OCR Automation Pipeline 🚀
+# OCR Automation Pipeline 
 
 **MIT Hackathon Project - Intelligent Document Processing System**
 
 A comprehensive OCR automation pipeline for processing admission documents with AI-powered classification, multi-engine OCR, intelligent entity extraction, and robust validation.
 
-## 🌟 Features
+## Features
 
-### 🧠 **AI-Powered Document Classification**
+### **AI-Powered Document Classification**
 
 - Automatically identifies document types (marksheets, certificates, admit cards, etc.)
 - Uses computer vision and pattern recognition
 - Supports 10+ document types for admission processes
 
-### 📄 **Multi-Engine OCR Processing**
+### **Multi-Engine OCR Processing**
 
 - **EasyOCR**: High accuracy with GPU acceleration support
 - **Tesseract**: Industry-standard OCR engine
@@ -20,21 +20,21 @@ A comprehensive OCR automation pipeline for processing admission documents with 
 - Automatic best-result selection across engines
 - Advanced image preprocessing (denoise, deskew, contrast enhancement)
 
-### 🔍 **Intelligent Entity Extraction**
+### **Intelligent Entity Extraction**
 
 - NLP-powered entity recognition using spaCy
 - Document-specific extraction templates
 - Regex pattern matching for structured data
 - Confidence scoring and validation
 
-### ✅ **Comprehensive Validation**
+### **Comprehensive Validation**
 
 - JSON schema validation for each document type
 - Cross-document consistency checking
 - Data integrity verification
 - Business rule enforcement
 
-### 🌐 **Web Interface**
+### **Web Interface**
 
 - Modern FastAPI-based REST API
 - Interactive web UI for document upload
@@ -42,7 +42,7 @@ A comprehensive OCR automation pipeline for processing admission documents with 
 - Structured JSON output display
 - Batch processing support
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 Document Upload → Classification → OCR Processing → Entity Extraction → Validation → Structured Output
@@ -51,7 +51,7 @@ Document Upload → Classification → OCR Processing → Entity Extraction → 
     Web UI         (Vision ML)     (OCR Engines)     (spaCy + Regex)  Validation    + Metadata
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ocr-automation-pipeline/
@@ -81,7 +81,7 @@ ocr-automation-pipeline/
 └── README.md                      # This file
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. **Setup Environment**
 
@@ -112,7 +112,7 @@ python run_demo.py
 - **API Documentation**: http://localhost:8000/api/docs
 - **Alternative API Docs**: http://localhost:8000/api/redoc
 
-## 📋 Supported Document Types
+## Supported Document Types
 
 | Document Type             | Description                  | Key Data Extracted                         |
 | ------------------------- | ---------------------------- | ------------------------------------------ |
@@ -127,7 +127,7 @@ python run_demo.py
 | **Domicile Certificate**  | Residence proof              | Name, Address, State, Certificate validity |
 | **Passport Photo**        | Student photograph           | Face detection, Image quality check        |
 
-## 🛠️ Technical Stack
+## Technical Stack
 
 ### **Core Technologies**
 
@@ -156,7 +156,7 @@ python run_demo.py
 - **Pillow (PIL)**: Image processing
 - **scikit-image**: Advanced image processing
 
-## 🔧 API Usage
+## API Usage
 
 ### **Single Document Processing**
 
@@ -191,7 +191,7 @@ curl -X POST "http://localhost:8000/api/process-batch" \
 curl -X GET "http://localhost:8000/api/health"
 ```
 
-## 📊 Output Format
+## Output Format
 
 The pipeline generates structured JSON output:
 
@@ -235,7 +235,7 @@ The pipeline generates structured JSON output:
 }
 ```
 
-## 🏆 Demo Highlights
+## Demo Highlights
 
 ### **For Hackathon Judges**
 
@@ -275,7 +275,7 @@ The pipeline generates structured JSON output:
 2. Add custom validators in `DocumentValidator`
 3. Extend cross-validation logic in `CrossValidator`
 
-## 📈 Performance & Scalability
+## Performance & Scalability
 
 - **Processing Time**: 2-5 seconds per document
 - **Supported Formats**: PDF, JPG, PNG, TIFF
@@ -283,7 +283,7 @@ The pipeline generates structured JSON output:
 - **Accuracy**: 85-95% depending on document quality
 - **Memory Usage**: ~500MB baseline + ~200MB per concurrent process
 
-## 🚨 Known Limitations
+## Known Limitations
 
 1. **Tesseract Installation**: Requires manual system installation
 2. **GPU Support**: EasyOCR benefits from GPU but works on CPU
@@ -291,7 +291,7 @@ The pipeline generates structured JSON output:
 4. **File Size**: Recommended max 10MB per document
 5. **Complex Layouts**: May struggle with heavily formatted documents
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - [ ] Multi-language support (Hindi, regional languages)
 - [ ] GPU optimization for faster processing
@@ -302,7 +302,7 @@ The pipeline generates structured JSON output:
 - [ ] Advanced ML models for classification
 - [ ] Database integration for persistence
 
-## 🤝 Contributing
+## Contributing
 
 This is a hackathon project built for demonstration. For production use:
 
@@ -313,11 +313,11 @@ This is a hackathon project built for demonstration. For production use:
 5. Add database integration
 6. Implement proper error handling
 
-## 📝 License
+## License
 
 Built for MIT Hackathon - Educational and demonstration purposes.
 
-## 🙋‍♂️ Support
+## Support
 
 For hackathon demonstration and questions, the system includes:
 
@@ -329,7 +329,7 @@ For hackathon demonstration and questions, the system includes:
 
 ---
 
-**Ready for Demo! 🎯**
+**Ready for Demo! **
 
 The OCR Automation Pipeline is now fully operational and ready for hackathon presentation. Upload documents, see the magic happen, and explore the API documentation for technical details.
 
