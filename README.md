@@ -1,4 +1,5 @@
 # OCR Automation Pipeline 🚀
+
 **MIT Hackathon Project - Intelligent Document Processing System**
 
 A comprehensive OCR automation pipeline for processing admission documents with AI-powered classification, multi-engine OCR, intelligent entity extraction, and robust validation.
@@ -6,11 +7,13 @@ A comprehensive OCR automation pipeline for processing admission documents with 
 ## 🌟 Features
 
 ### 🧠 **AI-Powered Document Classification**
+
 - Automatically identifies document types (marksheets, certificates, admit cards, etc.)
 - Uses computer vision and pattern recognition
 - Supports 10+ document types for admission processes
 
 ### 📄 **Multi-Engine OCR Processing**
+
 - **EasyOCR**: High accuracy with GPU acceleration support
 - **Tesseract**: Industry-standard OCR engine
 - **PaddleOCR**: Advanced Chinese/multilingual support (optional)
@@ -18,18 +21,21 @@ A comprehensive OCR automation pipeline for processing admission documents with 
 - Advanced image preprocessing (denoise, deskew, contrast enhancement)
 
 ### 🔍 **Intelligent Entity Extraction**
+
 - NLP-powered entity recognition using spaCy
 - Document-specific extraction templates
 - Regex pattern matching for structured data
 - Confidence scoring and validation
 
 ### ✅ **Comprehensive Validation**
+
 - JSON schema validation for each document type
 - Cross-document consistency checking
 - Data integrity verification
 - Business rule enforcement
 
 ### 🌐 **Web Interface**
+
 - Modern FastAPI-based REST API
 - Interactive web UI for document upload
 - Real-time processing status
@@ -52,7 +58,7 @@ ocr-automation-pipeline/
 ├── src/
 │   ├── ocr_pipeline/
 │   │   ├── __init__.py              # Package exports and main API
-│   │   ├── pipeline.py              # Main orchestrator 
+│   │   ├── pipeline.py              # Main orchestrator
 │   │   ├── classifiers/
 │   │   │   └── document_classifier.py  # AI document type classifier
 │   │   ├── extractors/
@@ -78,6 +84,7 @@ ocr-automation-pipeline/
 ## 🚀 Quick Start
 
 ### 1. **Setup Environment**
+
 ```bash
 # Clone or navigate to project directory
 cd ocr-automation-pipeline
@@ -93,51 +100,57 @@ pip install -r requirements.txt
 ```
 
 ### 2. **Start the Web Application**
+
 ```bash
 cd src/web_app
 python run_demo.py
 ```
 
 ### 3. **Access the Demo**
+
 - **Web Interface**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/api/docs  
+- **API Documentation**: http://localhost:8000/api/docs
 - **Alternative API Docs**: http://localhost:8000/api/redoc
 
 ## 📋 Supported Document Types
 
-| Document Type | Description | Key Data Extracted |
-|---------------|-------------|-------------------|
-| **10th Marksheet** | Class X academic records | Name, Roll No., Marks, Percentage, Board |
-| **12th Marksheet** | Class XII academic records | Name, Roll No., Stream, Marks, Board |
-| **Entrance Scorecard** | JEE/NEET exam results | Name, Roll No., Subject scores, Percentile |
-| **Admit Card** | Entrance exam hall tickets | Name, Roll No., Exam center, Date |
-| **Caste Certificate** | SC/ST/OBC certificates | Name, Category, Certificate No., Validity |
-| **Aadhar Card** | Government ID card | Aadhar No., Name, DOB, Address |
-| **Transfer Certificate** | School leaving certificate | Name, Class, School, Date of issue |
+| Document Type             | Description                  | Key Data Extracted                         |
+| ------------------------- | ---------------------------- | ------------------------------------------ |
+| **10th Marksheet**        | Class X academic records     | Name, Roll No., Marks, Percentage, Board   |
+| **12th Marksheet**        | Class XII academic records   | Name, Roll No., Stream, Marks, Board       |
+| **Entrance Scorecard**    | JEE/NEET exam results        | Name, Roll No., Subject scores, Percentile |
+| **Admit Card**            | Entrance exam hall tickets   | Name, Roll No., Exam center, Date          |
+| **Caste Certificate**     | SC/ST/OBC certificates       | Name, Category, Certificate No., Validity  |
+| **Aadhar Card**           | Government ID card           | Aadhar No., Name, DOB, Address             |
+| **Transfer Certificate**  | School leaving certificate   | Name, Class, School, Date of issue         |
 | **Migration Certificate** | University transfer document | Name, Course, University, Migration reason |
-| **Domicile Certificate** | Residence proof | Name, Address, State, Certificate validity |
-| **Passport Photo** | Student photograph | Face detection, Image quality check |
+| **Domicile Certificate**  | Residence proof              | Name, Address, State, Certificate validity |
+| **Passport Photo**        | Student photograph           | Face detection, Image quality check        |
 
 ## 🛠️ Technical Stack
 
 ### **Core Technologies**
+
 - **Python 3.8+**: Primary development language
 - **FastAPI**: Modern web framework for APIs
 - **Pydantic**: Data validation and settings management
 - **Uvicorn**: ASGI server for production deployment
 
 ### **Machine Learning & AI**
+
 - **spaCy**: Industrial-strength NLP
 - **Transformers**: Hugging Face transformer models
 - **scikit-learn**: Machine learning utilities
 - **OpenCV**: Computer vision and image processing
 
 ### **OCR Engines**
+
 - **EasyOCR**: Deep learning-based OCR
 - **Tesseract**: Google's OCR engine
 - **PaddleOCR**: Baidu's multilingual OCR (optional)
 
 ### **Data Processing**
+
 - **Pandas**: Data manipulation and analysis
 - **NumPy**: Numerical computing
 - **Pillow (PIL)**: Image processing
@@ -146,6 +159,7 @@ python run_demo.py
 ## 🔧 API Usage
 
 ### **Single Document Processing**
+
 ```bash
 # Upload document
 curl -X POST "http://localhost:8000/api/upload" \
@@ -161,6 +175,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 ### **Batch Processing**
+
 ```bash
 curl -X POST "http://localhost:8000/api/process-batch" \
      -H "accept: application/json" \
@@ -171,6 +186,7 @@ curl -X POST "http://localhost:8000/api/process-batch" \
 ```
 
 ### **Health Check**
+
 ```bash
 curl -X GET "http://localhost:8000/api/health"
 ```
@@ -222,34 +238,39 @@ The pipeline generates structured JSON output:
 ## 🏆 Demo Highlights
 
 ### **For Hackathon Judges**
+
 1. **Upload any admission document** via the web interface
-2. **Watch real-time processing** with status updates  
+2. **Watch real-time processing** with status updates
 3. **See structured JSON output** with extracted data
 4. **Validate cross-document consistency** with batch upload
 5. **Check API documentation** at `/api/docs`
 
 ### **Key Demo Documents**
+
 - Sample 10th marksheet → Structured academic data
-- Sample JEE scorecard → Entrance exam results  
+- Sample JEE scorecard → Entrance exam results
 - Sample Aadhar card → Identity verification data
 - Multiple documents → Cross-validation demo
 
 ## 🔧 Development & Customization
 
 ### **Adding New Document Types**
+
 1. Add document type to `DocumentType` enum
 2. Create data model in `models/__init__.py`
-3. Add classification patterns in `document_classifier.py`  
+3. Add classification patterns in `document_classifier.py`
 4. Create extraction template in `entity_extractor.py`
 5. Define JSON schema in `json_validator.py`
 
 ### **Adding New OCR Engines**
+
 1. Extend `BaseOCREngine` in `ocr_engine.py`
 2. Implement `extract_text()` method
 3. Add to `MultiEngineOCR` initialization
 4. Update configuration options
 
 ### **Extending Validation Rules**
+
 1. Modify schemas in `DocumentSchemas` class
 2. Add custom validators in `DocumentValidator`
 3. Extend cross-validation logic in `CrossValidator`
@@ -273,7 +294,7 @@ The pipeline generates structured JSON output:
 ## 🔮 Future Enhancements
 
 - [ ] Multi-language support (Hindi, regional languages)
-- [ ] GPU optimization for faster processing  
+- [ ] GPU optimization for faster processing
 - [ ] Document quality assessment and enhancement
 - [ ] Integration with admission management systems
 - [ ] Mobile application support
@@ -286,7 +307,7 @@ The pipeline generates structured JSON output:
 This is a hackathon project built for demonstration. For production use:
 
 1. Add comprehensive test coverage
-2. Implement proper logging and monitoring  
+2. Implement proper logging and monitoring
 3. Add authentication and authorization
 4. Optimize for production deployment
 5. Add database integration
@@ -299,8 +320,9 @@ Built for MIT Hackathon - Educational and demonstration purposes.
 ## 🙋‍♂️ Support
 
 For hackathon demonstration and questions, the system includes:
+
 - Live web interface with upload capabilities
-- Comprehensive API documentation  
+- Comprehensive API documentation
 - Sample documents for testing
 - Real-time processing status
 - Detailed error messages and logging
@@ -311,5 +333,5 @@ For hackathon demonstration and questions, the system includes:
 
 The OCR Automation Pipeline is now fully operational and ready for hackathon presentation. Upload documents, see the magic happen, and explore the API documentation for technical details.
 
-*Built with ❤️ for MIT Hackathon*
+_Built with ❤️ for MIT Hackathon_
 for the mit hackathon, a sub module to extract the entities from the student document
