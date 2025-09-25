@@ -169,10 +169,15 @@ class EntityExtractor:
                     ],
                     "name": [
                         r"candidate[''']?s\s*name\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"candidate[''']?s\s*name\s*:?\s*([A-Z][A-Z\s]{2,30})",
                         r"name\s*of\s*candidate\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"name\s*of\s*candidate\s*:?\s*([A-Z][A-Z\s]{2,30})",
                         r"student\s*name\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"student\s*name\s*:?\s*([A-Z][A-Z\s]{2,30})",
                         r"candidate.*name.*}\s*([A-Z][A-Z\s]{2,30})",
-                        r"([A-Z]{3,15}\s+[A-Z]\s+[A-Z])",  # Pattern like SANJAN B M
+                        r"candidate.*name.*([A-Z][A-Z\s]{2,30})",
+                        # More specific patterns that avoid father/mother context
+                        r"([A-Z]{3,15}\s+[A-Z]\s+[A-Z])(?=.*father[''']?s\s*name)",  # Before father's name
                         r"name\s*}\s*([A-Z][A-Z\s]{2,30})"
                     ],
                     "father_name": [
@@ -352,15 +357,24 @@ class EntityExtractor:
                 subjects = {}
                 for subject_pattern in template["subject_patterns"]:
                     for text_variant in [text, clean_text]:
-                        matches = re.finditer(subject_pattern, text_variant, re.IGNORECASE)
+                        matches = re.finditer(subject_pattern, text_variant, re.IGNORECASE | re.DOTALL)
                         for match in matches:
                             if len(match.groups()) >= 2:
                                 subject_name = match.group(1).strip().title()
                                 try:
-                                    subject_score = int(re.sub(r'[^\d]', '', match.group(2)))
-                                    subjects[subject_name] = subject_score
-                                except ValueError:
+                                    score_text = match.group(2).strip()
+                                    # Extract just the numeric part
+                                    score_match = re.search(r'(\d{1,3})', score_text)
+                                    if score_match:
+                                        subject_score = int(score_match.group(1))
+                                        if 0 <= subject_score <= 100:  # Valid score range
+                                            subjects[subject_name] = subject_score
+                                except (ValueError, AttributeError):
                                     continue
+                
+                # Additional subject extraction for better coverage
+                if not subjects:
+                    subjects = self._extract_subjects_fallback(text)
                 
                 if subjects:
                     entities["subjects"] = subjects
@@ -381,11 +395,26 @@ class EntityExtractor:
         # Process text with spaCy
         doc = self.nlp(text)
         
-        # Extract named entities
+        # Extract named entities - but be smarter about person names
+        person_candidates = []
+        
         for ent in doc.ents:
             if ent.label_ == "PERSON" and "name" in template.get("required_fields", []):
-                if "name" not in entities:  # Only take first person found
-                    entities["name"] = ent.text.strip()
+                # Collect all person names with context
+                person_name = ent.text.strip()
+                start_pos = ent.start_char
+                # Get context around the person name
+                context_before = text[max(0, start_pos-50):start_pos].lower()
+                context_after = text[start_pos+len(person_name):start_pos+len(person_name)+50].lower()
+                
+                # Score the person name based on context
+                score = 0
+                if any(keyword in context_before for keyword in ['candidate', 'student', 'name of']):
+                    score += 10
+                if any(keyword in context_before for keyword in ['father', 'mother', 'parent']):
+                    score -= 5  # Penalize parent names
+                    
+                person_candidates.append((person_name, score, start_pos))
             
             elif ent.label_ == "DATE":
                 # Try to extract year or date of birth
@@ -410,6 +439,11 @@ class EntityExtractor:
                 elif any(keyword in org_text for keyword in ["school", "college", "university"]):
                     if "school_name" not in entities:
                         entities["school_name"] = ent.text.strip()
+        
+        # Choose the best person name candidate (highest score, or first if tied)
+        if person_candidates and "name" not in entities:
+            best_candidate = max(person_candidates, key=lambda x: (x[1], -x[2]))  # Highest score, then earliest position
+            entities["name"] = self._clean_name(best_candidate[0])
         
         return entities
     
@@ -538,6 +572,163 @@ class EntityExtractor:
             validated[field_name] = value
         
         return validated
+    
+    def _preprocess_ocr_text(self, text: str) -> str:
+        """Preprocess OCR text to fix common errors"""
+        # Common OCR error corrections
+        corrections = {
+            # Common character substitutions
+            'Educejio': 'Education',
+            'Educatio': 'Education', 
+            'Educafion': 'Education',
+            'Govemment': 'Government',
+            'Govemrnent': 'Government',
+            'Departrnent': 'Department',
+            'Depariment': 'Department',
+            'Karnateka': 'Karnataka',
+            'Kamataka': 'Karnataka',
+            'Pre-Unlversity': 'Pre-University',
+            'Pre-Unlverslty': 'Pre-University',
+            'Reglster': 'Register',
+            'Reglstratlon': 'Registration',
+            'Candldate': 'Candidate',
+            'Cendldate': 'Candidate',
+            'Studenl': 'Student',
+            'Siudent': 'Student',
+            'Fathe1': 'Father',
+            'Mothe1': 'Mother',
+            'Ma1ks': 'Marks',
+            'Malks': 'Marks',
+            'Subjecl': 'Subject',
+            'Subjecis': 'Subjects',
+            # Numbers that might be confused
+            'O': '0',  # Letter O to zero
+            'l': '1',  # Letter l to one
+            'S': '5',  # Sometimes S is confused with 5
+            'G': '6',  # Sometimes G is confused with 6
+        }
+        
+        cleaned_text = text
+        for wrong, correct in corrections.items():
+            cleaned_text = re.sub(rf'\b{re.escape(wrong)}\b', correct, cleaned_text, flags=re.IGNORECASE)
+        
+        # Fix spacing issues
+        cleaned_text = re.sub(r'\s+', ' ', cleaned_text)  # Multiple spaces to single
+        cleaned_text = re.sub(r'([a-z])([A-Z])', r'\1 \2', cleaned_text)  # Add space between lowercase and uppercase
+        
+        return cleaned_text
+    
+    def _clean_name(self, name: str) -> str:
+        """Clean extracted name"""
+        if not name:
+            return "Unknown"
+            
+        # Remove extra spaces and special characters
+        cleaned = re.sub(r'[^\w\s]', '', name)
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # Capitalize properly
+        cleaned = ' '.join(word.capitalize() for word in cleaned.split())
+        
+        # Validate it looks like a name (at least 2 parts, each at least 1 char)
+        parts = cleaned.split()
+        if len(parts) >= 2 and all(len(part) >= 1 for part in parts):
+            return cleaned
+        
+        return "Unknown"
+    
+    def _extract_name_fallback(self, text: str) -> str:
+        """Fallback method to extract name from text"""
+        # Look for common name patterns in PUC documents - prioritize Candidate's Name
+        patterns = [
+            r"candidate[''']?s\s*name\s*[:\}]\s*([A-Z][A-Z\s]{5,30})",
+            r"name\s*of\s*candidate\s*[:\}]\s*([A-Z][A-Z\s]{5,30})",
+            r"student\s*name\s*[:\}]\s*([A-Z][A-Z\s]{5,30})",
+            # Look for patterns before Father's/Mother's name context
+            r"([A-Z]{3,15}\s+[A-Z]\s+[A-Z])(?=.*father[''']?s\s*name)",  # Like SANJAN B M before Father's Name
+        ]
+        
+        for pattern in patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE | re.DOTALL)
+            for match in matches:
+                name_candidate = match.group(1).strip() if match.groups() else match.group(0).strip()
+                name = self._clean_name(name_candidate)
+                if name != "Unknown" and len(name.split()) >= 2:
+                    return name
+        
+        # If no specific pattern matches, try the general pattern but filter out parents' names
+        general_pattern = r"([A-Z]{3,15}\s+[A-Z]\s+[A-Z])"
+        matches = re.finditer(general_pattern, text, re.IGNORECASE)
+        candidate_names = []
+        
+        for match in matches:
+            name_candidate = match.group(1).strip()
+            match_start = match.start()
+            # Check context around the match
+            context_before = text[max(0, match_start-30):match_start].lower()
+            context_after = text[match.end():match.end()+30].lower()
+            
+            # Skip if this looks like father's or mother's name
+            if any(keyword in context_before for keyword in ['father', 'mother', 'parent']):
+                continue
+                
+            name = self._clean_name(name_candidate)
+            if name != "Unknown" and len(name.split()) >= 2:
+                candidate_names.append(name)
+        
+        # Return first valid candidate name
+        if candidate_names:
+            return candidate_names[0]
+        
+        return "Unknown"
+    
+    def _extract_roll_number_fallback(self, text: str) -> str:
+        """Fallback method to extract roll/register number"""
+        # Look for 6-digit numbers (common in PUC)
+        patterns = [
+            r'(\d{6,8})',  # Any 6-8 digit number
+            r'No[:\.\s]*(\d{6,8})',
+            r'Register[:\.\s]*(\d{6,8})',
+            r'Roll[:\.\s]*(\d{6,8})',
+        ]
+        
+        for pattern in patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                number = match.group(1).strip()
+                if 6 <= len(number) <= 8:  # Reasonable length for roll number
+                    return number
+        
+        return "Unknown"
+    
+    def _extract_subjects_fallback(self, text: str) -> dict:
+        """Fallback method to extract subjects and scores"""
+        subjects = {}
+        
+        # Look for subject-score patterns in the text
+        # Pattern: SUBJECT_NAME followed by numbers (possibly on next line)
+        subject_patterns = [
+            r"(KANNADA|ENGLISH|PHYSICS|CHEMISTRY|MATHEMATICS|COMPUTER\s*SC?|BIOLOGY|ELECTRONICS|ACCOUNTANCY|ECONOMICS|BUSINESS|STATISTICS|PSYCHOLOGY)\s*[:\-\s]*(\d{2,3})",
+            r"([A-Z]{4,15})\s+(\d{2,3})",  # Generic subject pattern
+        ]
+        
+        for pattern in subject_patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE | re.MULTILINE)
+            for match in matches:
+                if len(match.groups()) >= 2:
+                    subject_name = match.group(1).strip().title()
+                    try:
+                        score = int(match.group(2).strip())
+                        if 0 <= score <= 100:  # Valid score range
+                            # Clean up subject name
+                            subject_name = subject_name.replace("Sc", "Science")
+                            if "Computer" in subject_name:
+                                subject_name = "Computer Science"
+                            subjects[subject_name] = score
+                    except ValueError:
+                        continue
+        
+        return subjects
     
     def _calculate_confidence(self, entities: Dict[str, Any], text: str, template: Dict) -> float:
         """Calculate confidence score for extracted entities"""
