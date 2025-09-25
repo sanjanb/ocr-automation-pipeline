@@ -53,7 +53,7 @@ Document Upload → Classification → OCR Processing → Entity Extraction → 
 
 ---
 
-![howitlooks](ocr-automation-pipeline\assets\look.png)
+![howitlooks](/assets/look.png)
 
 ## Project Structure
 
