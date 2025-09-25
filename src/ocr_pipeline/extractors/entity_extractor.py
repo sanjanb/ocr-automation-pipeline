@@ -158,19 +158,35 @@ class EntityExtractor:
             DocumentType.MARKSHEET_12TH: {
                 "name": "12th_marksheet",
                 "required_fields": ["name", "roll_number", "board", "year", "subjects", "stream"],
-                "optional_fields": ["dob", "father_name", "school_name", "percentage"],
+                "optional_fields": ["dob", "father_name", "school_name", "percentage", "register_number"],
                 "regex_patterns": {
                     "roll_number": [
                         r"roll\s*no\.?\s*:?\s*(\d{6,12})",
-                        r"roll\s*number\s*:?\s*(\d{6,12})"
+                        r"roll\s*number\s*:?\s*(\d{6,12})",
+                        r"register\s*no\.?\s*:?\s*(\d{6,12})",
+                        r"reg\.?\s*no\.?\s*:?\s*(\d{6,12})"
                     ],
                     "stream": [
                         r"stream\s*:?\s*(science|commerce|arts|humanities)",
-                        r"(science|commerce|arts|humanities)\s*stream"
+                        r"(science|commerce|arts|humanities)\s*stream",
+                        r"combination\s*:?\s*([A-Z\s]+)",
+                        r"group\s*:?\s*([A-Z\s]+)"
                     ],
                     "percentage": [
                         r"percentage\s*:?\s*(\d{1,3}(?:\.\d{1,2})?)\s*%?",
-                        r"total\s*marks\s*:?\s*(\d{1,3}(?:\.\d{1,2})?)\s*%?"
+                        r"total\s*marks\s*:?\s*(\d{1,3}(?:\.\d{1,2})?)\s*%?",
+                        r"class\s*obtained\s*:?\s*([A-Z\s]+)",
+                        r"distinction|first\s*class|second\s*class|third\s*class"
+                    ],
+                    "candidate_name": [
+                        r"candidate[''']?s\s*name\s*:?\s*([A-Z\s]+)",
+                        r"name\s*of\s*candidate\s*:?\s*([A-Z\s]+)",
+                        r"student\s*name\s*:?\s*([A-Z\s]+)"
+                    ],
+                    "month_year": [
+                        r"month/year\s*:?\s*([A-Z]+\s*\d{4})",
+                        r"(APRIL|MAY|JUNE|MARCH)\s*(\d{4})",
+                        r"examination\s*held\s*in\s*([A-Z]+\s*\d{4})"
                     ]
                 }
             },

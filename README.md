@@ -1,4 +1,4 @@
-# OCR Automation Pipeline 
+# OCR Automation Pipeline
 
 **MIT Hackathon Project - Intelligent Document Processing System**
 
@@ -332,6 +332,8 @@ For hackathon demonstration and questions, the system includes:
 **Ready for Demo! **
 
 The OCR Automation Pipeline is now fully operational and ready for hackathon presentation. Upload documents, see the magic happen, and explore the API documentation for technical details.
+
+cd "d:\Projects\MIT Hackathon\ocr-automation-pipeline\src\web_app"; ..\..\venv\Scripts\Activate.ps1; uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 _Built with ❤️ for MIT Hackathon_
 for the mit hackathon, a sub module to extract the entities from the student document

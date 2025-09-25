@@ -110,24 +110,8 @@ class OCRPipeline:
         )
         
         try:
-            # Step 1: Document Classification
-            logger.info("Step 1: Document Classification")
-            classification_result = self.classifier.classify_document(
-                request.document_upload.file_path
-            )
-            
-            result.classification_result = ClassificationMetadata(
-                document_type=classification_result.document_type,
-                confidence=classification_result.confidence,
-                features=classification_result.features,
-                classification_method="hybrid"
-            )
-            
-            logger.info(f"✓ Document classified as: {classification_result.document_type.value} "
-                       f"(confidence: {classification_result.confidence:.3f})")
-            
-            # Step 2: OCR Text Extraction
-            logger.info("Step 2: OCR Text Extraction")
+            # Step 1: Initial OCR Text Extraction (needed for improved classification)
+            logger.info("Step 1: OCR Text Extraction")
             ocr_result = self.ocr_engine.extract_text(
                 request.document_upload.file_path,
                 use_best_result=True
@@ -148,6 +132,22 @@ class OCRPipeline:
                        f"(confidence: {ocr_result.confidence:.3f}, "
                        f"text length: {len(ocr_result.text)} chars)")
             
+            # Step 2: Document Classification (using OCR text for better accuracy)
+            logger.info("Step 2: Document Classification")
+            classification_result = self.classifier.classify_document(
+                request.document_upload.file_path,
+                ocr_text=ocr_result.text
+            )
+            
+            result.classification_result = ClassificationMetadata(
+                document_type=classification_result.document_type,
+                confidence=classification_result.confidence,
+                features=classification_result.features,
+                classification_method="hybrid_with_ocr"
+            )
+            
+            logger.info(f"✓ Document classified as: {classification_result.document_type.value} "
+                       f"(confidence: {classification_result.confidence:.3f})")
             # Step 3: Entity Extraction
             logger.info("Step 3: Entity Extraction")
             extraction_result = self.entity_extractor.extract_entities(

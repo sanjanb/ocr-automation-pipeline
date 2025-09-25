@@ -77,17 +77,21 @@ class DocumentClassifier:
         """Initialize rule-based classification patterns"""
         return {
             DocumentType.MARKSHEET_10TH: {
-                "keywords": ["class x", "10th", "tenth", "secondary", "matriculation", "board"],
+                "keywords": ["class x", "10th", "tenth", "secondary", "matriculation", "board",
+                           "sslc", "first puc", "i puc", "1st puc", "karnataka secondary"],
                 "structure_features": ["table", "marks", "subjects"],
                 "min_confidence": 0.7
             },
             DocumentType.MARKSHEET_12TH: {
-                "keywords": ["class xii", "12th", "twelfth", "senior secondary", "intermediate"],
+                "keywords": ["class xii", "12th", "twelfth", "senior secondary", "intermediate", 
+                           "puc", "pre-university", "pre university", "karnataka", "department of pre-university",
+                           "second year puc", "ii puc", "2nd puc", "higher secondary", "plus two"],
                 "structure_features": ["table", "marks", "subjects"],
                 "min_confidence": 0.7
             },
             DocumentType.PASSING_CERTIFICATE: {
-                "keywords": ["passing", "passed", "certificate", "completion"],
+                "keywords": ["passing", "passed", "certificate", "completion", "qualify", "qualified",
+                           "pre-university examination", "puc examination", "course and passed"],
                 "structure_features": ["header", "signature", "seal"],
                 "min_confidence": 0.6
             },
@@ -133,12 +137,13 @@ class DocumentClassifier:
             }
         }
     
-    def classify_document(self, image_path: str) -> ClassificationResult:
+    def classify_document(self, image_path: str, ocr_text: Optional[str] = None) -> ClassificationResult:
         """
         Classify a document from image path.
         
         Args:
             image_path: Path to document image
+            ocr_text: Pre-extracted OCR text (optional, recommended for better accuracy)
             
         Returns:
             ClassificationResult containing document type and confidence
@@ -152,14 +157,15 @@ class DocumentClassifier:
             # Extract features
             features = self._extract_features(image)
             
-            # Perform classification
-            document_type, confidence = self._classify_from_features(features, image_path)
+            # Perform classification with OCR text if available
+            document_type, confidence = self._classify_from_features(features, image_path, ocr_text)
             
             # Create metadata
             metadata = {
                 "image_path": image_path,
                 "image_size": image.shape,
-                "processing_timestamp": torch.tensor(0).item()  # Placeholder
+                "processing_timestamp": "N/A",  # Simplified
+                "used_ocr_text": ocr_text is not None
             }
             
             return ClassificationResult(
@@ -200,13 +206,14 @@ class DocumentClassifier:
         
         return features
     
-    def _classify_from_features(self, features: Dict[str, float], image_path: str) -> Tuple[DocumentType, float]:
+    def _classify_from_features(self, features: Dict[str, float], image_path: str, ocr_text: Optional[str] = None) -> Tuple[DocumentType, float]:
         """
         Classify document based on extracted features.
         
         Args:
             features: Extracted features dictionary
             image_path: Path to original image for OCR if needed
+            ocr_text: Pre-extracted OCR text (preferred over re-extraction)
             
         Returns:
             Tuple of (document_type, confidence)
@@ -222,8 +229,11 @@ class DocumentClassifier:
                 if struct_feature in features:
                     score += features[struct_feature] * 0.4
             
-            # Check text-based keywords (simplified OCR)
-            text_score = self._check_text_patterns(image_path, rules["keywords"])
+            # Check text-based keywords using provided OCR text or fallback
+            if ocr_text:
+                text_score = self._check_text_patterns_from_text(ocr_text, rules["keywords"])
+            else:
+                text_score = self._check_text_patterns(image_path, rules["keywords"])
             score += text_score * 0.6
             
             scores[doc_type] = score
@@ -242,6 +252,51 @@ class DocumentClassifier:
         
         return best_type, best_score
     
+    def _check_text_patterns_from_text(self, text: str, keywords: List[str]) -> float:
+        """
+        Check for text patterns in already extracted OCR text.
+        
+        Args:
+            text: Extracted OCR text
+            keywords: List of keywords to search for
+            
+        Returns:
+            Score based on keyword matches
+        """
+        if not text or not keywords:
+            return 0.0
+        
+        text_lower = text.lower()
+        matches = 0
+        
+        for keyword in keywords:
+            keyword_lower = keyword.lower()
+            # Exact match
+            if keyword_lower in text_lower:
+                matches += 1
+            # Partial match for compound keywords
+            elif any(word in text_lower for word in keyword_lower.split() if len(word) > 2):
+                matches += 0.5
+            # Fuzzy matching for slight variations
+            elif self._fuzzy_match(keyword_lower, text_lower):
+                matches += 0.3
+        
+        return min(matches / len(keywords), 1.0) if keywords else 0.0
+    
+    def _fuzzy_match(self, keyword: str, text: str) -> bool:
+        """Simple fuzzy matching for slight text variations"""
+        keyword_words = keyword.split()
+        if len(keyword_words) == 1:
+            # Check if most characters match
+            keyword_chars = set(keyword.replace(" ", ""))
+            text_chars = set(text.replace(" ", ""))
+            common_chars = len(keyword_chars.intersection(text_chars))
+            return common_chars >= len(keyword_chars) * 0.7
+        else:
+            # Check if most words are present
+            matches = sum(1 for word in keyword_words if word in text)
+            return matches >= len(keyword_words) * 0.7
+    
     def _check_text_patterns(self, image_path: str, keywords: List[str]) -> float:
         """
         Check for text patterns in the document using simple OCR.
@@ -254,20 +309,57 @@ class DocumentClassifier:
             Score based on keyword matches
         """
         try:
-            # Simple OCR using pytesseract (fallback)
-            import pytesseract
-            
-            image = Image.open(image_path)
-            text = pytesseract.image_to_string(image).lower()
+            # Try to use pytesseract if available, otherwise use basic image analysis
+            try:
+                import pytesseract
+                image = Image.open(image_path)
+                text = pytesseract.image_to_string(image).lower()
+            except ImportError:
+                logger.info("Pytesseract not available, using basic pattern matching")
+                # Use basic pattern matching based on image characteristics
+                return self._basic_pattern_matching(image_path, keywords)
             
             if not keywords:
                 return 0.0
             
-            matches = sum(1 for keyword in keywords if keyword.lower() in text)
-            return matches / len(keywords) if keywords else 0.0
+            # Enhanced keyword matching with partial matches and fuzzy logic
+            matches = 0
+            text_words = text.split()
+            
+            for keyword in keywords:
+                keyword_lower = keyword.lower()
+                # Exact match
+                if keyword_lower in text:
+                    matches += 1
+                # Partial match for compound keywords
+                elif any(word in text for word in keyword_lower.split()):
+                    matches += 0.5
+                # Check individual words for better matching
+                elif any(keyword_word in text for keyword_word in keyword_lower.split() if len(keyword_word) > 3):
+                    matches += 0.3
+            
+            return min(matches / len(keywords), 1.0) if keywords else 0.0
             
         except Exception as e:
             logger.warning(f"Error in text pattern matching: {str(e)}")
+            return 0.0
+    
+    def _basic_pattern_matching(self, image_path: str, keywords: List[str]) -> float:
+        """
+        Basic pattern matching when OCR is not available.
+        Uses image characteristics and filename patterns.
+        """
+        try:
+            # Check filename for patterns
+            filename = Path(image_path).name.lower()
+            matches = sum(1 for keyword in keywords if any(word in filename for word in keyword.lower().split()))
+            
+            if matches > 0:
+                return min(matches / len(keywords) * 0.5, 0.5)  # Lower confidence for filename-based matching
+            
+            return 0.1  # Minimal score for unknown documents
+            
+        except Exception:
             return 0.0
     
     # Feature extraction methods
