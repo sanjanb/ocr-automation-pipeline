@@ -53,7 +53,7 @@ Document Upload → Classification → OCR Processing → Entity Extraction → 
 
 ---
 
-![howitlooks](D:\Projects\MIT Hackathon\ocr-automation-pipeline\assets\look.png)
+![howitlooks](ocr-automation-pipeline\assets\look.png)
 
 ## Project Structure
 
