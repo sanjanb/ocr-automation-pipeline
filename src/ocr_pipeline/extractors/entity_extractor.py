@@ -158,37 +158,74 @@ class EntityExtractor:
             DocumentType.MARKSHEET_12TH: {
                 "name": "12th_marksheet",
                 "required_fields": ["name", "roll_number", "board", "year", "subjects", "stream"],
-                "optional_fields": ["dob", "father_name", "school_name", "percentage", "register_number"],
+                "optional_fields": ["dob", "father_name", "mother_name", "school_name", "percentage", "register_number"],
                 "regex_patterns": {
                     "roll_number": [
                         r"roll\s*no\.?\s*:?\s*(\d{6,12})",
                         r"roll\s*number\s*:?\s*(\d{6,12})",
                         r"register\s*no\.?\s*:?\s*(\d{6,12})",
-                        r"reg\.?\s*no\.?\s*:?\s*(\d{6,12})"
+                        r"reg\.?\s*no\.?\s*:?\s*(\d{6,12})",
+                        r"(?:register|reg)\s*(?:no|number)\.?\s*:?\s*(\d{6,12})"
+                    ],
+                    "name": [
+                        r"candidate[''']?s\s*name\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"name\s*of\s*candidate\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"student\s*name\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"candidate.*name.*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"([A-Z]{3,15}\s+[A-Z]\s+[A-Z])",  # Pattern like SANJAN B M
+                        r"name\s*}\s*([A-Z][A-Z\s]{2,30})"
+                    ],
+                    "father_name": [
+                        r"father[''']?s\s*name\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"father.*name.*}\s*([A-Z][A-Z\s]{2,30})"
+                    ],
+                    "mother_name": [
+                        r"mother[''']?s\s*name\s*:?\s*}\s*([A-Z][A-Z\s]{2,30})",
+                        r"mother.*name.*}\s*([A-Z][A-Z\s]{2,30})"
                     ],
                     "stream": [
                         r"stream\s*:?\s*(science|commerce|arts|humanities)",
                         r"(science|commerce|arts|humanities)\s*stream",
                         r"combination\s*:?\s*([A-Z\s]+)",
-                        r"group\s*:?\s*([A-Z\s]+)"
+                        r"group\s*:?\s*([A-Z\s]+)",
+                        r"(PCMC|PCM|PCMB|CEC|HEP|ARTS)",  # Common PUC combinations
+                        r"(?:physics|chemistry|mathematics|computer|biology|economics|commerce|arts)"
                     ],
                     "percentage": [
                         r"percentage\s*:?\s*(\d{1,3}(?:\.\d{1,2})?)\s*%?",
                         r"total\s*marks\s*:?\s*(\d{1,3}(?:\.\d{1,2})?)\s*%?",
                         r"class\s*obtained\s*:?\s*([A-Z\s]+)",
-                        r"distinction|first\s*class|second\s*class|third\s*class"
+                        r"(distinction|first\s*class|second\s*class|third\s*class|pass)",
+                        r"(\d{3}/\d{3})"  # Like 535/600
                     ],
-                    "candidate_name": [
-                        r"candidate[''']?s\s*name\s*:?\s*([A-Z\s]+)",
-                        r"name\s*of\s*candidate\s*:?\s*([A-Z\s]+)",
-                        r"student\s*name\s*:?\s*([A-Z\s]+)"
-                    ],
-                    "month_year": [
+                    "year": [
                         r"month/year\s*:?\s*([A-Z]+\s*\d{4})",
                         r"(APRIL|MAY|JUNE|MARCH)\s*(\d{4})",
-                        r"examination\s*held\s*in\s*([A-Z]+\s*\d{4})"
+                        r"examination\s*held\s*in\s*([A-Z]+\s*\d{4})",
+                        r"(20\d{2})"  # Any year like 2022
+                    ],
+                    "board": [
+                        r"(karnataka|cbse|icse|state\s*board)",
+                        r"department\s*of\s*pre[\-\s]*university",
+                        r"government\s*of\s*karnataka",
+                        r"puc?\s*board",
+                        r"pre[\-\s]*university\s*education"
+                    ],
+                    "college": [
+                        r"college\s*:?\s*([A-Z][A-Z\s,]{5,50})",
+                        r"([A-Z]+\s+PU\s+COLLEGE)",
+                        r"([A-Z\s]+COLLEGE[A-Z\s,]*)"
                     ]
-                }
+                },
+                "subject_patterns": [
+                    r"(KANNADA|kannada)\s*.*?(\d{2,3})",
+                    r"(ENGLISH|english)\s*.*?(\d{2,3})",
+                    r"(PHYSICS|physics)\s*.*?(\d{2,3})",
+                    r"(CHEMISTRY|chemistry)\s*.*?(\d{2,3})",
+                    r"(MATHEMATICS|mathematics)\s*.*?(\d{2,3})",
+                    r"(COMPUTER[\-\s]*SC|computer)\s*.*?(\d{2,3})",
+                    r"(BIOLOGY|biology)\s*.*?(\d{2,3})"
+                ]
             },
             
             DocumentType.ENTRANCE_SCORECARD: {
@@ -278,32 +315,62 @@ class EntityExtractor:
         }
     
     def _extract_with_regex(self, text: str, template: Dict) -> Dict[str, Any]:
-        """Extract entities using regex patterns"""
+        """Extract entities using regex patterns with OCR error handling"""
         entities = {}
+        
+        # Preprocess text to handle common OCR errors
+        clean_text = self._preprocess_ocr_text(text)
         
         regex_patterns = template.get("regex_patterns", {})
         
         for field_name, patterns in regex_patterns.items():
             for pattern in patterns:
-                matches = re.finditer(pattern, text, re.IGNORECASE)
-                for match in matches:
-                    if match.groups():
-                        entities[field_name] = match.group(1).strip()
-                        break  # Take first match
+                # Try on both original and cleaned text
+                for text_variant in [text, clean_text]:
+                    matches = re.finditer(pattern, text_variant, re.IGNORECASE | re.DOTALL)
+                    for match in matches:
+                        if match.groups():
+                            value = match.group(1).strip()
+                            # Clean up the extracted value
+                            if field_name == "name":
+                                value = self._clean_name(value)
+                            elif field_name in ["roll_number", "register_number"]:
+                                value = re.sub(r'[^\d]', '', value)  # Keep only digits
+                            elif field_name == "year":
+                                year_match = re.search(r'(20\d{2})', value)
+                                if year_match:
+                                    value = year_match.group(1)
+                                    
+                            if value and len(value.strip()) > 0:
+                                entities[field_name] = value
+                                break
+                    if field_name in entities:
+                        break  # Found match, move to next field
             
             # Special handling for subject patterns
             if field_name == "subjects" and "subject_patterns" in template:
                 subjects = {}
                 for subject_pattern in template["subject_patterns"]:
-                    matches = re.finditer(subject_pattern, text, re.IGNORECASE)
-                    for match in matches:
-                        if len(match.groups()) >= 2:
-                            subject_name = match.group(1).strip()
-                            subject_score = match.group(2).strip()
-                            subjects[subject_name] = int(subject_score)
+                    for text_variant in [text, clean_text]:
+                        matches = re.finditer(subject_pattern, text_variant, re.IGNORECASE)
+                        for match in matches:
+                            if len(match.groups()) >= 2:
+                                subject_name = match.group(1).strip().title()
+                                try:
+                                    subject_score = int(re.sub(r'[^\d]', '', match.group(2)))
+                                    subjects[subject_name] = subject_score
+                                except ValueError:
+                                    continue
                 
                 if subjects:
                     entities["subjects"] = subjects
+        
+        # Try fallback extraction for critical fields if not found
+        if "name" not in entities:
+            entities["name"] = self._extract_name_fallback(text)
+        
+        if "roll_number" not in entities and template.get("name") == "12th_marksheet":
+            entities["roll_number"] = self._extract_roll_number_fallback(text)
         
         return entities
     

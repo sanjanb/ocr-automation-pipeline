@@ -87,13 +87,13 @@ class DocumentClassifier:
                            "puc", "pre-university", "pre university", "karnataka", "department of pre-university",
                            "second year puc", "ii puc", "2nd puc", "higher secondary", "plus two"],
                 "structure_features": ["table", "marks", "subjects"],
-                "min_confidence": 0.7
+                "min_confidence": 0.3
             },
             DocumentType.PASSING_CERTIFICATE: {
                 "keywords": ["passing", "passed", "certificate", "completion", "qualify", "qualified",
                            "pre-university examination", "puc examination", "course and passed"],
                 "structure_features": ["header", "signature", "seal"],
-                "min_confidence": 0.6
+                "min_confidence": 0.4
             },
             DocumentType.TRANSFER_CERTIFICATE: {
                 "keywords": ["transfer", "tc", "school leaving"],
@@ -269,19 +269,39 @@ class DocumentClassifier:
         text_lower = text.lower()
         matches = 0
         
+        # Define high-value keywords that should get extra weight
+        high_value_keywords = [
+            "puc", "pre-university", "karnataka", "department of pre-university",
+            "12th", "class xii", "twelfth", "entrance", "aadhar", "aadhaar"
+        ]
+        
         for keyword in keywords:
             keyword_lower = keyword.lower()
-            # Exact match
+            
+            # Check for exact match
             if keyword_lower in text_lower:
-                matches += 1
+                # Give extra weight to high-value keywords
+                weight = 2.0 if keyword_lower in high_value_keywords else 1.0
+                matches += weight
             # Partial match for compound keywords
             elif any(word in text_lower for word in keyword_lower.split() if len(word) > 2):
-                matches += 0.5
+                # Partial matches get half weight
+                weight = 1.0 if keyword_lower in high_value_keywords else 0.5
+                matches += weight
             # Fuzzy matching for slight variations
             elif self._fuzzy_match(keyword_lower, text_lower):
                 matches += 0.3
         
-        return min(matches / len(keywords), 1.0) if keywords else 0.0
+        # Calculate score with bonus for multiple matches
+        base_score = matches / len(keywords) if keywords else 0.0
+        
+        # Bonus for documents with multiple strong indicators
+        if matches >= 3:
+            base_score *= 1.2  # 20% bonus
+        elif matches >= 2:
+            base_score *= 1.1  # 10% bonus
+            
+        return min(base_score, 1.0)
     
     def _fuzzy_match(self, keyword: str, text: str) -> bool:
         """Simple fuzzy matching for slight text variations"""
