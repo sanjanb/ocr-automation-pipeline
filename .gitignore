@@ -95,3 +95,4 @@ models/trained/
 # OCR temp files
 *.txt.tmp
 temp_images/
+sample_documents/
