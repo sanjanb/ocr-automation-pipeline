@@ -12,6 +12,7 @@ We actively support and provide security updates for the following versions:
 ## Reporting Security Vulnerabilities
 
 ### Where to Report
+
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 Instead, please report them responsibly through one of the following channels:
@@ -21,6 +22,7 @@ Instead, please report them responsibly through one of the following channels:
 3. **Private Issue**: Create a private security issue (if your repository supports it)
 
 ### What to Include
+
 When reporting a security vulnerability, please include:
 
 - **Type of issue** (e.g., buffer overflow, SQL injection, XSS, etc.)
@@ -32,6 +34,7 @@ When reporting a security vulnerability, please include:
 - **Impact** of the issue, including how an attacker might exploit it
 
 ### Response Timeline
+
 - **Acknowledgment**: We'll acknowledge receipt within 48 hours
 - **Initial Assessment**: We'll provide an initial assessment within 5 business days
 - **Regular Updates**: We'll send updates every 5 business days until resolved
@@ -42,6 +45,7 @@ When reporting a security vulnerability, please include:
 ### Current Security Features
 
 #### API Security
+
 - **Input Validation**: All inputs are validated and sanitized
 - **Rate Limiting**: Protection against DoS attacks
 - **CORS Configuration**: Restricted cross-origin requests
@@ -49,12 +53,14 @@ When reporting a security vulnerability, please include:
 - **Content Type Validation**: Only allowed file types accepted
 
 #### Data Security
+
 - **No Data Persistence**: Documents are not stored after processing
 - **Memory Cleanup**: Processed images cleared from memory
 - **Environment Variables**: Sensitive data stored in environment variables
 - **API Key Protection**: Gemini API keys secured via environment configuration
 
 #### Infrastructure Security
+
 - **Docker Security**: Non-root user in containers
 - **Dependency Scanning**: Automated vulnerability scanning with safety
 - **CI/CD Security**: Secure secrets management in GitHub Actions
@@ -63,6 +69,7 @@ When reporting a security vulnerability, please include:
 ### Recommended Security Practices
 
 #### For Deployment
+
 1. **Use HTTPS**: Always deploy behind HTTPS in production
 2. **Environment Variables**: Never commit API keys to version control
 3. **Network Security**: Use firewalls and network restrictions
@@ -71,6 +78,7 @@ When reporting a security vulnerability, please include:
 6. **Access Control**: Restrict API access as needed
 
 #### For Development
+
 1. **Secure Development**: Follow OWASP guidelines
 2. **Code Review**: All changes should be reviewed
 3. **Dependency Management**: Regularly audit dependencies
@@ -80,18 +88,21 @@ When reporting a security vulnerability, please include:
 ## Known Security Considerations
 
 ### File Upload Security
+
 - **File Type Validation**: Only specific image formats allowed
 - **File Size Limits**: 10MB maximum to prevent DoS
 - **Content Scanning**: Files are validated before processing
 - **Memory Management**: Files processed in memory, not saved
 
 ### API Security
+
 - **Rate Limiting**: Prevents abuse and DoS attacks
 - **Input Sanitization**: All inputs validated before processing
 - **Error Handling**: Secure error messages (no sensitive data exposure)
 - **CORS Policy**: Configurable origin restrictions
 
 ### Third-Party Dependencies
+
 - **Gemini API**: Uses official Google AI SDK
 - **Dependency Monitoring**: Automated vulnerability scanning
 - **Regular Updates**: Dependencies updated regularly
@@ -100,13 +111,16 @@ When reporting a security vulnerability, please include:
 ## Vulnerability Disclosure
 
 ### Our Commitment
+
 - We take security seriously and appreciate responsible disclosure
 - We'll work with you to understand and resolve issues quickly
 - We'll credit researchers who report vulnerabilities responsibly
 - We'll provide updates on our progress toward resolution
 
 ### Safe Harbor
+
 We support safe harbor for security researchers who:
+
 - Make a good faith effort to avoid privacy violations and data destruction
 - Report vulnerabilities promptly and allow reasonable time for fixes
 - Avoid social engineering, DoS, or physical attacks
@@ -115,12 +129,14 @@ We support safe harbor for security researchers who:
 ## Security Updates
 
 ### Update Process
+
 1. **Critical Vulnerabilities**: Immediate patch release
 2. **High Severity**: Patch within 1 week
 3. **Medium/Low Severity**: Next scheduled release
 4. **Security Advisories**: Published for all security fixes
 
 ### Notification Channels
+
 - **GitHub Releases**: Security fixes noted in release notes
 - **Security Advisories**: GitHub security advisory system
 - **Changelog**: All security fixes documented
@@ -129,6 +145,7 @@ We support safe harbor for security researchers who:
 ## Security Checklist for Contributors
 
 Before contributing, ensure:
+
 - [ ] No hardcoded secrets or credentials
 - [ ] Input validation for all user inputs
 - [ ] Proper error handling (no sensitive data in errors)
@@ -140,12 +157,14 @@ Before contributing, ensure:
 ## Security Tools and Scanning
 
 ### Automated Security Checks
+
 - **bandit**: Python security linter
 - **safety**: Dependency vulnerability scanner
 - **GitHub Dependabot**: Automated dependency updates
 - **GitHub Advanced Security**: Code scanning (if available)
 
 ### Manual Security Review
+
 - Regular security audits of critical components
 - Penetration testing for major releases
 - Code review with security focus
@@ -154,6 +173,7 @@ Before contributing, ensure:
 ## Contact Information
 
 For security-related questions or concerns:
+
 - **Security Email**: security@yourdomain.com (if applicable)
 - **General Contact**: Open a private issue or discussion
 - **Urgent Issues**: Use GitHub security advisory for immediate attention
@@ -161,6 +181,7 @@ For security-related questions or concerns:
 ## Acknowledgments
 
 We thank the security research community for helping keep our project safe:
+
 - [List of security researchers who helped]
 - [Bug bounty program information if applicable]
 

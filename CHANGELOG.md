@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Initial project setup with FastAPI framework
 - Gemini AI integration for document processing
 - Support for 9 Indian document types
@@ -21,15 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-09-26
 
 ### Added
+
 - **Core Features**
   - Document processing using Gemini 2.0 Flash model
   - Auto document type detection
   - Confidence scoring and validation
   - Support for multiple image formats (JPEG, PNG, WebP, PDF)
-  
 - **Document Types Supported**
+
   - Aadhaar Card
-  - Academic Marksheets  
+  - Academic Marksheets
   - Birth Certificates
   - Passports
   - PAN Cards
@@ -39,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Bank Statements
 
 - **API Features**
+
   - FastAPI with automatic OpenAPI documentation
   - Async processing for better performance
   - Health check endpoints
@@ -46,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CORS support for web integration
 
 - **Development Infrastructure**
+
   - Professional project structure
   - Comprehensive test suite (>90% coverage goal)
   - Docker support for easy deployment
@@ -61,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Performance benchmarks
 
 ### Technical Details
+
 - **Framework**: FastAPI 0.104+
 - **AI Model**: Google Gemini 2.0 Flash
 - **Python**: 3.8+ support
@@ -69,12 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CI/CD**: GitHub Actions with automated testing and deployment
 
 ### Performance
+
 - Average processing time: 2-4 seconds per document
 - Supported file sizes: Up to 10MB
 - Confidence threshold: Configurable (default 0.5)
 - Rate limiting: 100 requests/hour per IP
 
 ### Security
+
 - Environment-based configuration
 - Input validation and sanitization
 - Secure file handling
@@ -84,6 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Future Releases
 
 ### [1.1.0] - Planned
+
 - Additional document types (GST certificates, income certificates)
 - Batch processing capabilities
 - Redis caching for improved performance
@@ -91,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-language support
 
 ### [1.2.0] - Planned
+
 - Database integration for audit trails
 - User authentication and authorization
 - Enhanced analytics and reporting
@@ -98,6 +107,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile app SDK
 
 ### [2.0.0] - Planned
+
 - Machine learning model fine-tuning
 - Custom document type training
 - Advanced data extraction techniques
@@ -108,23 +118,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-| Version | Release Date | Key Features |
-|---------|--------------|--------------|
-| 1.0.0 | 2025-09-26 | Initial release with Gemini integration |
-| Unreleased | TBD | Enhanced features and optimizations |
+| Version    | Release Date | Key Features                            |
+| ---------- | ------------ | --------------------------------------- |
+| 1.0.0      | 2025-09-26   | Initial release with Gemini integration |
+| Unreleased | TBD          | Enhanced features and optimizations     |
 
 ## Migration Notes
 
 ### Upgrading to 1.0.0
+
 This is the initial release. No migration required.
 
 ### Breaking Changes
+
 None in this release.
 
 ## Support
 
 For questions about changes or upgrading:
+
 - Check the [documentation](README.md)
-- Review [API documentation](API.md) 
+- Review [API documentation](API.md)
 - Open an [issue](https://github.com/sanjanb/ocr-automation-pipeline/issues)
 - Read the [contributing guide](CONTRIBUTING.md)

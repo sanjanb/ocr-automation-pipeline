@@ -10,6 +10,7 @@
 ## Environment Setup
 
 ### Option 1: Virtual Environment (Recommended)
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -25,6 +26,7 @@ pip install -r requirements.txt
 ```
 
 ### Option 2: Conda Environment
+
 ```bash
 # Create conda environment
 conda create -n document-processor python=3.10
@@ -37,6 +39,7 @@ pip install -r requirements.txt
 ## Configuration
 
 ### 1. Gemini API Key
+
 Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey):
 
 1. Sign in with Google account
@@ -45,6 +48,7 @@ Get your API key from [Google AI Studio](https://makersuite.google.com/app/apike
 4. Copy the key
 
 ### 2. Environment Variables
+
 Create a `.env` file in the project root:
 
 ```env
@@ -65,6 +69,7 @@ MIN_CONFIDENCE_THRESHOLD=0.5
 ### 3. Alternative Configuration Methods
 
 #### Environment Variables (Production)
+
 ```bash
 # Linux/macOS
 export GEMINI_API_KEY=your_api_key_here
@@ -76,7 +81,9 @@ set DEBUG=false
 ```
 
 #### Configuration File
+
 You can also use a `config.yml` file:
+
 ```yaml
 gemini:
   api_key: your_api_key_here
@@ -96,6 +103,7 @@ processing:
 ## Verification
 
 ### Quick Test
+
 ```bash
 # Test installation
 python -c "import src.document_processor.core; print('✅ Installation successful')"
@@ -113,6 +121,7 @@ except Exception as e:
 ```
 
 ### Run Test Suite
+
 ```bash
 # Run all tests
 pytest tests/ -v
@@ -122,6 +131,7 @@ pytest tests/ --cov=src --cov-report=term-missing
 ```
 
 ### Start Application
+
 ```bash
 # Development server
 uvicorn app:app --reload
@@ -135,6 +145,7 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
 ### Common Issues
 
 #### 1. Import Errors
+
 ```bash
 # Error: ModuleNotFoundError: No module named 'src'
 # Solution: Run from project root directory
@@ -143,6 +154,7 @@ python app.py
 ```
 
 #### 2. API Key Issues
+
 ```bash
 # Error: Gemini API key required
 # Solution: Check .env file exists and has correct key
@@ -151,6 +163,7 @@ cat .env | grep GEMINI_API_KEY
 ```
 
 #### 3. Package Installation Issues
+
 ```bash
 # Error: Failed building wheel for package
 # Solution: Upgrade pip and try again
@@ -159,6 +172,7 @@ pip install -r requirements.txt
 ```
 
 #### 4. Port Already in Use
+
 ```bash
 # Error: Port 8000 is already in use
 # Solution: Use different port or kill process
@@ -171,16 +185,19 @@ netstat -ano | findstr :8000   # Windows
 ### Performance Issues
 
 #### 1. Slow Processing
+
 - Check internet connection
 - Verify Gemini API quotas
 - Consider using faster model variants
 
 #### 2. High Memory Usage
+
 - Reduce image sizes before processing
 - Implement batch processing limits
 - Use Docker with memory constraints
 
 #### 3. API Rate Limits
+
 - Implement exponential backoff
 - Use multiple API keys with rotation
 - Cache results when appropriate
@@ -188,12 +205,14 @@ netstat -ano | findstr :8000   # Windows
 ### Logging
 
 Enable detailed logging for debugging:
+
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
 
 Or set environment variable:
+
 ```bash
 export LOG_LEVEL=DEBUG
 ```
@@ -201,6 +220,7 @@ export LOG_LEVEL=DEBUG
 ### Docker Issues
 
 #### 1. Build Failures
+
 ```bash
 # Clear Docker cache
 docker system prune -a
@@ -210,6 +230,7 @@ docker build --no-cache -t document-processor .
 ```
 
 #### 2. Container Won't Start
+
 ```bash
 # Check logs
 docker logs document-processor
@@ -221,6 +242,7 @@ docker run -it document-processor /bin/bash
 ## Advanced Configuration
 
 ### Custom Model Selection
+
 ```python
 from src.document_processor.core import create_processor
 
@@ -229,6 +251,7 @@ processor = create_processor(model_name="gemini-1.5-pro")
 ```
 
 ### Processing Timeouts
+
 ```python
 from src.document_processor.config import Settings
 
@@ -237,6 +260,7 @@ settings.processing_timeout = 120  # 2 minutes
 ```
 
 ### Custom Validation Rules
+
 ```python
 # Add custom validation in schemas.py
 DOCUMENT_SCHEMAS['custom_document'] = {
@@ -250,6 +274,7 @@ DOCUMENT_SCHEMAS['custom_document'] = {
 ## Production Deployment
 
 ### Security Considerations
+
 - Use HTTPS in production
 - Implement rate limiting
 - Set up proper error logging
@@ -257,12 +282,14 @@ DOCUMENT_SCHEMAS['custom_document'] = {
 - Enable CORS only for trusted origins
 
 ### Performance Optimization
+
 - Use multiple workers
 - Implement caching
 - Set up load balancing
 - Monitor API quotas and usage
 
 ### Monitoring
+
 - Set up health checks
 - Monitor processing times
 - Track error rates
@@ -271,6 +298,7 @@ DOCUMENT_SCHEMAS['custom_document'] = {
 ## Support
 
 If you encounter issues:
+
 1. Check this troubleshooting guide
 2. Review the logs for error details
 3. Search existing [GitHub Issues](https://github.com/sanjanb/ocr-automation-pipeline/issues)

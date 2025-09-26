@@ -19,6 +19,7 @@
 ## 🚀 **Quick Start**
 
 ### **Option 1: Direct Installation**
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/sanjanb/ocr-automation-pipeline.git
@@ -39,6 +40,7 @@ uvicorn app:app --reload
 ```
 
 ### **Option 2: Docker**
+
 ```bash
 # 1. Clone and build
 git clone https://github.com/sanjanb/ocr-automation-pipeline.git
@@ -54,6 +56,7 @@ docker-compose up -d
 ```
 
 ### **Get Gemini API Key**
+
 1. Visit: [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Create new project and API key
 3. Copy key to your `.env` file
@@ -67,7 +70,7 @@ graph TD
     C --> D[JSON Extraction]
     D --> E[AI Validation]
     E --> F[Structured Response]
-    
+
     G[Web Interface] --> A
     H[API Client] --> A
     I[Batch Processing] --> A
@@ -75,20 +78,21 @@ graph TD
 
 ## 🎯 **Supported Documents**
 
-| Document | Required Fields | Validation Rules | Use Case |
-|----------|----------------|------------------|-----------|
-| 🆔 **Aadhaar Card** | Name, Number, DOB, Address | 12-digit validation | Identity verification |
-| 📜 **10th/12th Marksheet** | Student, Roll No, Board, Year, Subjects | Grade validation | Academic verification |
-| 📄 **Transfer Certificate** | Student, Father, School, Class | Date format validation | School transfers |
-| 🎓 **Migration Certificate** | Student, University, Course | Year validation | University transfers |
-| 📊 **Entrance Scorecard** | Candidate, Exam, Score, Rank | Numeric validation | Competitive exams |
-| 🎫 **Admit Card** | Candidate, Exam, Date, Center | Date/time validation | Exam identification |
-| 📋 **Caste Certificate** | Name, Father, Caste, Category | Category validation | Government benefits |
-| 🏠 **Domicile Certificate** | Name, State, District | Geographic validation | Residence proof |
+| Document                     | Required Fields                         | Validation Rules       | Use Case              |
+| ---------------------------- | --------------------------------------- | ---------------------- | --------------------- |
+| 🆔 **Aadhaar Card**          | Name, Number, DOB, Address              | 12-digit validation    | Identity verification |
+| 📜 **10th/12th Marksheet**   | Student, Roll No, Board, Year, Subjects | Grade validation       | Academic verification |
+| 📄 **Transfer Certificate**  | Student, Father, School, Class          | Date format validation | School transfers      |
+| 🎓 **Migration Certificate** | Student, University, Course             | Year validation        | University transfers  |
+| 📊 **Entrance Scorecard**    | Candidate, Exam, Score, Rank            | Numeric validation     | Competitive exams     |
+| 🎫 **Admit Card**            | Candidate, Exam, Date, Center           | Date/time validation   | Exam identification   |
+| 📋 **Caste Certificate**     | Name, Father, Caste, Category           | Category validation    | Government benefits   |
+| 🏠 **Domicile Certificate**  | Name, State, District                   | Geographic validation  | Residence proof       |
 
 ## 🔌 **API Usage**
 
 ### **Process Single Document**
+
 ```python
 import requests
 
@@ -106,6 +110,7 @@ print(f"Data: {result['extracted_data']}")
 ```
 
 ### **Batch Processing**
+
 ```python
 import asyncio
 import aiohttp
@@ -116,7 +121,7 @@ async def process_documents(file_paths):
         for file_path in file_paths:
             task = process_single_document(session, file_path)
             tasks.append(task)
-        
+
         results = await asyncio.gather(*tasks)
         return results
 
@@ -125,6 +130,7 @@ results = asyncio.run(process_documents(["doc1.jpg", "doc2.jpg"]))
 ```
 
 ### **Validation Results**
+
 ```json
 {
   "success": true,
@@ -161,6 +167,7 @@ python -m pytest tests/test_core.py::TestDocumentProcessor::test_process_documen
 ## � **Deployment**
 
 ### **Production Deployment**
+
 ```bash
 # 1. Build production image
 docker build -t document-processor:latest .
@@ -179,25 +186,27 @@ curl http://localhost:8000/health
 ```
 
 ### **Cloud Deployment**
+
 - **AWS**: Deploy to ECS, Lambda, or Elastic Beanstalk
-- **Google Cloud**: Deploy to Cloud Run or App Engine  
+- **Google Cloud**: Deploy to Cloud Run or App Engine
 - **Azure**: Deploy to Container Instances or App Service
 - **Heroku**: One-click deployment with buildpacks
 
 ## 📈 **Performance Benchmarks**
 
-| Metric | This Solution | Traditional OCR Pipeline |
-|--------|---------------|---------------------------|
-| **Processing Time** | 2-5 seconds | 15-30 seconds |
-| **Accuracy** | 85-95% | 70-85% |
-| **Setup Time** | 2 minutes | 30+ minutes |
-| **Dependencies** | <100MB | 1GB+ |
-| **API Calls** | 1 call | 3-5 calls |
-| **Infrastructure** | Serverless ready | Requires GPU/CPU |
+| Metric              | This Solution    | Traditional OCR Pipeline |
+| ------------------- | ---------------- | ------------------------ |
+| **Processing Time** | 2-5 seconds      | 15-30 seconds            |
+| **Accuracy**        | 85-95%           | 70-85%                   |
+| **Setup Time**      | 2 minutes        | 30+ minutes              |
+| **Dependencies**    | <100MB           | 1GB+                     |
+| **API Calls**       | 1 call           | 3-5 calls                |
+| **Infrastructure**  | Serverless ready | Requires GPU/CPU         |
 
 ## 🛠️ **Development**
 
 ### **Project Structure**
+
 ```
 ocr-automation-pipeline/
 ├── src/document_processor/     # Core processing logic
@@ -213,6 +222,7 @@ ocr-automation-pipeline/
 ```
 
 ### **Contributing**
+
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
@@ -220,6 +230,7 @@ ocr-automation-pipeline/
 5. Open Pull Request
 
 ### **Code Quality**
+
 - **Linting**: `flake8`, `black`, `isort`
 - **Type Checking**: `mypy`
 - **Testing**: `pytest` with >90% coverage
@@ -228,6 +239,7 @@ ocr-automation-pipeline/
 ## � **Demo Features**
 
 ### **Web Interface**
+
 - 🎨 Modern, responsive design
 - 📱 Mobile-friendly upload
 - 🔄 Real-time processing updates
@@ -236,12 +248,14 @@ ocr-automation-pipeline/
 - 💾 JSON export functionality
 
 ### **API Documentation**
+
 - 📖 Interactive Swagger UI
 - 📚 ReDoc documentation
 - 🔧 Request/response schemas
 - 🚀 Try-it-out functionality
 
 ### **Monitoring & Debugging**
+
 - 📝 Structured logging
 - 💚 Health check endpoints
 - 📊 Processing metrics
@@ -250,20 +264,23 @@ ocr-automation-pipeline/
 ## 🏆 **Why Choose This Solution?**
 
 ### **For Hackathons**
+
 - ⚡ **Quick Setup**: Demo ready in 2 minutes
 - 🎯 **Impressive Results**: High accuracy, fast processing
 - � **Professional UI**: Judge-ready interface
 - � **Technical Depth**: Modern architecture, comprehensive features
 
 ### **For Production**
+
 - 🚀 **Scalable**: Async FastAPI, containerized
 - 🛡️ **Secure**: Input validation, error handling
 - � **Observable**: Logging, monitoring, health checks
 - 🔧 **Maintainable**: Clean code, comprehensive tests
 
 ### **For Developers**
+
 - 🐍 **Modern Python**: Type hints, async/await, Pydantic
-- 🧪 **Well Tested**: >90% coverage, CI/CD pipeline  
+- 🧪 **Well Tested**: >90% coverage, CI/CD pipeline
 - 📚 **Documented**: Comprehensive docs, API specs
 - 🔌 **Extensible**: Plugin architecture, configurable
 
@@ -277,4 +294,4 @@ ocr-automation-pipeline/
 ---
 
 **Built with ❤️ for MIT Hackathon 2025**  
-*Transform documents, not just extract text*
+_Transform documents, not just extract text_

@@ -16,17 +16,17 @@ The API uses Gemini API key authentication configured via environment variables.
 
 ## Supported Document Types
 
-| Document Type | Code | Description |
-|---------------|------|-------------|
-| Aadhaar Card | `aadhaar` | Indian national ID card |
-| Marksheet | `marksheet` | Academic transcripts |
-| Birth Certificate | `birth_certificate` | Official birth documents |
-| Passport | `passport` | Indian passport |
-| PAN Card | `pan_card` | Permanent Account Number card |
-| Driving License | `driving_license` | Indian driving license |
-| Voter ID | `voter_id` | Election identity card |
-| Ration Card | `ration_card` | Public distribution system card |
-| Bank Statement | `bank_statement` | Financial institution statements |
+| Document Type     | Code                | Description                      |
+| ----------------- | ------------------- | -------------------------------- |
+| Aadhaar Card      | `aadhaar`           | Indian national ID card          |
+| Marksheet         | `marksheet`         | Academic transcripts             |
+| Birth Certificate | `birth_certificate` | Official birth documents         |
+| Passport          | `passport`          | Indian passport                  |
+| PAN Card          | `pan_card`          | Permanent Account Number card    |
+| Driving License   | `driving_license`   | Indian driving license           |
+| Voter ID          | `voter_id`          | Election identity card           |
+| Ration Card       | `ration_card`       | Public distribution system card  |
+| Bank Statement    | `bank_statement`    | Financial institution statements |
 
 ## Endpoints
 
@@ -39,6 +39,7 @@ GET /api/health
 ```
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -60,12 +61,15 @@ POST /api/process
 **Content-Type:** `multipart/form-data`
 
 **Parameters:**
+
 - `file` (required): Document image file
+
   - Supported formats: JPEG, PNG, WebP, HEIC, PDF
   - Maximum size: 10MB
   - Recommended: 1080p or higher resolution
 
 - `document_type` (optional): Expected document type
+
   - If not provided, auto-detection is attempted
   - Valid values: See supported document types above
 
@@ -93,6 +97,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -124,6 +129,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 **Error Response (400):**
+
 ```json
 {
   "success": false,
@@ -134,6 +140,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 **Error Response (422):**
+
 ```json
 {
   "success": false,
@@ -149,6 +156,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 **Error Response (500):**
+
 ```json
 {
   "success": false,
@@ -163,43 +171,44 @@ curl -X POST "http://localhost:8000/api/process" \
 
 ### Success Response
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `success` | boolean | Always `true` for successful responses |
-| `document_type` | string | Detected/specified document type |
-| `confidence` | number | Confidence score (0.0-1.0) |
-| `processing_time` | number | Processing duration in seconds |
-| `extracted_data` | object | Structured document data |
-| `metadata` | object | Processing and file metadata |
+| Field             | Type    | Description                            |
+| ----------------- | ------- | -------------------------------------- |
+| `success`         | boolean | Always `true` for successful responses |
+| `document_type`   | string  | Detected/specified document type       |
+| `confidence`      | number  | Confidence score (0.0-1.0)             |
+| `processing_time` | number  | Processing duration in seconds         |
+| `extracted_data`  | object  | Structured document data               |
+| `metadata`        | object  | Processing and file metadata           |
 
 ### Error Response
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `success` | boolean | Always `false` for error responses |
-| `error` | string | Human-readable error message |
-| `details` | string | Additional error context |
-| `error_code` | string | Machine-readable error code |
+| Field        | Type    | Description                        |
+| ------------ | ------- | ---------------------------------- |
+| `success`    | boolean | Always `false` for error responses |
+| `error`      | string  | Human-readable error message       |
+| `details`    | string  | Additional error context           |
+| `error_code` | string  | Machine-readable error code        |
 
 ### Common Error Codes
 
-| Code | Description | HTTP Status |
-|------|-------------|-------------|
-| `MISSING_FILE` | No file uploaded | 400 |
-| `INVALID_FILE_FORMAT` | Unsupported file type | 400 |
-| `FILE_TOO_LARGE` | File exceeds size limit | 400 |
-| `INVALID_DOCUMENT_TYPE` | Unknown document type specified | 400 |
-| `INVALID_CONFIDENCE_THRESHOLD` | Threshold not between 0.0-1.0 | 400 |
-| `LOW_CONFIDENCE` | Extraction confidence below threshold | 422 |
-| `DOCUMENT_NOT_READABLE` | Document image unclear/corrupted | 422 |
-| `API_KEY_INVALID` | Gemini API key authentication failed | 500 |
-| `API_QUOTA_EXCEEDED` | Gemini API usage limits reached | 500 |
-| `PROCESSING_TIMEOUT` | Document processing timed out | 500 |
-| `INTERNAL_ERROR` | Unexpected system error | 500 |
+| Code                           | Description                           | HTTP Status |
+| ------------------------------ | ------------------------------------- | ----------- |
+| `MISSING_FILE`                 | No file uploaded                      | 400         |
+| `INVALID_FILE_FORMAT`          | Unsupported file type                 | 400         |
+| `FILE_TOO_LARGE`               | File exceeds size limit               | 400         |
+| `INVALID_DOCUMENT_TYPE`        | Unknown document type specified       | 400         |
+| `INVALID_CONFIDENCE_THRESHOLD` | Threshold not between 0.0-1.0         | 400         |
+| `LOW_CONFIDENCE`               | Extraction confidence below threshold | 422         |
+| `DOCUMENT_NOT_READABLE`        | Document image unclear/corrupted      | 422         |
+| `API_KEY_INVALID`              | Gemini API key authentication failed  | 500         |
+| `API_QUOTA_EXCEEDED`           | Gemini API usage limits reached       | 500         |
+| `PROCESSING_TIMEOUT`           | Document processing timed out         | 500         |
+| `INTERNAL_ERROR`               | Unexpected system error               | 500         |
 
 ## Document Type Schemas
 
 ### Aadhaar Card
+
 ```json
 {
   "name": "string",
@@ -220,6 +229,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 ### Academic Marksheet
+
 ```json
 {
   "student_name": "string",
@@ -245,6 +255,7 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 ### Birth Certificate
+
 ```json
 {
   "child_name": "string",
@@ -266,6 +277,7 @@ curl -X POST "http://localhost:8000/api/process" \
 - Large files (>5MB): 20 requests per hour
 
 Rate limit headers are included in responses:
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -275,49 +287,53 @@ X-RateLimit-Reset: 1695715200
 ## Best Practices
 
 ### Image Quality
+
 - Use high resolution (1080p+) images
 - Ensure good lighting and contrast
 - Avoid blurry or skewed images
 - Remove shadows and glare
 
 ### File Formats
+
 - JPEG: Good for photos, moderate compression
 - PNG: Best for scanned documents, lossless
 - PDF: Good for multi-page documents
 - WebP: Smaller file sizes, good quality
 
 ### Error Handling
+
 ```javascript
 // Example JavaScript error handling
 try {
-  const response = await fetch('/api/process', {
-    method: 'POST',
-    body: formData
+  const response = await fetch("/api/process", {
+    method: "POST",
+    body: formData,
   });
-  
+
   const result = await response.json();
-  
+
   if (!result.success) {
     // Handle specific errors
     switch (result.error_code) {
-      case 'LOW_CONFIDENCE':
-        console.warn('Document quality may be poor');
+      case "LOW_CONFIDENCE":
+        console.warn("Document quality may be poor");
         // Show user feedback options
         break;
-      case 'API_QUOTA_EXCEEDED':
-        console.error('Service temporarily unavailable');
+      case "API_QUOTA_EXCEEDED":
+        console.error("Service temporarily unavailable");
         // Retry after specified time
         break;
       default:
-        console.error('Processing failed:', result.error);
+        console.error("Processing failed:", result.error);
     }
   }
 } catch (error) {
-  console.error('Network error:', error);
+  console.error("Network error:", error);
 }
 ```
 
 ### Performance Optimization
+
 - Compress images before upload when possible
 - Use appropriate confidence thresholds
 - Implement client-side caching for repeated requests
@@ -326,19 +342,20 @@ try {
 ## SDK Examples
 
 ### Python
+
 ```python
 import requests
 
 def process_document(file_path, document_type=None):
     url = "http://localhost:8000/api/process"
-    
+
     with open(file_path, 'rb') as f:
         files = {'file': f}
         data = {}
-        
+
         if document_type:
             data['document_type'] = document_type
-            
+
         response = requests.post(url, files=files, data=data)
         return response.json()
 
@@ -350,6 +367,7 @@ if result['success']:
 ```
 
 ### cURL
+
 ```bash
 #!/bin/bash
 # Process document with error handling
@@ -372,6 +390,7 @@ fi
 ## Testing
 
 ### Test Endpoints
+
 ```bash
 # Health check
 curl http://localhost:8000/api/health
@@ -383,7 +402,9 @@ curl -X POST "http://localhost:8000/api/process" \
 ```
 
 ### Sample Test Data
+
 Test images are available in the `tests/fixtures/` directory:
+
 - `sample_aadhaar.jpg`
 - `sample_marksheet.pdf`
 - `sample_birth_certificate.png`
@@ -391,6 +412,7 @@ Test images are available in the `tests/fixtures/` directory:
 ## Changelog
 
 ### v1.0.0
+
 - Initial API release
 - Support for 9 Indian document types
 - Gemini 2.0 Flash integration
