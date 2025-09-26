@@ -35,7 +35,28 @@ class GeminiEntityExtractor:
             raise ValueError("Gemini API key not found. Set GEMINI_API_KEY environment variable.")
         
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
+        
+        # Try multiple model options
+        model_options = [
+            'models/gemini-2.5-flash',
+            'models/gemini-1.5-flash',
+            'models/gemini-pro-latest',
+            'gemini-pro'
+        ]
+        
+        self.model = None
+        for model_name in model_options:
+            try:
+                self.model = genai.GenerativeModel(model_name)
+                self.model_name = model_name
+                self.logger.info(f"Successfully initialized Gemini model: {model_name}")
+                break
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize model {model_name}: {e}")
+                continue
+                
+        if not self.model:
+            raise ValueError("Failed to initialize any Gemini model. Check API key and model access.")
         
         self.logger.info("Gemini Pro entity extractor initialized")
         
