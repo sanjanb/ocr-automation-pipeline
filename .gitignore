@@ -1,0 +1,260 @@
+# Byte-compiled / optimized / DLL files# Environment variables
+
+__pycache__/.env
+
+*.py[cod].env.local
+
+*$py.class.env.*.local
+
+
+
+# C extensions# Byte-compiled / optimized / DLL files
+
+*.so__pycache__/
+
+*.py[cod]
+
+# Distribution / packaging*$py.class
+
+.Python
+
+build/# C extensions
+
+develop-eggs/*.so
+
+dist/
+
+downloads/# Distribution / packaging
+
+eggs/.Python
+
+.eggs/build/
+
+lib/develop-eggs/
+
+lib64/dist/
+
+parts/downloads/
+
+sdist/eggs/
+
+var/.eggs/
+
+wheels/lib/
+
+share/python-wheels/lib64/
+
+*.egg-info/parts/
+
+.installed.cfgsdist/
+
+*.eggvar/
+
+MANIFESTwheels/
+
+share/python-wheels/
+
+# PyInstaller*.egg-info/
+
+*.manifest.installed.cfg
+
+*.spec*.egg
+
+MANIFEST
+
+# Installer logs
+
+pip-log.txt# PyInstaller
+
+pip-delete-this-directory.txt*.manifest
+
+*.spec
+
+# Unit test / coverage reports
+
+htmlcov/# Unit test / coverage reports
+
+.tox/htmlcov/
+
+.nox/.tox/
+
+.coverage.nox/
+
+.coverage.*.coverage
+
+.cache.coverage.*
+
+nosetests.xml.cache
+
+coverage.xmlnosetests.xml
+
+*.covercoverage.xml
+
+*.py,cover*.cover
+
+.hypothesis/*.py,cover
+
+.pytest_cache/.hypothesis/
+
+cover/.pytest_cache/
+
+cover/
+
+# Translations
+
+*.mo# Jupyter Notebook
+
+*.pot.ipynb_checkpoints
+
+
+
+# Django stuff:# IPython
+
+*.logprofile_default/
+
+local_settings.pyipython_config.py
+
+db.sqlite3
+
+db.sqlite3-journal# pyenv
+
+.python-version
+
+# Flask stuff:
+
+instance/# Virtual environments
+
+.webassets-cachevenv/
+
+env/
+
+# Scrapy stuff:ENV/
+
+.scrapyenv.bak/
+
+venv.bak/
+
+# Sphinx documentation
+
+docs/_build/# IDE
+
+.vscode/
+
+# PyBuilder.idea/
+
+.pybuilder/*.swp
+
+target/*.swo
+
+*~
+
+# Jupyter Notebook
+
+.ipynb_checkpoints# OS
+
+.DS_Store
+
+# IPython.DS_Store?
+
+profile_default/._*
+
+ipython_config.py.Spotlight-V100
+
+.Trashes
+
+# pyenvehthumbs.db
+
+.python-versionThumbs.db
+
+
+
+# pipenv# Project specific
+
+Pipfile.lockdata/uploads/
+
+data/temp/
+
+# poetrylogs/
+
+poetry.lockmodels/trained/
+
+*.log
+
+# pdm*.pkl
+
+.pdm.toml*.model
+
+
+
+# PEP 582# OCR temp files
+
+__pypackages__/*.txt.tmp
+
+temp_images/
+
+# Celery stuffsample_documents/
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Temporary files
+temp_uploads/
+*.tmp
+test_*.png
+test_*.jpg
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+models/
+checkpoints/
+logs/
+data/samples/
