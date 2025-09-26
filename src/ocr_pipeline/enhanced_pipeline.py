@@ -12,6 +12,7 @@ from pathlib import Path
 from .extractors import MultiEngineOCR, EntityExtractor, OCREngine
 from .classifiers import DocumentClassifier, DocumentType
 from .extractors.ai_entity_extractor import AIEntityExtractor, AIExtractionResult
+from .extractors.gemini_entity_extractor import GeminiEntityExtractor, GeminiExtractionResult
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class EnhancedOCRPipeline:
     def __init__(self, 
                  use_ai: bool = True,
                  hf_token: Optional[str] = None,
+                 gemini_api_key: Optional[str] = None,
                  ai_fallback_threshold: float = 0.6):
         """
         Initialize enhanced pipeline
@@ -43,6 +45,7 @@ class EnhancedOCRPipeline:
         Args:
             use_ai: Whether to use AI-powered extraction as primary method
             hf_token: Hugging Face API token for AI models
+            gemini_api_key: Google Gemini API key for text parsing
             ai_fallback_threshold: Confidence threshold below which to try traditional OCR
         """
         self.use_ai = use_ai
@@ -64,6 +67,14 @@ class EnhancedOCRPipeline:
                 self.use_ai = False
         else:
             self.ai_extractor = None
+        
+        # Initialize Gemini components 
+        try:
+            self.gemini_extractor = GeminiEntityExtractor(api_key=gemini_api_key)
+            logger.info("Gemini entity extractor initialized successfully")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Gemini extractor: {e}")
+            self.gemini_extractor = None
             
     def process_document(self, image_path: str, 
                         method: str = "auto",
@@ -73,7 +84,7 @@ class EnhancedOCRPipeline:
         
         Args:
             image_path: Path to the document image
-            method: "auto", "ai", or "traditional"
+            method: "auto", "ai", "gemini", or "traditional"
             document_type_hint: Optional hint about document type
             
         Returns:
@@ -87,13 +98,31 @@ class EnhancedOCRPipeline:
             
             # Auto method selection
             if method == "auto":
-                if self.use_ai and self.ai_extractor:
+                if self.gemini_extractor:
+                    method = "gemini"  # Prefer Gemini (OCR + AI parsing)
+                elif self.use_ai and self.ai_extractor:
                     method = "ai"
                 else:
                     method = "traditional"
             
-            # Try AI-powered extraction first
-            if method == "ai" and self.ai_extractor:
+            # Try Gemini-powered extraction (OCR + AI parsing)
+            if method == "gemini" and self.gemini_extractor:
+                result = self._process_with_gemini(image_path, document_type_hint)
+                
+                # Fallback to traditional if Gemini confidence is too low
+                if result.confidence < self.ai_fallback_threshold:
+                    logger.info(f"Gemini confidence {result.confidence:.3f} below threshold {self.ai_fallback_threshold}, trying traditional method")
+                    traditional_result = self._process_traditional(image_path)
+                    
+                    # Use better result
+                    if traditional_result.confidence > result.confidence:
+                        result = traditional_result
+                        result.metadata["gemini_fallback"] = True
+                    else:
+                        result.metadata["used_gemini"] = True
+                        
+            # Try AI-powered extraction (pure AI models)
+            elif method == "ai" and self.ai_extractor:
                 result = self._process_with_ai(image_path, document_type_hint)
                 
                 # Fallback to traditional if AI confidence is too low
@@ -237,6 +266,69 @@ class EnhancedOCRPipeline:
                 method_used="traditional"
             )
     
+    def _process_with_gemini(self, image_path: str, document_type_hint: Optional[str] = None) -> PipelineResult:
+        """Process document using OCR + Gemini Pro parsing"""
+        try:
+            logger.info("Using Gemini-powered extraction (OCR + AI parsing)")
+            
+            # Step 1: Extract raw text using traditional OCR
+            logger.info("Extracting text with MultiEngineOCR for Gemini parsing")
+            ocr_result = self.ocr_engine.extract_text(image_path)
+            
+            if not ocr_result or not ocr_result.text:
+                logger.warning("OCR extraction failed, no text for Gemini to parse")
+                return PipelineResult(
+                    success=False,
+                    document_type=DocumentType.OTHER,
+                    confidence=0.0,
+                    metadata={"gemini_error": "OCR extraction failed"},
+                    method_used="gemini"
+                )
+            
+            # Step 2: Use Gemini to parse and structure the OCR text
+            document_type = document_type_hint or "marksheet_12th"
+            gemini_result = self.gemini_extractor.extract_from_ocr_text(ocr_result.text, document_type)
+            
+            # Step 3: Convert to pipeline result
+            if gemini_result.entities:
+                # Use document classifier to get document type
+                doc_type = self.document_classifier.classify(image_path)
+                
+                return PipelineResult(
+                    success=True,
+                    document_type=doc_type,
+                    extracted_text=ocr_result.text,
+                    entities=gemini_result.entities,
+                    confidence=gemini_result.confidence,
+                    metadata={
+                        "gemini_model": gemini_result.model_used,
+                        "ocr_engine": getattr(ocr_result, 'engine_used', 'unknown'),
+                        "ocr_confidence": getattr(ocr_result, 'confidence', 0.0),
+                        "gemini_raw_output": gemini_result.raw_output,
+                        **gemini_result.metadata
+                    },
+                    method_used="gemini"
+                )
+            else:
+                return PipelineResult(
+                    success=False,
+                    document_type=DocumentType.OTHER,
+                    extracted_text=ocr_result.text,
+                    confidence=0.0,
+                    metadata={"gemini_error": "No entities extracted by Gemini"},
+                    method_used="gemini"
+                )
+                
+        except Exception as e:
+            logger.error(f"Gemini processing failed: {e}")
+            return PipelineResult(
+                success=False,
+                document_type=DocumentType.OTHER,
+                confidence=0.0,
+                metadata={"gemini_error": str(e)},
+                method_used="gemini"
+            )
+    
     def _map_to_ai_document_type(self, document_type_hint: Optional[str]) -> str:
         """Map our document type to AI model document type"""
         mapping = {
@@ -273,6 +365,7 @@ class EnhancedOCRPipeline:
 
 def create_enhanced_pipeline(use_ai: bool = True, 
                            hf_token: Optional[str] = None,
+                           gemini_api_key: Optional[str] = None,
                            ai_fallback_threshold: float = 0.6) -> EnhancedOCRPipeline:
     """
     Factory function to create enhanced OCR pipeline
@@ -280,6 +373,7 @@ def create_enhanced_pipeline(use_ai: bool = True,
     Args:
         use_ai: Whether to use AI-powered extraction
         hf_token: Hugging Face API token
+        gemini_api_key: Google Gemini API key
         ai_fallback_threshold: Confidence threshold for AI fallback
         
     Returns:
@@ -287,6 +381,7 @@ def create_enhanced_pipeline(use_ai: bool = True,
     """
     return EnhancedOCRPipeline(
         use_ai=use_ai,
-        hf_token=hf_token, 
+        hf_token=hf_token,
+        gemini_api_key=gemini_api_key,
         ai_fallback_threshold=ai_fallback_threshold
     )
