@@ -98,7 +98,7 @@ async def root():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>🎓 Smart Document Processor</title>
+        <title> Smart Document Processor</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -179,7 +179,7 @@ async def root():
     <body>
         <div class="container">
             <div class="header">
-                <h1>🎓 Smart Document Processor</h1>
+                <h1> Smart Document Processor</h1>
                 <p>AI-powered document extraction using Gemini API | FastAPI + Modern Interface</p>
             </div>
             
@@ -187,27 +187,27 @@ async def root():
                 <div class="upload-section">
                     <form id="uploadForm">
                         <div class="form-group">
-                            <label for="document">📄 Select Document Image</label>
+                            <label for="document"> Select Document Image</label>
                             <input type="file" id="document" accept="image/*" required>
                         </div>
                         
                         <div class="form-group">
-                            <label for="doc_type">📋 Document Type (optional - auto-detect if not selected)</label>
+                            <label for="doc_type"> Document Type (optional - auto-detect if not selected)</label>
                             <select id="doc_type">
-                                <option value="">🔍 Auto-detect</option>
-                                <option value="aadhaar_card">🆔 Aadhaar Card</option>
-                                <option value="marksheet_10th">📜 10th Marksheet</option>
-                                <option value="marksheet_12th">📜 12th Marksheet</option>
-                                <option value="transfer_certificate">📄 Transfer Certificate</option>
-                                <option value="migration_certificate">🎓 Migration Certificate</option>
-                                <option value="entrance_scorecard">📊 Entrance Scorecard</option>
-                                <option value="admit_card">🎫 Admit Card</option>
-                                <option value="caste_certificate">📋 Caste Certificate</option>
-                                <option value="domicile_certificate">🏠 Domicile Certificate</option>
+                                <option value=""> Auto-detect</option>
+                                <option value="aadhaar_card"> Aadhaar Card</option>
+                                <option value="marksheet_10th"> 10th Marksheet</option>
+                                <option value="marksheet_12th"> 12th Marksheet</option>
+                                <option value="transfer_certificate"> Transfer Certificate</option>
+                                <option value="migration_certificate"> Migration Certificate</option>
+                                <option value="entrance_scorecard"> Entrance Scorecard</option>
+                                <option value="admit_card"> Admit Card</option>
+                                <option value="caste_certificate"> Caste Certificate</option>
+                                <option value="domicile_certificate"> Domicile Certificate</option>
                             </select>
                         </div>
                         
-                        <button type="submit" class="btn" id="submitBtn">🚀 Process Document</button>
+                        <button type="submit" class="btn" id="submitBtn"> Process Document</button>
                     </form>
                 </div>
                 
@@ -215,10 +215,10 @@ async def root():
                 
                 <div class="api-links">
                     <h4>🔗 API Documentation</h4>
-                    <a href="/docs" target="_blank">📖 Interactive API Docs (Swagger)</a>
-                    <a href="/redoc" target="_blank">📚 ReDoc Documentation</a>
-                    <a href="/health" target="_blank">💚 Health Check</a>
-                    <a href="/schemas" target="_blank">📋 Document Schemas</a>
+                    <a href="/docs" target="_blank">Interactive API Docs (Swagger)</a>
+                    <a href="/redoc" target="_blank">ReDoc Documentation</a>
+                    <a href="/health" target="_blank">Health Check</a>
+                    <a href="/schemas" target="_blank">Document Schemas</a>
                 </div>
             </div>
         </div>
@@ -239,9 +239,9 @@ async def root():
                 
                 // Show loading
                 submitBtn.disabled = true;
-                submitBtn.textContent = '⏳ Processing...';
+                submitBtn.textContent = 'Processing...';
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<div class="loading">🔄 Processing your document...</div>';
+                resultDiv.innerHTML = '<div class="loading">Processing your document...</div>';
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -277,7 +277,7 @@ async def root():
                                     <div class="metric-label">AI Model</div>
                                 </div>
                             </div>
-                            <h4>📋 Extracted Data</h4>
+                            <h4> Extracted Data</h4>
                             <div class="json-display">${JSON.stringify(result.extracted_data, null, 2)}</div>
                             ${result.validation_issues.length > 0 ? `
                                 <div class="validation-issues">
@@ -303,7 +303,7 @@ async def root():
                 
                 // Reset button
                 submitBtn.disabled = false;
-                submitBtn.textContent = '🚀 Process Document';
+                submitBtn.textContent = ' Process Document';
             });
         </script>
     </body>
@@ -419,12 +419,12 @@ if __name__ == "__main__":
     
     # Check API key
     if not os.getenv("GEMINI_API_KEY"):
-        print("⚠️ WARNING: GEMINI_API_KEY not found in environment variables")
-        print("   Set it with: set GEMINI_API_KEY=your_api_key_here")
+        print("WARNING: GEMINI_API_KEY not found in environment variables")
+        print("Set it with: set GEMINI_API_KEY=your_api_key_here")
     
-    print("🚀 Starting FastAPI Document Processor...")
-    print("📱 Web interface: http://127.0.0.1:8000")
-    print("📖 API docs: http://127.0.0.1:8000/docs")
-    print("📚 ReDoc: http://127.0.0.1:8000/redoc")
+    print(" Starting FastAPI Document Processor...")
+    print("Web interface: http://127.0.0.1:8000")
+    print(" API docs: http://127.0.0.1:8000/docs")
+    print(" ReDoc: http://127.0.0.1:8000/redoc")
     
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

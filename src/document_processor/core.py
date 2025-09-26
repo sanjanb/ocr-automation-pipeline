@@ -9,6 +9,10 @@ import logging
 import time
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 from dataclasses import dataclass
 from datetime import datetime
 

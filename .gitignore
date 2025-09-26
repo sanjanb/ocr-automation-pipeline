@@ -1,206 +1,111 @@
-# Byte-compiled / optimized / DLL files# Environment variables
-
-__pycache__/.env
-
-*.py[cod].env.local
-
-*$py.class.env.*.local
-
-
-
-# C extensions# Byte-compiled / optimized / DLL files
-
-*.so__pycache__/
-
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
+*$py.class
 
-# Distribution / packaging*$py.class
+# C extensions
+*.so
 
+# Distribution / packaging
 .Python
-
-build/# C extensions
-
-develop-eggs/*.so
-
+build/
+develop-eggs/
 dist/
-
-downloads/# Distribution / packaging
-
-eggs/.Python
-
-.eggs/build/
-
-lib/develop-eggs/
-
-lib64/dist/
-
-parts/downloads/
-
-sdist/eggs/
-
-var/.eggs/
-
-wheels/lib/
-
-share/python-wheels/lib64/
-
-*.egg-info/parts/
-
-.installed.cfgsdist/
-
-*.eggvar/
-
-MANIFESTwheels/
-
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 share/python-wheels/
-
-# PyInstaller*.egg-info/
-
-*.manifest.installed.cfg
-
-*.spec*.egg
-
+*.egg-info/
+.installed.cfg
+*.egg
 MANIFEST
 
-# Installer logs
-
-pip-log.txt# PyInstaller
-
-pip-delete-this-directory.txt*.manifest
-
+# PyInstaller
+*.manifest
 *.spec
 
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
 # Unit test / coverage reports
-
-htmlcov/# Unit test / coverage reports
-
-.tox/htmlcov/
-
-.nox/.tox/
-
-.coverage.nox/
-
-.coverage.*.coverage
-
-.cache.coverage.*
-
-nosetests.xml.cache
-
-coverage.xmlnosetests.xml
-
-*.covercoverage.xml
-
-*.py,cover*.cover
-
-.hypothesis/*.py,cover
-
-.pytest_cache/.hypothesis/
-
-cover/.pytest_cache/
-
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
 cover/
 
 # Translations
+*.mo
+*.pot
 
-*.mo# Jupyter Notebook
-
-*.pot.ipynb_checkpoints
-
-
-
-# Django stuff:# IPython
-
-*.logprofile_default/
-
-local_settings.pyipython_config.py
-
+# Django stuff:
+*.log
+local_settings.py
 db.sqlite3
-
-db.sqlite3-journal# pyenv
-
-.python-version
+db.sqlite3-journal
 
 # Flask stuff:
+instance/
+.webassets-cache
 
-instance/# Virtual environments
-
-.webassets-cachevenv/
-
-env/
-
-# Scrapy stuff:ENV/
-
-.scrapyenv.bak/
-
-venv.bak/
+# Scrapy stuff:
+.scrapy
 
 # Sphinx documentation
+docs/_build/
 
-docs/_build/# IDE
-
-.vscode/
-
-# PyBuilder.idea/
-
-.pybuilder/*.swp
-
-target/*.swo
-
-*~
+# PyBuilder
+.pybuilder/
+target/
 
 # Jupyter Notebook
+.ipynb_checkpoints
 
-.ipynb_checkpoints# OS
+# IPython
+profile_default/
+ipython_config.py
 
-.DS_Store
+# pyenv
+.python-version
 
-# IPython.DS_Store?
+# pipenv
+Pipfile.lock
 
-profile_default/._*
+# poetry
+poetry.lock
 
-ipython_config.py.Spotlight-V100
+# pdm
+.pdm.toml
 
-.Trashes
+# PEP 582
+__pypackages__/
 
-# pyenvehthumbs.db
-
-.python-versionThumbs.db
-
-
-
-# pipenv# Project specific
-
-Pipfile.lockdata/uploads/
-
-data/temp/
-
-# poetrylogs/
-
-poetry.lockmodels/trained/
-
-*.log
-
-# pdm*.pkl
-
-.pdm.toml*.model
-
-
-
-# PEP 582# OCR temp files
-
-__pypackages__/*.txt.tmp
-
-temp_images/
-
-# Celery stuffsample_documents/
+# Celery stuff
 celerybeat-schedule
 celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environment variables
 .env
+.env.local
+.env.*.local
 .venv
 env/
 venv/
@@ -232,17 +137,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# PyCharm
+# IDE
 .idea/
-
-# VS Code
 .vscode/
-
-# Temporary files
-temp_uploads/
-*.tmp
-test_*.png
-test_*.jpg
+*.swp
+*.swo
+*~
 
 # OS generated files
 .DS_Store
@@ -254,7 +154,19 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
+temp_uploads/
+data/uploads/
+data/temp/
+logs/
+models/trained/
+*.pkl
+*.model
+sample_documents/
+temp_images/
+*.txt.tmp
+*.tmp
+test_*.png
+test_*.jpg
 models/
 checkpoints/
-logs/
 data/samples/
