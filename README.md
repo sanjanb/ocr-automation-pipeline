@@ -5,6 +5,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)
+
 > **AI-powered document processing using Gemini API with FastAPI**  
 > Transform document images into structured JSON in seconds, not hours.
 
