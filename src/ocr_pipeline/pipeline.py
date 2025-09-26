@@ -40,7 +40,9 @@ class OCRPipeline:
     def __init__(self, 
                  ocr_engines: Optional[List[OCREngine]] = None,
                  model_path: Optional[str] = None,
-                 spacy_model: str = "en_core_web_sm"):
+                 spacy_model: str = "en_core_web_sm",
+                 use_gemini: bool = True,
+                 gemini_api_key: Optional[str] = None):
         """
         Initialize the OCR pipeline.
         
@@ -48,6 +50,8 @@ class OCRPipeline:
             ocr_engines: List of OCR engines to use
             model_path: Path to custom ML models
             spacy_model: spaCy model name for NLP
+            use_gemini: Whether to use Gemini Pro for enhanced entity extraction
+            gemini_api_key: Gemini API key (optional, can use environment variable)
         """
         
         # Initialize components
@@ -64,9 +68,16 @@ class OCRPipeline:
             self.ocr_engine = create_multi_engine_ocr(engines=ocr_engines)
             logger.info(f"✓ OCR engines initialized: {[e.value for e in self.ocr_engine.get_available_engines()]}")
             
-            # Entity extractor
-            self.entity_extractor = create_entity_extractor(model_name=spacy_model)
-            logger.info("✓ Entity extractor initialized")
+            # Entity extractor with optional Gemini integration
+            self.entity_extractor = create_entity_extractor(
+                model_name=spacy_model,
+                use_gemini=use_gemini,
+                gemini_api_key=gemini_api_key
+            )
+            if use_gemini:
+                logger.info("✓ Entity extractor initialized with Gemini Pro enhancement")
+            else:
+                logger.info("✓ Entity extractor initialized (traditional methods)")
             
             # Validators
             self.validator = create_validator()
@@ -436,7 +447,9 @@ class OCRPipeline:
 
 def create_pipeline(ocr_engines: Optional[List[OCREngine]] = None,
                    model_path: Optional[str] = None,
-                   spacy_model: str = "en_core_web_sm") -> OCRPipeline:
+                   spacy_model: str = "en_core_web_sm",
+                   use_gemini: bool = True,
+                   gemini_api_key: Optional[str] = None) -> OCRPipeline:
     """
     Factory function to create an OCR pipeline instance.
     
@@ -444,12 +457,16 @@ def create_pipeline(ocr_engines: Optional[List[OCREngine]] = None,
         ocr_engines: List of OCR engines to use
         model_path: Path to custom ML models
         spacy_model: spaCy model name
+        use_gemini: Whether to use Gemini Pro for enhanced extraction
+        gemini_api_key: Gemini API key (optional)
         
     Returns:
-        OCRPipeline instance
+        OCRPipeline instance with optional Gemini integration
     """
     return OCRPipeline(
         ocr_engines=ocr_engines,
         model_path=model_path,
-        spacy_model=spacy_model
+        spacy_model=spacy_model,
+        use_gemini=use_gemini,
+        gemini_api_key=gemini_api_key
     )

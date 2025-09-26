@@ -17,6 +17,14 @@ from spacy import displacy
 import json
 from pathlib import Path
 
+# Gemini integration
+try:
+    from .gemini_entity_extractor import GeminiEntityExtractor, create_gemini_entity_extractor
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
+    logging.warning("Gemini entity extractor not available. Install google-generativeai for Gemini support.")
+
 from ..classifiers.document_classifier import DocumentType
 
 logger = logging.getLogger(__name__)
@@ -36,14 +44,29 @@ class EntityExtractor:
     and AI/NLP to extract structured information from OCR text.
     """
     
-    def __init__(self, model_name: str = "en_core_web_sm"):
+    def __init__(self, model_name: str = "en_core_web_sm", use_gemini: bool = True, gemini_api_key: str = None):
         """
         Initialize entity extractor.
         
         Args:
             model_name: spaCy model name to use
+            use_gemini: Whether to use Gemini Pro for enhanced extraction
+            gemini_api_key: Gemini API key (optional, can use env variable)
         """
         self.model_name = model_name
+        self.use_gemini = use_gemini and GEMINI_AVAILABLE
+        
+        # Initialize Gemini extractor if available and requested
+        if self.use_gemini:
+            try:
+                self.gemini_extractor = create_gemini_entity_extractor(gemini_api_key)
+                logger.info("Gemini entity extractor initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Gemini extractor: {e}")
+                self.gemini_extractor = None
+                self.use_gemini = False
+        else:
+            self.gemini_extractor = None
         
         # Load spaCy model
         try:
@@ -83,24 +106,48 @@ class EntityExtractor:
             
             # Extract entities using multiple methods
             entities = {}
+            extraction_methods = []
             
             # Method 1: Regex-based extraction
             regex_entities = self._extract_with_regex(text, template)
             entities.update(regex_entities)
+            extraction_methods.append("regex")
             
             # Method 2: NLP-based extraction
             nlp_entities = self._extract_with_nlp(text, template)
             entities.update(nlp_entities)
+            extraction_methods.append("nlp")
             
             # Method 3: Template-based extraction
             template_entities = self._extract_with_template(text, template)
             entities.update(template_entities)
+            extraction_methods.append("template")
+            
+            # Method 4: Gemini AI-powered extraction (if available)
+            if self.use_gemini and self.gemini_extractor:
+                try:
+                    document_type_str = self._map_document_type_to_gemini(document_type)
+                    gemini_result = self.gemini_extractor.extract_from_ocr_text(text, document_type_str)
+                    
+                    if gemini_result.entities:
+                        # Merge Gemini results with existing entities (Gemini takes priority for conflicts)
+                        for key, value in gemini_result.entities.items():
+                            if value and (key not in entities or not entities[key]):
+                                entities[key] = value
+                        
+                        extraction_methods.append("gemini")
+                        logger.info(f"Gemini enhanced extraction with {len(gemini_result.entities)} entities")
+                
+                except Exception as e:
+                    logger.warning(f"Gemini extraction failed, using traditional methods: {e}")
             
             # Validate extracted entities
             validated_entities = self._validate_entities(entities, document_type)
             
-            # Calculate confidence
+            # Calculate confidence (boost if Gemini was used successfully)
             confidence = self._calculate_confidence(validated_entities, text, template)
+            if "gemini" in extraction_methods:
+                confidence = min(confidence * 1.2, 1.0)  # Boost confidence for Gemini-enhanced extraction
             
             processing_time = time.time() - start_time
             
@@ -110,8 +157,9 @@ class EntityExtractor:
                 metadata={
                     "document_type": document_type.value,
                     "text_length": len(text),
-                    "extraction_methods": ["regex", "nlp", "template"],
-                    "template_used": template.get("name", "unknown")
+                    "extraction_methods": extraction_methods,
+                    "template_used": template.get("name", "unknown"),
+                    "gemini_enhanced": "gemini" in extraction_methods
                 },
                 processing_time=processing_time
             )
@@ -754,6 +802,21 @@ class EntityExtractor:
         
         return min(confidence, 1.0)
     
+    def _map_document_type_to_gemini(self, document_type: DocumentType) -> str:
+        """Map DocumentType enum to Gemini extractor string format"""
+        mapping = {
+            DocumentType.MARKSHEET_10TH: "marksheet_10th",
+            DocumentType.MARKSHEET_12TH: "marksheet_12th",
+            DocumentType.ENTRANCE_SCORECARD: "entrance_scorecard", 
+            DocumentType.ADMIT_CARD: "admit_card",
+            DocumentType.CASTE_CERTIFICATE: "caste_certificate",
+            DocumentType.AADHAR_CARD: "aadhar_card",
+            DocumentType.TRANSFER_CERTIFICATE: "transfer_certificate",
+            DocumentType.MIGRATION_CERTIFICATE: "migration_certificate",
+            DocumentType.DOMICILE_CERTIFICATE: "domicile_certificate"
+        }
+        return mapping.get(document_type, "marksheet_12th")  # Default fallback
+    
     def _empty_result(self) -> EntityResult:
         """Return empty result for unsupported document types"""
         return EntityResult(
@@ -762,14 +825,18 @@ class EntityExtractor:
             metadata={"status": "unsupported_document_type"}
         )
 
-def create_entity_extractor(model_name: str = "en_core_web_sm") -> EntityExtractor:
+def create_entity_extractor(model_name: str = "en_core_web_sm", 
+                           use_gemini: bool = True, 
+                           gemini_api_key: str = None) -> EntityExtractor:
     """
     Factory function to create an entity extractor.
     
     Args:
         model_name: spaCy model name
+        use_gemini: Whether to use Gemini Pro for enhanced extraction
+        gemini_api_key: Gemini API key (optional)
         
     Returns:
-        EntityExtractor instance
+        EntityExtractor instance with optional Gemini integration
     """
-    return EntityExtractor(model_name=model_name)
+    return EntityExtractor(model_name=model_name, use_gemini=use_gemini, gemini_api_key=gemini_api_key)
