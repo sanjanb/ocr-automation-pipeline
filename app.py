@@ -197,7 +197,7 @@ async def root():
         <div class="container">
             <div class="header">
                 <h1> Smart Document Processor</h1>
-                <p>AI-powered document extraction using Gemini API | Upload Images & PDFs | FastAPI + Modern Interface</p>
+                <p>AI-powered document extraction using Local API | Upload Images & PDFs | FastAPI + Modern Interface</p>
             </div>
             
             <div class="content">
@@ -323,7 +323,7 @@ async def root():
                         const studentId = result.metadata?.student_id;
                         
                         if (mongoStored) {
-                            showToast(`✅ Document processed and saved to database for student: ${studentId}`, 'success');
+                            showToast(`✅ Document processed and  to database for student: ${studentId}`, 'success');
                         } else if (studentId) {
                             showToast(`⚠️ Document processed but failed to save to database`, 'error');
                         } else {
@@ -357,12 +357,12 @@ async def root():
                             </div>
                             ` : ''}
                             
-                            <h4>📋 Extracted Data:</h4>
+                            <h4>Extracted Data:</h4>
                             <div class="json-display">${JSON.stringify(result.extracted_data, null, 2)}</div>
                             
                             ${studentId && mongoStored ? `
                             <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; border-left: 4px solid #4CAF50;">
-                                <strong>🎉 Success!</strong> Document has been stored in MongoDB for student <strong>${studentId}</strong>.
+                                <strong>Success!</strong> Document has been stored in MongoDB for student <strong>${studentId}</strong>.
                                 <br><small>You can retrieve this data later using the student ID.</small>
                             </div>
                             ` : ''}
@@ -414,7 +414,7 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
     
     Main endpoint for the document processing microservice:
     1. Downloads image from Cloudinary URL OR uses local file path
-    2. Processes with Gemini API to extract structured data
+    2. Processes with local API to extract structured data
     3. Normalizes fields based on document type
     4. Stores/updates in MongoDB under student record
     
