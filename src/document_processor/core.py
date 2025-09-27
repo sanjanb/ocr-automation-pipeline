@@ -101,17 +101,45 @@ class DocumentProcessor:
         start_time = time.time()
         
         try:
-            # Load and prepare image
-            image = Image.open(image_path)
-            if image.mode != 'RGB':
-                image = image.convert('RGB')
+            # Determine file type and prepare for processing
+            file_path = Path(image_path)
+            file_extension = file_path.suffix.lower()
             
-            # Auto-detect document type if not provided
-            if not document_type:
-                document_type = self._detect_document_type(image)
-            
-            # Extract data using Gemini
-            extracted_data = self._extract_with_gemini(image, document_type)
+            if file_extension == '.pdf':
+                # For PDF files, upload directly to Gemini
+                document_data = self._prepare_pdf_for_gemini(image_path)
+                
+                # Auto-detect document type if not provided
+                if not document_type:
+                    document_type = self._detect_document_type_pdf(document_data)
+                
+                # Extract data using Gemini for PDF
+                extracted_data = self._extract_with_gemini_pdf(document_data, document_type)
+                
+                metadata = {
+                    'file_type': 'pdf',
+                    'file_size': file_path.stat().st_size,
+                    'fields_extracted': len(extracted_data)
+                }
+            else:
+                # For image files, use existing logic
+                image = Image.open(image_path)
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
+                
+                # Auto-detect document type if not provided
+                if not document_type:
+                    document_type = self._detect_document_type(image)
+                
+                # Extract data using Gemini
+                extracted_data = self._extract_with_gemini(image, document_type)
+                
+                metadata = {
+                    'file_type': 'image',
+                    'image_size': image.size,
+                    'image_mode': image.mode,
+                    'fields_extracted': len(extracted_data)
+                }
             
             # Validate extracted data
             validation_issues = self._validate_data(extracted_data, document_type)
@@ -129,11 +157,7 @@ class DocumentProcessor:
                 validation_issues=validation_issues,
                 confidence_score=confidence,
                 model_used=self.model_name,
-                metadata={
-                    'image_size': image.size,
-                    'image_mode': image.mode,
-                    'fields_extracted': len(extracted_data)
-                }
+                metadata=metadata
             )
             
         except Exception as e:
@@ -282,6 +306,76 @@ Extract the data now:"""
                         issues.append(f"{field} should be {expected_length} digits, got: {value}")
         
         return issues
+    
+    def _prepare_pdf_for_gemini(self, pdf_path: str):
+        """Prepare PDF file for Gemini processing"""
+        try:
+            # Upload PDF to Gemini
+            file_part = genai.upload_file(pdf_path)
+            return file_part
+        except Exception as e:
+            logger.error(f"Failed to prepare PDF for Gemini: {e}")
+            raise
+    
+    def _detect_document_type_pdf(self, pdf_data) -> str:
+        """Auto-detect document type for PDF using Gemini"""
+        detection_prompt = """
+        Analyze this PDF document and identify its type.
+        
+        Choose from these options:
+        - aadhaar_card
+        - marksheet_10th
+        - marksheet_12th
+        - transfer_certificate
+        - migration_certificate
+        - entrance_scorecard
+        - admit_card
+        - caste_certificate
+        - domicile_certificate
+        - passport_photo
+        - other
+        
+        Return only the document type, nothing else.
+        """
+        
+        try:
+            response = self.model.generate_content([detection_prompt, pdf_data])
+            if response and response.text:
+                doc_type = response.text.strip().lower()
+                supported_types = {
+                    'aadhaar_card', 'marksheet_10th', 'marksheet_12th', 
+                    'transfer_certificate', 'migration_certificate', 'entrance_scorecard',
+                    'admit_card', 'caste_certificate', 'domicile_certificate', 'passport_photo'
+                }
+                return doc_type if doc_type in supported_types else 'other'
+        except Exception as e:
+            logger.warning(f"PDF document type detection failed: {e}")
+        
+        return 'other'
+    
+    def _extract_with_gemini_pdf(self, pdf_data, document_type: str) -> Dict[str, Any]:
+        """Extract structured data from PDF using Gemini"""
+        schema = self._get_document_schema(document_type)
+        prompt = self._create_extraction_prompt(document_type, schema)
+        
+        try:
+            response = self.model.generate_content([prompt, pdf_data])
+            if response and response.text:
+                # Clean and parse JSON response
+                response_text = response.text.strip()
+                if response_text.startswith('```json'):
+                    response_text = response_text[7:]  # Remove ```json
+                if response_text.endswith('```'):
+                    response_text = response_text[:-3]  # Remove ```
+                
+                return json.loads(response_text.strip())
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse Gemini JSON response for PDF: {e}")
+            logger.debug(f"Raw response: {response.text if response else 'None'}")
+        except Exception as e:
+            logger.error(f"Gemini PDF extraction failed: {e}")
+        
+        return {}
     
     def _calculate_confidence(self, data: Dict[str, Any], validation_issues: List[str]) -> float:
         """Calculate confidence score"""

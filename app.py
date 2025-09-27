@@ -145,6 +145,7 @@ async def root():
             
             .form-group { margin-bottom: 20px; }
             label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+            small { display: block; margin-top: 5px; color: #666; font-size: 12px; }
             input[type="file"], select { 
                 width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px;
                 font-size: 16px; background: white;
@@ -196,7 +197,7 @@ async def root():
         <div class="container">
             <div class="header">
                 <h1> Smart Document Processor</h1>
-                <p>AI-powered document extraction using Gemini API | FastAPI + Modern Interface</p>
+                <p>AI-powered document extraction using Gemini API | Upload Images & PDFs | FastAPI + Modern Interface</p>
             </div>
             
             <div class="content">
@@ -212,8 +213,9 @@ async def root():
                         </div>
                         
                         <div class="form-group">
-                            <label for="document"> Select Document Image</label>
-                            <input type="file" id="document" accept="image/*" required>
+                            <label for="document"> Select Document (Image or PDF)</label>
+                            <input type="file" id="document" accept="image/*,application/pdf" required>
+                            <small>Supported: JPG, PNG, GIF, WebP, PDF</small>
                         </div>
                         
                         <div class="form-group">
@@ -283,11 +285,19 @@ async def root():
                     return;
                 }
                 
+                // Validate file type (images and PDFs)
+                const file = fileInput.files[0];
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Please select an image file (JPG, PNG, GIF, WebP) or PDF document');
+                    return;
+                }
+                
                 // Show loading
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<div class="loading">🔍 Processing your document...</div>';
+                resultDiv.innerHTML = '<div class="loading">🔍 Processing your document (image/PDF)...</div>';
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -642,11 +652,12 @@ async def process_document(
             detail="Document processor not available"
         )
     
-    # Validate file type
-    if not file.content_type.startswith('image/'):
+    # Validate file type (allow images and PDFs)
+    allowed_types = ['image/', 'application/pdf']
+    if not any(file.content_type.startswith(t) for t in allowed_types):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File must be an image"
+            detail="File must be an image (jpg, png, etc.) or PDF"
         )
     
     # Validate document type
