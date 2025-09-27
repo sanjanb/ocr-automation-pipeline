@@ -6,6 +6,7 @@ Modern async API with automatic documentation and MongoDB integration
 import os
 import tempfile
 import logging
+import time
 from pathlib import Path
 from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
@@ -14,8 +15,10 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Union, List
 import uvicorn
+import requests
 
 from src.document_processor.core import create_processor, ProcessingResult
 from src.document_processor.schemas import get_supported_types, get_schema
@@ -104,6 +107,61 @@ class DocumentSchema(BaseModel):
     required_fields: list[str]
     optional_fields: list[str]
     validation_rules: Dict[str, str]
+
+# New models for URI/document processing
+class DocumentProcessingRequest(BaseModel):
+    """Request model for processing documents from URIs or direct upload"""
+    document_uris: Optional[List[str]] = Field(None, description="List of document URIs to download and process")
+    document_type: Optional[str] = Field(None, description="Document type hint (optional)")
+    student_id: Optional[str] = Field(None, description="Student ID for MongoDB storage (optional)")
+    batch_name: Optional[str] = Field(None, description="Batch identifier for grouping documents")
+    callback_url: Optional[str] = Field(None, description="URL to send results to when processing is complete")
+
+class DocumentProcessingResult(BaseModel):
+    """Result for a single document processing"""
+    uri: Optional[str] = None
+    success: bool
+    document_type: str
+    extracted_data: Dict[str, Any]
+    processing_time: float
+    validation_issues: List[str]
+    confidence_score: float
+    model_used: str
+    error_message: Optional[str] = None
+    mongodb_stored: bool = False
+
+class BatchProcessingResponse(BaseModel):
+    """Response for batch document processing"""
+    success: bool
+    batch_name: Optional[str]
+    total_documents: int
+    processed_documents: int
+    failed_documents: int
+    results: List[DocumentProcessingResult]
+    total_processing_time: float
+    message: str
+
+# Service registration models
+class ServiceRegistration(BaseModel):
+    """Model for external service registration"""
+    service_name: str
+    service_type: str = "spring_boot"
+    base_url: str
+    callback_endpoint: Optional[str] = None
+    health_endpoint: Optional[str] = None
+    contact_info: Optional[Dict[str, str]] = None
+
+class RegisteredService(BaseModel):
+    """Model for registered service info"""
+    id: str
+    service_name: str
+    service_type: str
+    base_url: str
+    callback_endpoint: Optional[str]
+    health_endpoint: Optional[str]
+    registered_at: str
+    last_health_check: Optional[str] = None
+    status: str = "active"
 
 # API Routes
 
@@ -345,7 +403,7 @@ async def root():
                                     <div class="metric-label">Processing Time</div>
                                 </div>
                                 <div class="metric">
-                                    <div class="metric-value">${mongoStored ? '✅ Saved' : '❌ Not Saved'}</div>
+                                    <div class="metric-value">${mongoStored ? 'Saved' : '❌ Not Saved'}</div>
                                     <div class="metric-label">Database Storage</div>
                                 </div>
                             </div>
@@ -404,6 +462,210 @@ async def health_check():
         database_connected=db_healthy,
         gemini_configured=bool(os.getenv("GEMINI_API_KEY"))
     )
+
+@app.get("/service-info")
+async def get_service_info():
+    """
+    Service information endpoint for Spring Boot server discovery
+    Returns the configuration and endpoints that Spring Boot needs to communicate
+    """
+    import socket
+    
+    # Get local IP address
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    
+    # Get server port (default 8000)
+    server_port = os.getenv("SERVER_PORT", "8000")
+    
+    service_info = {
+        "service_name": "OCR Document Processor",
+        "service_type": "document_processing",
+        "version": "2.0.0",
+        "status": "running",
+        "host_info": {
+            "hostname": hostname,
+            "local_ip": local_ip,
+            "port": server_port,
+            "base_url": f"http://{local_ip}:{server_port}",
+            "public_url": f"http://localhost:{server_port}"  # For same-machine testing
+        },
+        "endpoints": {
+            "health_check": f"http://{local_ip}:{server_port}/health",
+            "service_info": f"http://{local_ip}:{server_port}/service-info",
+            "single_document_processing": f"http://{local_ip}:{server_port}/api/process",
+            "batch_document_processing": f"http://{local_ip}:{server_port}/api/process/documents",
+            "cloudinary_document_processing": f"http://{local_ip}:{server_port}/process-doc",
+            "student_documents": f"http://{local_ip}:{server_port}/students/{{student_id}}/documents",
+            "api_documentation": f"http://{local_ip}:{server_port}/docs"
+        },
+        "capabilities": {
+            "supported_formats": ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"],
+            "supported_document_types": [
+                "aadhaar_card", "marksheet_10th", "marksheet_12th", "transfer_certificate",
+                "migration_certificate", "entrance_scorecard", "admit_card", 
+                "caste_certificate", "domicile_certificate", "passport_photo"
+            ],
+            "features": [
+                "single_document_processing",
+                "batch_processing",
+                "uri_download",
+                "mongodb_storage",
+                "callback_webhooks",
+                "auto_document_detection",
+                "field_extraction",
+                "validation",
+                "confidence_scoring"
+            ]
+        },
+        "integration_examples": {
+            "spring_boot_service_call": {
+                "description": "How Spring Boot should call this service",
+                "method": "POST",
+                "url": f"http://{local_ip}:{server_port}/api/process/documents",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                "example_request_body": {
+                    "document_uris": [
+                        "https://your-file-server.com/documents/doc1.jpg"
+                    ],
+                    "student_id": "STUDENT_123",
+                    "document_type": "aadhaar_card",
+                    "batch_name": "admission_batch_1",
+                    "callback_url": "http://your-spring-boot-server:8080/api/ocr/callback"
+                }
+            }
+        }
+    }
+    
+    return service_info
+
+# In-memory storage for registered services (in production, use Redis or database)
+registered_services = {}
+
+@app.post("/register-service")
+async def register_external_service(registration: ServiceRegistration):
+    """
+    Register an external service (like Spring Boot) with this FastAPI server
+    This allows the FastAPI server to know about and communicate back to other services
+    """
+    import uuid
+    from datetime import datetime
+    
+    # Generate unique service ID
+    service_id = str(uuid.uuid4())[:8]
+    
+    # Create registered service record
+    registered_service = RegisteredService(
+        id=service_id,
+        service_name=registration.service_name,
+        service_type=registration.service_type,
+        base_url=registration.base_url,
+        callback_endpoint=registration.callback_endpoint,
+        health_endpoint=registration.health_endpoint,
+        registered_at=datetime.now().isoformat(),
+        status="active"
+    )
+    
+    # Store in memory (use database in production)
+    registered_services[service_id] = registered_service
+    
+    logger.info(f"Registered new service: {registration.service_name} ({service_id}) at {registration.base_url}")
+    
+    # Get current service info for endpoints
+    import socket
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    server_port = os.getenv("SERVER_PORT", "8000")
+    base_url = f"http://{local_ip}:{server_port}"
+    
+    return {
+        "success": True,
+        "message": f"Service {registration.service_name} registered successfully",
+        "service_id": service_id,
+        "registered_service": registered_service,
+        "fastapi_endpoints": {
+            "batch_processing": f"{base_url}/api/process/documents",
+            "single_processing": f"{base_url}/api/process",
+            "health_check": f"{base_url}/health",
+            "service_info": f"{base_url}/service-info"
+        }
+    }
+
+@app.get("/registered-services")
+async def get_registered_services():
+    """Get list of all registered external services"""
+    return {
+        "total_services": len(registered_services),
+        "services": list(registered_services.values())
+    }
+
+@app.delete("/registered-services/{service_id}")
+async def unregister_service(service_id: str):
+    """Unregister a service"""
+    if service_id in registered_services:
+        service = registered_services.pop(service_id)
+        logger.info(f"Unregistered service: {service.service_name} ({service_id})")
+        return {"success": True, "message": f"Service {service.service_name} unregistered"}
+    else:
+        raise HTTPException(status_code=404, detail="Service not found")
+
+@app.post("/notify-services")
+async def notify_registered_services(message: Dict[str, Any]):
+    """
+    Send notifications to all registered services
+    Useful for broadcasting system status, maintenance updates, etc.
+    """
+    results = []
+    
+    for service_id, service in registered_services.items():
+        try:
+            if service.callback_endpoint:
+                notification_url = f"{service.base_url}{service.callback_endpoint}"
+                
+                import asyncio
+                import concurrent.futures
+                
+                def send_notification():
+                    response = requests.post(
+                        notification_url,
+                        json={
+                            "from_service": "OCR Document Processor",
+                            "message_type": "notification",
+                            "timestamp": time.time(),
+                            "data": message
+                        },
+                        headers={"Content-Type": "application/json"},
+                        timeout=10
+                    )
+                    return response.status_code
+                
+                # Send async
+                loop = asyncio.get_event_loop()
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    status_code = await loop.run_in_executor(executor, send_notification)
+                
+                results.append({
+                    "service_id": service_id,
+                    "service_name": service.service_name,
+                    "success": status_code == 200,
+                    "status_code": status_code
+                })
+                
+        except Exception as e:
+            results.append({
+                "service_id": service_id,
+                "service_name": service.service_name,
+                "success": False,
+                "error": str(e)
+            })
+    
+    return {
+        "message": "Notifications sent to registered services",
+        "results": results
+    }
 
 # NEW MICROSERVICE ENDPOINTS
 
@@ -769,10 +1031,271 @@ async def process_document(
 async def batch_processing_info():
     """Information about batch processing capabilities"""
     return {
-        "message": "Batch processing not implemented yet",
-        "suggested_approach": "Call /api/process multiple times for batch processing",
+        "message": "Batch processing available via /api/process/documents endpoint",
+        "suggested_approach": "Use /api/process/documents for processing multiple documents from URIs",
         "rate_limits": "Depends on Gemini API quotas"
     }
+
+@app.post("/api/process/documents", response_model=BatchProcessingResponse)
+async def process_documents_from_uris(request: DocumentProcessingRequest):
+    """
+    Process multiple documents from URIs and extract structured data
+    
+    This endpoint allows you to:
+    - Submit multiple document URIs for batch processing
+    - Specify document types for better accuracy 
+    - Store results in MongoDB with student ID
+    - Get results via callback URL (optional)
+    
+    **Example request:**
+    ```json
+    {
+        "document_uris": [
+            "https://example.com/document1.jpg",
+            "https://example.com/document2.pdf"
+        ],
+        "document_type": "aadhaar_card",
+        "student_id": "STUDENT_123",
+        "batch_name": "admission_docs_batch_1"
+    }
+    ```
+    
+    Returns processing results for all documents
+    """
+    if not processor:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Document processor not available"
+        )
+    
+    if not request.document_uris or len(request.document_uris) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one document URI must be provided"
+        )
+    
+    # Validate document type
+    if request.document_type and request.document_type not in get_supported_types() + ['other']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported document type: {request.document_type}"
+        )
+    
+    start_time = time.time()
+    results = []
+    processed_count = 0
+    failed_count = 0
+    
+    logger.info(f"Starting batch processing of {len(request.document_uris)} documents")
+    
+    # Process each URI
+    for uri in request.document_uris:
+        try:
+            logger.info(f"Processing document from URI: {uri}")
+            
+            # Download document from URI
+            temp_file_path = await download_document_from_uri(uri)
+            
+            if not temp_file_path:
+                result = DocumentProcessingResult(
+                    uri=uri,
+                    success=False,
+                    document_type="unknown",
+                    extracted_data={},
+                    processing_time=0.0,
+                    validation_issues=["Failed to download document from URI"],
+                    confidence_score=0.0,
+                    model_used="none",
+                    error_message=f"Could not download document from {uri}",
+                    mongodb_stored=False
+                )
+                results.append(result)
+                failed_count += 1
+                continue
+            
+            try:
+                # Process the downloaded document
+                processing_result = await processor.process_document_async(temp_file_path, request.document_type)
+                
+                # Store in MongoDB if student_id is provided
+                mongodb_stored = False
+                if request.student_id and processing_result.success:
+                    try:
+                        # Use document type from result if available, fallback to provided or 'other'
+                        detected_doc_type = processing_result.document_type if processing_result.document_type != 'unknown' else request.document_type or 'other'
+                        
+                        # Normalize extracted fields
+                        normalized_fields = normalize_fields(processing_result.extracted_data, detected_doc_type)
+                        
+                        # Create document entry for database
+                        doc_entry = DocumentEntry(
+                            docType=detected_doc_type,
+                            cloudinaryUrl=uri,  # Store the URI as cloudinary URL
+                            documentPath=None,
+                            fields=normalized_fields,
+                            confidence=processing_result.confidence_score,
+                            modelUsed=processing_result.model_used,
+                            validationIssues=processing_result.validation_issues
+                        )
+                        
+                        # Find or create student record
+                        student = await StudentDocument.find_or_create_student(request.student_id)
+                        
+                        # Add document to student record
+                        await student.add_document(doc_entry)
+                        mongodb_stored = True
+                        
+                        logger.info(f"Document from {uri} stored in MongoDB for student {request.student_id}")
+                        
+                    except Exception as e:
+                        logger.error(f"Failed to store document from {uri} in MongoDB: {e}")
+                        mongodb_stored = False
+                
+                # Create result
+                result = DocumentProcessingResult(
+                    uri=uri,
+                    success=processing_result.success,
+                    document_type=processing_result.document_type,
+                    extracted_data=processing_result.extracted_data,
+                    processing_time=processing_result.processing_time,
+                    validation_issues=processing_result.validation_issues,
+                    confidence_score=processing_result.confidence_score,
+                    model_used=processing_result.model_used,
+                    error_message=processing_result.error_message,
+                    mongodb_stored=mongodb_stored
+                )
+                
+                if processing_result.success:
+                    processed_count += 1
+                else:
+                    failed_count += 1
+                    
+                results.append(result)
+                
+            finally:
+                # Clean up temp file
+                try:
+                    if temp_file_path and os.path.exists(temp_file_path):
+                        Path(temp_file_path).unlink(missing_ok=True)
+                        logger.debug(f"Cleaned up temp file: {temp_file_path}")
+                except Exception as cleanup_error:
+                    logger.warning(f"Failed to cleanup temp file {temp_file_path}: {cleanup_error}")
+                    
+        except Exception as e:
+            logger.error(f"Error processing document from {uri}: {e}")
+            result = DocumentProcessingResult(
+                uri=uri,
+                success=False,
+                document_type="unknown",
+                extracted_data={},
+                processing_time=0.0,
+                validation_issues=[f"Processing error: {str(e)}"],
+                confidence_score=0.0,
+                model_used="none",
+                error_message=str(e),
+                mongodb_stored=False
+            )
+            results.append(result)
+            failed_count += 1
+    
+    total_processing_time = time.time() - start_time
+    
+    # Create response
+    response = BatchProcessingResponse(
+        success=processed_count > 0,
+        batch_name=request.batch_name,
+        total_documents=len(request.document_uris),
+        processed_documents=processed_count,
+        failed_documents=failed_count,
+        results=results,
+        total_processing_time=total_processing_time,
+        message=f"Processed {processed_count}/{len(request.document_uris)} documents successfully"
+    )
+    
+    # Send callback if URL provided
+    if request.callback_url and processed_count > 0:
+        try:
+            await send_callback(request.callback_url, response)
+            logger.info(f"Callback sent to {request.callback_url}")
+        except Exception as e:
+            logger.error(f"Failed to send callback to {request.callback_url}: {e}")
+    
+    logger.info(f"Batch processing completed: {processed_count} successful, {failed_count} failed")
+    return response
+
+async def download_document_from_uri(uri: str) -> Optional[str]:
+    """Download document from URI and save to temp file"""
+    try:
+        import asyncio
+        import concurrent.futures
+        
+        def download_sync():
+            response = requests.get(uri, timeout=30, stream=True)
+            if response.status_code == 200:
+                # Get file extension from URI or content type
+                content_type = response.headers.get('content-type', '')
+                
+                if content_type.startswith('image/'):
+                    extension = '.jpg'
+                elif content_type == 'application/pdf':
+                    extension = '.pdf'
+                else:
+                    # Try to get from URI
+                    path = Path(uri)
+                    extension = path.suffix or '.jpg'
+                
+                # Create temp file
+                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=extension)
+                temp_path = temp_file.name
+                
+                # Download content
+                for chunk in response.iter_content(chunk_size=8192):
+                    temp_file.write(chunk)
+                temp_file.close()
+                
+                logger.info(f"Downloaded document from {uri} to {temp_path}")
+                return temp_path
+            else:
+                logger.error(f"Failed to download {uri}: HTTP {response.status_code}")
+                return None
+        
+        # Run the sync download in a thread pool to avoid blocking
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            return await loop.run_in_executor(executor, download_sync)
+                    
+    except Exception as e:
+        logger.error(f"Error downloading document from {uri}: {e}")
+        return None
+
+async def send_callback(callback_url: str, response_data: BatchProcessingResponse):
+    """Send processing results to callback URL"""
+    try:
+        import asyncio
+        import concurrent.futures
+        
+        def send_callback_sync():
+            response = requests.post(
+                callback_url, 
+                json=response_data.dict(),
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            return response.status_code
+        
+        # Run the sync callback in a thread pool to avoid blocking
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            status_code = await loop.run_in_executor(executor, send_callback_sync)
+            
+        if status_code == 200:
+            logger.info(f"Callback successfully sent to {callback_url}")
+        else:
+            logger.warning(f"Callback to {callback_url} returned status {status_code}")
+                    
+    except Exception as e:
+        logger.error(f"Failed to send callback to {callback_url}: {e}")
+        raise
 
 if __name__ == "__main__":
     # Load environment variables
