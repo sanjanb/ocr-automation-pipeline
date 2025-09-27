@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="Smart Document Processor",
-    description="AI-powered document processing using Gemini API for direct image-to-JSON extraction",
+    description="AI-powered document processing using Local API for direct image-to-JSON extraction",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",

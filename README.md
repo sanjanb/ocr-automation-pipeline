@@ -1,4 +1,4 @@
-# 🎓 Smart Document Processor
+# Smart Document Processor
 
 [![CI/CD Pipeline](https://github.com/sanjanb/ocr-automation-pipeline/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/sanjanb/ocr-automation-pipeline/actions)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -10,15 +10,15 @@
 > **AI-powered document processing using Gemini API with FastAPI**  
 > Transform document images into structured JSON in seconds, not hours.
 
-## ✨ **What This Does**
+## **What This Does**
 
-- 🤖 **Direct AI Processing**: Gemini 1.5 Flash reads images and extracts structured data in one step
-- ⚡ **Lightning Fast**: 2-5 second processing vs traditional 30+ second OCR pipelines
-- 🎯 **Smart Validation**: AI-powered completeness checking and error detection
-- 📱 **Production Ready**: FastAPI with automatic documentation, async support, and Docker deployment
-- 🔧 **Developer Friendly**: Modern Python, comprehensive tests, and CI/CD pipeline
+- **Direct AI Processing**: Gemini 1.5 Flash reads images and extracts structured data in one step
+- **Lightning Fast**: 2-5 second processing vs traditional 30+ second OCR pipelines
+- **Smart Validation**: AI-powered completeness checking and error detection
+- **Production Ready**: FastAPI with automatic documentation, async support, and Docker deployment
+- **Developer Friendly**: Modern Python, comprehensive tests, and CI/CD pipeline
 
-## 🚀 **Quick Start**
+## **Quick Start**
 
 ### **Option 1: Direct Installation**
 
@@ -63,7 +63,7 @@ docker-compose up -d
 2. Create new project and API key
 3. Copy key to your `.env` file
 
-## 📊 **Architecture**
+## **Architecture**
 
 ```mermaid
 graph TD
@@ -78,7 +78,7 @@ graph TD
     I[Batch Processing] --> A
 ```
 
-## 🎯 **Supported Documents**
+## **Supported Documents**
 
 | Document                     | Required Fields                         | Validation Rules       | Use Case              |
 | ---------------------------- | --------------------------------------- | ---------------------- | --------------------- |
@@ -166,7 +166,7 @@ pytest tests/test_api.py -v
 python -m pytest tests/test_core.py::TestDocumentProcessor::test_process_document_success
 ```
 
-## � **Deployment**
+## **Deployment**
 
 ### **Production Deployment**
 
@@ -238,60 +238,60 @@ ocr-automation-pipeline/
 - **Testing**: `pytest` with >90% coverage
 - **Security**: `bandit`, `safety`
 
-## � **Demo Features**
+## **Demo Features**
 
 ### **Web Interface**
 
-- 🎨 Modern, responsive design
-- 📱 Mobile-friendly upload
-- 🔄 Real-time processing updates
-- 📊 Confidence scoring
-- ⚠️ Validation issue highlighting
-- 💾 JSON export functionality
+- Modern, responsive design
+- Mobile-friendly upload
+- Real-time processing updates
+- Confidence scoring
+- Validation issue highlighting
+- JSON export functionality
 
 ### **API Documentation**
 
-- 📖 Interactive Swagger UI
-- 📚 ReDoc documentation
+- Interactive Swagger UI
+  ReDoc documentation
 - 🔧 Request/response schemas
-- 🚀 Try-it-out functionality
+- Try-it-out functionality
 
 ### **Monitoring & Debugging**
 
-- 📝 Structured logging
-- 💚 Health check endpoints
-- 📊 Processing metrics
-- 🔍 Error tracking
+- Structured logging
+- Health check endpoints
+- Processing metrics
+- Error tracking
 
 ## 🏆 **Why Choose This Solution?**
 
 ### **For Hackathons**
 
-- ⚡ **Quick Setup**: Demo ready in 2 minutes
-- 🎯 **Impressive Results**: High accuracy, fast processing
-- � **Professional UI**: Judge-ready interface
-- � **Technical Depth**: Modern architecture, comprehensive features
+- **Quick Setup**: Demo ready in 2 minutes
+- **Impressive Results**: High accuracy, fast processing
+- **Professional UI**: Judge-ready interface
+- **Technical Depth**: Modern architecture, comprehensive features
 
 ### **For Production**
 
-- 🚀 **Scalable**: Async FastAPI, containerized
-- 🛡️ **Secure**: Input validation, error handling
-- � **Observable**: Logging, monitoring, health checks
-- 🔧 **Maintainable**: Clean code, comprehensive tests
+- **Scalable**: Async FastAPI, containerized
+- **Secure**: Input validation, error handling
+- **Observable**: Logging, monitoring, health checks
+- **Maintainable**: Clean code, comprehensive tests
 
 ### **For Developers**
 
-- 🐍 **Modern Python**: Type hints, async/await, Pydantic
-- 🧪 **Well Tested**: >90% coverage, CI/CD pipeline
-- 📚 **Documented**: Comprehensive docs, API specs
-- 🔌 **Extensible**: Plugin architecture, configurable
+- **Modern Python**: Type hints, async/await, Pydantic
+- **Well Tested**: >90% coverage, CI/CD pipeline
+  **Documented**: Comprehensive docs, API specs
+- **Extensible**: Plugin architecture, configurable
 
-## 📞 **Support**
+## **Support**
 
 - 🐛 **Issues**: [GitHub Issues](https://github.com/sanjanb/ocr-automation-pipeline/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/sanjanb/ocr-automation-pipeline/discussions)
-- 📖 **Documentation**: [Wiki](https://github.com/sanjanb/ocr-automation-pipeline/wiki)
-- 🚀 **Examples**: [Examples Repository](https://github.com/sanjanb/ocr-automation-pipeline/tree/main/examples)
+- **Documentation**: [Wiki](https://github.com/sanjanb/ocr-automation-pipeline/wiki)
+- **Examples**: [Examples Repository](https://github.com/sanjanb/ocr-automation-pipeline/tree/main/examples)
 
 ---
 
