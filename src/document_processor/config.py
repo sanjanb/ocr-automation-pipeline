@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     gemini_api_key: str = Field(..., env="GEMINI_API_KEY", description="Gemini API key")
     gemini_model: str = Field("gemini-2.0-flash-exp", env="GEMINI_MODEL", description="Gemini model to use")
     
+    # Database Configuration
+    mongodb_url: str = Field("mongodb://localhost:27017/document_processor", env="MONGODB_URL", description="MongoDB connection string")
+    database_name: str = Field("document_processor", env="DATABASE_NAME", description="Database name")
+    
     # Server Configuration
     host: str = Field("0.0.0.0", env="HOST", description="Server host")
     port: int = Field(8000, env="PORT", description="Server port")
