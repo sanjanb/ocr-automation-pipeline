@@ -203,6 +203,15 @@ async def root():
                 <div class="upload-section">
                     <form id="uploadForm">
                         <div class="form-group">
+                            <label for="student_id">👤 Student ID (Optional - for MongoDB storage)</label>
+                            <input 
+                                type="text" 
+                                id="student_id" 
+                                placeholder="Enter student ID to save in database (e.g., STUDENT_123)"
+                            />
+                        </div>
+                        
+                        <div class="form-group">
                             <label for="document"> Select Document Image</label>
                             <input type="file" id="document" accept="image/*" required>
                         </div>
@@ -240,11 +249,32 @@ async def root():
         </div>
         
         <script>
+            // Toast notification function
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 10000;
+                    padding: 15px 25px; border-radius: 10px; font-weight: 600;
+                    color: white; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    transform: translateX(400px); transition: all 0.3s ease;
+                    background: ${type === 'success' ? 'linear-gradient(135deg, #4CAF50, #2E7D32)' : 'linear-gradient(135deg, #f44336, #d32f2f)'};
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.style.transform = 'translateX(0)', 100);
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(400px)';
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 4000);
+            }
+            
             document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
                 const fileInput = document.getElementById('document');
                 const docTypeInput = document.getElementById('doc_type');
+                const studentIdInput = document.getElementById('student_id');
                 const submitBtn = document.getElementById('submitBtn');
                 const resultDiv = document.getElementById('result');
                 
@@ -257,12 +287,15 @@ async def root():
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<div class="loading">Processing your document...</div>';
+                resultDiv.innerHTML = '<div class="loading">🔍 Processing your document...</div>';
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
                 if (docTypeInput.value) {
                     formData.append('document_type', docTypeInput.value);
+                }
+                if (studentIdInput.value.trim()) {
+                    formData.append('student_id', studentIdInput.value.trim());
                 }
                 
                 try {
@@ -274,6 +307,19 @@ async def root():
                     
                     if (result.success) {
                         resultDiv.className = 'result';
+                        
+                        // Check if data was stored in MongoDB
+                        const mongoStored = result.metadata?.mongodb_stored;
+                        const studentId = result.metadata?.student_id;
+                        
+                        if (mongoStored) {
+                            showToast(`✅ Document processed and saved to database for student: ${studentId}`, 'success');
+                        } else if (studentId) {
+                            showToast(`⚠️ Document processed but failed to save to database`, 'error');
+                        } else {
+                            showToast(`✅ Document processed successfully (not saved - no student ID provided)`, 'success');
+                        }
+                        
                         resultDiv.innerHTML = `
                             <div class="metrics">
                                 <div class="metric">
@@ -289,17 +335,26 @@ async def root():
                                     <div class="metric-label">Processing Time</div>
                                 </div>
                                 <div class="metric">
-                                    <div class="metric-value">${result.model_used}</div>
-                                    <div class="metric-label">AI Model</div>
+                                    <div class="metric-value">${mongoStored ? '✅ Saved' : '❌ Not Saved'}</div>
+                                    <div class="metric-label">Database Storage</div>
                                 </div>
                             </div>
-                            <h4> Extracted Data</h4>
+                            
+                            ${result.validation_issues && result.validation_issues.length > 0 ? `
+                            <div class="validation-issues">
+                                <h4>⚠️ Validation Issues:</h4>
+                                ${result.validation_issues.map(issue => `<div class="issue">${issue}</div>`).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <h4>📋 Extracted Data:</h4>
                             <div class="json-display">${JSON.stringify(result.extracted_data, null, 2)}</div>
-                            ${result.validation_issues.length > 0 ? `
-                                <div class="validation-issues">
-                                    <h4>⚠️ Validation Issues</h4>
-                                    ${result.validation_issues.map(issue => `<div class="issue">${issue}</div>`).join('')}
-                                </div>
+                            
+                            ${studentId && mongoStored ? `
+                            <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                                <strong>🎉 Success!</strong> Document has been stored in MongoDB for student <strong>${studentId}</strong>.
+                                <br><small>You can retrieve this data later using the student ID.</small>
+                            </div>
                             ` : ''}
                         `;
                     } else {
@@ -569,13 +624,15 @@ async def get_schemas():
 @app.post("/api/process", response_model=ProcessingResponse)
 async def process_document(
     file: UploadFile = File(..., description="Document image file"),
-    document_type: Optional[str] = Form(None, description="Document type hint (optional)")
+    document_type: Optional[str] = Form(None, description="Document type hint (optional)"),
+    student_id: Optional[str] = Form(None, description="Student ID for MongoDB storage (optional)")
 ):
     """
     Process a document image and extract structured data
     
     - **file**: Document image (JPG, PNG, etc.)
     - **document_type**: Optional hint about document type for better accuracy
+    - **student_id**: Optional student ID - if provided, data will be stored in MongoDB
     
     Returns structured JSON data with validation results
     """
@@ -610,7 +667,43 @@ async def process_document(
             # Process document
             result = await processor.process_document_async(temp_path, document_type)
             
-            return ProcessingResponse(
+            # Store in MongoDB if student_id is provided
+            mongodb_stored = False
+            if student_id and result.success:
+                try:
+                    # Use document type from result if available, fallback to provided or 'other'
+                    detected_doc_type = result.document_type if result.document_type != 'unknown' else document_type or 'other'
+                    
+                    # Normalize extracted fields
+                    normalized_fields = normalize_fields(result.extracted_data, detected_doc_type)
+                    
+                    # Create document entry for database
+                    doc_entry = DocumentEntry(
+                        docType=detected_doc_type,  # Use detected type
+                        cloudinaryUrl=None,  # No cloudinary URL for uploaded files
+                        documentPath=None,   # Temporary file, don't store path
+                        fields=normalized_fields,
+                        confidence=result.confidence_score,
+                        modelUsed=result.model_used,
+                        validationIssues=result.validation_issues
+                    )
+                    
+                    # Find or create student record
+                    student = await StudentDocument.find_or_create_student(student_id)
+                    
+                    # Add document to student record
+                    await student.add_document(doc_entry)
+                    mongodb_stored = True
+                    
+                    logger.info(f"Document stored in MongoDB for student {student_id}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to store in MongoDB: {e}")
+                    # Continue without failing the request
+                    mongodb_stored = False
+            
+            # Create response with MongoDB storage info
+            response = ProcessingResponse(
                 success=result.success,
                 document_type=result.document_type,
                 extracted_data=result.extracted_data,
@@ -622,9 +715,37 @@ async def process_document(
                 metadata=result.metadata
             )
             
+            # Add MongoDB storage status to metadata
+            if hasattr(response, 'metadata') and response.metadata:
+                response.metadata['mongodb_stored'] = mongodb_stored
+            else:
+                response.metadata = {'mongodb_stored': mongodb_stored}
+            
+            if student_id:
+                response.metadata['student_id'] = student_id
+                
+            return response
+            
         finally:
-            # Clean up temp file
-            Path(temp_path).unlink(missing_ok=True)
+            # Clean up temp file with better error handling
+            try:
+                import time
+                time.sleep(0.1)  # Small delay to ensure file is released
+                if os.path.exists(temp_path):
+                    Path(temp_path).unlink(missing_ok=True)
+                    logger.debug(f"Cleaned up temp file: {temp_path}")
+            except Exception as cleanup_error:
+                logger.warning(f"Failed to cleanup temp file {temp_path}: {cleanup_error}")
+                # Try alternative cleanup method
+                try:
+                    import gc
+                    gc.collect()  # Force garbage collection
+                    time.sleep(0.2)
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                except Exception as alt_cleanup_error:
+                    logger.error(f"Alternative cleanup also failed for {temp_path}: {alt_cleanup_error}")
+                    # File will be cleaned up by OS eventually
             
     except Exception as e:
         logger.error(f"Processing error: {e}")
