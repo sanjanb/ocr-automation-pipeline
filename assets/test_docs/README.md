@@ -5,7 +5,7 @@ This folder contains sample documents for testing the OCR automation pipeline.
 ## Document Types Supported
 
 - **Aadhaar Card** - National ID card
-- **PAN Card** - Permanent Account Number card  
+- **PAN Card** - Permanent Account Number card
 - **Passport** - Travel document
 - **Driving License** - Vehicle license
 - **Voter ID** - Election card
@@ -21,7 +21,7 @@ Place your test documents in this folder and reference them using relative paths
 ```json
 {
   "studentId": "STUDENT_123",
-  "docType": "AadharCard", 
+  "docType": "AadharCard",
   "documentPath": "assets/test_docs/aadhaar_sample.jpg"
 }
 ```

@@ -52,7 +52,7 @@ class ProcessDocumentRequest(BaseModel):
                 raise ValueError(f'Invalid file extension. Supported: {valid_extensions}')
         return v
     
-    @validator('documentPath')
+    @validator('documentPath', always=True)
     def validate_either_url_or_path(cls, v, values):
         """Ensure either cloudinaryUrl or documentPath is provided, but not both"""
         cloudinary_url = values.get('cloudinaryUrl')
