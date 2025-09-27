@@ -67,7 +67,6 @@ class TestAPI:
         mock_result.processing_time = 2.5
         mock_result.validation_issues = []
         mock_result.confidence_score = 0.85
-        mock_result.model_used = "gemini-1.5-flash"
         mock_result.error_message = None
         mock_result.metadata = {"image_size": [800, 500]}
         

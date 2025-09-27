@@ -44,7 +44,6 @@ class TestDocumentProcessingMicroservice:
             cloudinaryUrl="https://res.cloudinary.com/demo/image/upload/v1234567890/aadhaar.jpg",
             fields=sample_normalized_fields,
             confidence=0.95,
-            modelUsed="gemini-2.0-flash-exp",
             validationIssues=[]
         )
     
@@ -85,8 +84,7 @@ class TestDocumentProcessingMicroservice:
                 extracted_data={"name": "Sanjan Acharya", "aadhaar_number": "1234567890123"},
                 processing_time=2.5,
                 validation_issues=[],
-                confidence_score=0.95,
-                model_used="gemini-2.0-flash-exp"
+                confidence_score=0.95
             )
             mock_process.return_value = mock_result
             mock_normalize.return_value = sample_normalized_fields
@@ -101,7 +99,6 @@ class TestDocumentProcessingMicroservice:
                 fields=sample_normalized_fields,
                 processedAt=datetime.utcnow(),
                 confidence=0.95,
-                modelUsed="gemini-2.0-flash-exp",
                 validationIssues=[]
             ))
             mock_student.return_value = mock_student_doc
@@ -158,7 +155,6 @@ class TestDocumentProcessingMicroservice:
                 processing_time=1.0,
                 validation_issues=[],
                 confidence_score=0.0,
-                model_used="gemini-2.0-flash-exp",
                 error_message="Failed to process document"
             )
             mock_process.return_value = mock_result

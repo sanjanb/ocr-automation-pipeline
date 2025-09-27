@@ -33,7 +33,6 @@ class ProcessingResult:
     processing_time: float
     validation_issues: List[str]
     confidence_score: float
-    model_used: str
     error_message: str = ""
     metadata: Dict[str, Any] = None
 
@@ -156,7 +155,6 @@ class DocumentProcessor:
                 processing_time=processing_time,
                 validation_issues=validation_issues,
                 confidence_score=confidence,
-                model_used=self.model_name,
                 metadata=metadata
             )
             
@@ -169,7 +167,6 @@ class DocumentProcessor:
                 processing_time=time.time() - start_time,
                 validation_issues=[],
                 confidence_score=0.0,
-                model_used=self.model_name or "none",
                 error_message=str(e)
             )
     

@@ -21,7 +21,6 @@ class DocumentEntry(BaseModel):
     fields: Dict[str, Any] = Field(..., description="Extracted document fields")
     processedAt: datetime = Field(default_factory=datetime.utcnow, description="When the document was processed")
     confidence: float = Field(..., description="Processing confidence score")
-    modelUsed: str = Field(..., description="AI model used for processing")
     validationIssues: List[str] = Field(default_factory=list, description="Validation issues found")
 
 class StudentDocument(Document):

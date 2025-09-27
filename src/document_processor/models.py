@@ -79,7 +79,6 @@ class ProcessedDocumentResponse(BaseModel):
     fields: Dict[str, Any] = Field(..., description="Normalized extracted fields")
     processedAt: datetime = Field(..., description="Processing timestamp")
     confidence: float = Field(..., description="Processing confidence score (0.0-1.0)")
-    modelUsed: str = Field(..., description="AI model used for processing")
     validationIssues: List[str] = Field(default_factory=list, description="Any validation issues found")
 
 class ProcessDocumentResponse(BaseModel):
@@ -104,7 +103,6 @@ class ProcessDocumentResponse(BaseModel):
                     },
                     "processedAt": "2025-09-27T18:45:00Z",
                     "confidence": 0.95,
-                    "modelUsed": "gemini-2.0-flash-exp",
                     "validationIssues": []
                 },
                 "message": "Document processed successfully"

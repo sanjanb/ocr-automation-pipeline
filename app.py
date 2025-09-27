@@ -98,7 +98,6 @@ class ProcessingResponse(BaseModel):
     processing_time: float
     validation_issues: list[str]
     confidence_score: float
-    model_used: str
     error_message: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
 
@@ -146,7 +145,6 @@ class DocumentProcessingResult(BaseModel):
     processing_time: float
     validation_issues: List[str]
     confidence_score: float
-    model_used: str
     error_message: Optional[str] = None
     mongodb_stored: bool = False
 
@@ -182,7 +180,6 @@ class DocumentProcessingResult(BaseModel):
     processing_time: float
     validation_issues: List[str]
     confidence_score: float
-    model_used: str
     error_message: Optional[str] = None
     mongodb_stored: bool = False
 
@@ -311,7 +308,7 @@ async def root():
         <div class="container">
             <div class="header">
                 <h1> Smart Document Processor</h1>
-                <p>AI-powered document extraction using Local API | Upload Images & PDFs | FastAPI + Modern Interface</p>
+                <p>AI-powered document extraction using Local API</p>
             </div>
             
             <div class="content">
@@ -355,7 +352,7 @@ async def root():
                 <div id="result" style="display: none;"></div>
                 
                 <div class="api-links">
-                    <h4>🔗 API Documentation</h4>
+                    <h4> API Documentation</h4>
                     <a href="/docs" target="_blank">Interactive API Docs (Swagger)</a>
                     <a href="/redoc" target="_blank">ReDoc Documentation</a>
                     <a href="/health" target="_blank">Health Check</a>
@@ -411,7 +408,7 @@ async def root():
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<div class="loading">🔍 Processing your document (image/PDF)...</div>';
+                resultDiv.innerHTML = '<div class="loading">Processing your document (image/PDF)...</div>';
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -516,7 +513,7 @@ async def health_check():
         status="healthy" if db_healthy else "unhealthy",
         version="2.0.0",
         database_connected=db_healthy,
-        gemini_configured=bool(os.getenv("GEMINI_API_KEY"))
+        gemini_configured=bool(processor)  # Check if processor is available instead
     )
 
 @app.get("/service-info")
@@ -778,7 +775,7 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
         # Convert external document type to internal schema type
         internal_doc_type = get_internal_doc_type(request.docType)
         
-        # Process document with Gemini
+        # Process document with AI
         result = await processor.process_document_async(temp_file_path, internal_doc_type)
         
         if not result.success:
@@ -797,7 +794,6 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
             documentPath=request.documentPath if use_local_file else None,
             fields=normalized_fields,
             confidence=result.confidence_score,
-            modelUsed=result.model_used,
             validationIssues=result.validation_issues
         )
         
@@ -827,7 +823,6 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
                 fields=saved_doc.fields,
                 processedAt=saved_doc.processedAt,
                 confidence=saved_doc.confidence,
-                modelUsed=saved_doc.modelUsed,
                 validationIssues=saved_doc.validationIssues
             ),
             message=f"Document {request.docType} processed and saved successfully"
@@ -874,7 +869,6 @@ async def get_student_documents(student_id: str):
                 fields=doc.fields,
                 processedAt=doc.processedAt,
                 confidence=doc.confidence,
-                modelUsed=doc.modelUsed,
                 validationIssues=doc.validationIssues
             ))
         
@@ -925,7 +919,6 @@ async def get_student_document_by_type(student_id: str, doc_type: str):
             fields=doc.fields,
             processedAt=doc.processedAt,
             confidence=doc.confidence,
-            modelUsed=doc.modelUsed,
             validationIssues=doc.validationIssues
         )
         
@@ -1014,7 +1007,6 @@ async def process_document(
                         documentPath=None,   # Temporary file, don't store path
                         fields=normalized_fields,
                         confidence=result.confidence_score,
-                        modelUsed=result.model_used,
                         validationIssues=result.validation_issues
                     )
                     
@@ -1040,7 +1032,6 @@ async def process_document(
                 processing_time=result.processing_time,
                 validation_issues=result.validation_issues,
                 confidence_score=result.confidence_score,
-                model_used=result.model_used,
                 error_message=result.error_message,
                 metadata=result.metadata
             )
@@ -1090,7 +1081,7 @@ async def batch_processing_info():
     return {
         "message": "Batch processing available via /api/process/documents endpoint",
         "suggested_approach": "Use /api/process/documents for processing multiple documents from URIs",
-        "rate_limits": "Depends on Gemini API quotas"
+        "rate_limits": "Optimized for high throughput processing"
     }
 
 @app.post("/api/process/documents", response_model=BatchProcessingResponse)
@@ -1162,7 +1153,6 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
                     processing_time=0.0,
                     validation_issues=["Failed to download document from URI"],
                     confidence_score=0.0,
-                    model_used="none",
                     error_message=f"Could not download document from {uri}",
                     mongodb_stored=False
                 )
@@ -1191,7 +1181,6 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
                             documentPath=None,
                             fields=normalized_fields,
                             confidence=processing_result.confidence_score,
-                            modelUsed=processing_result.model_used,
                             validationIssues=processing_result.validation_issues
                         )
                         
@@ -1217,7 +1206,6 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
                     processing_time=processing_result.processing_time,
                     validation_issues=processing_result.validation_issues,
                     confidence_score=processing_result.confidence_score,
-                    model_used=processing_result.model_used,
                     error_message=processing_result.error_message,
                     mongodb_stored=mongodb_stored
                 )
@@ -1248,7 +1236,6 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
                 processing_time=0.0,
                 validation_issues=[f"Processing error: {str(e)}"],
                 confidence_score=0.0,
-                model_used="none",
                 error_message=str(e),
                 mongodb_stored=False
             )
@@ -1388,7 +1375,6 @@ async def fetch_documents_from_mongodb_and_process(request: MongoDBFetchRequest)
                         processing_time=0.0,
                         validation_issues=["Failed to download document from Cloudinary"],
                         confidence_score=0.0,
-                        model_used="none",
                         error_message=f"Could not download document from {cloudinary_url}",
                         mongodb_stored=False
                     )
@@ -1432,7 +1418,6 @@ async def fetch_documents_from_mongodb_and_process(request: MongoDBFetchRequest)
                                 documentPath=None,
                                 fields=normalized_fields,
                                 confidence=processing_result.confidence_score,
-                                modelUsed=processing_result.model_used,
                                 validationIssues=processing_result.validation_issues
                             )
                             
@@ -1458,7 +1443,6 @@ async def fetch_documents_from_mongodb_and_process(request: MongoDBFetchRequest)
                         processing_time=processing_result.processing_time,
                         validation_issues=processing_result.validation_issues,
                         confidence_score=processing_result.confidence_score,
-                        model_used=processing_result.model_used,
                         error_message=processing_result.error_message,
                         mongodb_stored=mongodb_stored
                     )
@@ -1488,7 +1472,6 @@ async def fetch_documents_from_mongodb_and_process(request: MongoDBFetchRequest)
                     processing_time=0.0,
                     validation_issues=[f"Processing error: {str(e)}"],
                     confidence_score=0.0,
-                    model_used="none",
                     error_message=str(e),
                     mongodb_stored=False
                 )
@@ -1642,11 +1625,6 @@ if __name__ == "__main__":
         load_dotenv()
     except ImportError:
         pass
-    
-    # Check API key
-    if not os.getenv("GEMINI_API_KEY"):
-        print("WARNING: GEMINI_API_KEY not found in environment variables")
-        print("Set it with: set GEMINI_API_KEY=your_api_key_here")
     
     print(" Starting FastAPI Document Processor...")
     print("Web interface: http://127.0.0.1:8000")
