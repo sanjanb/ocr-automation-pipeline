@@ -38,8 +38,8 @@ class ProcessDocumentRequest(BaseModel):
             raise ValueError('Invalid Cloudinary URL format')
         return v
     
-    class Config:
-        schema_extra = {
+    class ConfigDict:
+        json_schema_extra = {
             "example": {
                 "studentId": "12345",
                 "docType": "AadharCard",
@@ -64,8 +64,8 @@ class ProcessDocumentResponse(BaseModel):
     savedDocument: ProcessedDocumentResponse = Field(..., description="Details of the saved document")
     message: str = Field(default="Document processed successfully", description="Response message")
     
-    class Config:
-        schema_extra = {
+    class ConfigDict:
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "studentId": "12345",

@@ -1,6 +1,6 @@
 """
 FastAPI Application for Document Processing
-Modern async API with automatic documentation
+Modern async API with automatic documentation and MongoDB integration
 """
 
 import os
@@ -19,13 +19,23 @@ import uvicorn
 
 from src.document_processor.core import create_processor, ProcessingResult
 from src.document_processor.schemas import get_supported_types, get_schema
+from src.document_processor.database import get_database, StudentDocument, DocumentEntry
+from src.document_processor.models import (
+    ProcessDocumentRequest, ProcessDocumentResponse, ProcessedDocumentResponse, ErrorResponse,
+    HealthResponse, StudentDocumentsResponse, get_internal_doc_type
+)
+from src.document_processor.normalizer import normalize_fields
+from src.document_processor.cloudinary_service import download_image_from_url, CloudinaryService
+from src.document_processor.config import get_settings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Global processor instance
+# Global instances
 processor = None
+cloudinary_service = CloudinaryService()
+settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,22 +45,34 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Document Processor API...")
     try:
+        # Initialize document processor
         processor = create_processor()
         logger.info("Document processor initialized successfully")
+        
+        # Initialize database connection
+        db_manager = await get_database()
+        await db_manager.connect_db(settings.mongodb_url)
+        logger.info("Database connection established")
+        
     except Exception as e:
-        logger.error(f"Failed to initialize processor: {e}")
+        logger.error(f"Failed to initialize services: {e}")
         raise
     
     yield
     
     # Shutdown
     logger.info("Shutting down Document Processor API...")
+    try:
+        db_manager = await get_database()
+        await db_manager.disconnect_db()
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
 
 # Create FastAPI app
 app = FastAPI(
-    title="Smart Document Processor",
-    description="AI-powered document processing using Local API for direct image-to-JSON extraction",
-    version="1.0.0",
+    title="Smart Document Processor Microservice",
+    description="AI-powered document processing with MongoDB storage for student document management",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan
@@ -65,7 +87,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Response models
+# Legacy response models (keeping for backward compatibility)
 class ProcessingResponse(BaseModel):
     success: bool
     document_type: str
@@ -76,12 +98,6 @@ class ProcessingResponse(BaseModel):
     model_used: str
     error_message: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
-
-class HealthResponse(BaseModel):
-    status: str
-    version: str
-    gemini_configured: bool
-    supported_documents: list[str]
 
 class DocumentSchema(BaseModel):
     description: str
@@ -314,12 +330,205 @@ async def root():
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint"""
+    db_manager = await get_database()
+    db_healthy = await db_manager.health_check()
+    
     return HealthResponse(
-        status="healthy",
-        version="1.0.0",
-        gemini_configured=bool(os.getenv("GEMINI_API_KEY")),
-        supported_documents=get_supported_types()
+        status="healthy" if db_healthy else "unhealthy",
+        version="2.0.0",
+        database_connected=db_healthy,
+        gemini_configured=bool(os.getenv("GEMINI_API_KEY"))
     )
+
+# NEW MICROSERVICE ENDPOINTS
+
+@app.post("/process-doc", response_model=ProcessDocumentResponse)
+async def process_document_from_cloudinary(request: ProcessDocumentRequest):
+    """
+    Process a document from Cloudinary URL and store in MongoDB
+    
+    Main endpoint for the document processing microservice:
+    1. Downloads image from Cloudinary URL
+    2. Processes with Gemini API to extract structured data
+    3. Normalizes fields based on document type
+    4. Stores/updates in MongoDB under student record
+    
+    Returns the processed document data
+    """
+    if not processor:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Document processor not available"
+        )
+    
+    temp_file_path = None
+    
+    try:
+        logger.info(f"Processing document for student {request.studentId}: {request.docType}")
+        
+        # Download image from Cloudinary
+        temp_file_path = await download_image_from_url(request.cloudinaryUrl)
+        
+        # Convert external document type to internal schema type
+        internal_doc_type = get_internal_doc_type(request.docType)
+        
+        # Process document with Gemini
+        result = await processor.process_document_async(temp_file_path, internal_doc_type)
+        
+        if not result.success:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Document processing failed: {result.error_message}"
+            )
+        
+        # Normalize extracted fields
+        normalized_fields = normalize_fields(result.extracted_data, internal_doc_type)
+        
+        # Create document entry for database
+        doc_entry = DocumentEntry(
+            docType=request.docType,  # Store external format
+            cloudinaryUrl=request.cloudinaryUrl,
+            fields=normalized_fields,
+            confidence=result.confidence_score,
+            modelUsed=result.model_used,
+            validationIssues=result.validation_issues
+        )
+        
+        # Find or create student record
+        student = await StudentDocument.find_or_create_student(request.studentId)
+        
+        # Add document to student record
+        updated_student = await student.add_document(doc_entry)
+        
+        # Find the saved document (latest one of this type)
+        saved_doc = await updated_student.get_latest_document(request.docType)
+        
+        if not saved_doc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Document was processed but not found in database"
+            )
+        
+        # Create response
+        response = ProcessDocumentResponse(
+            success=True,
+            studentId=request.studentId,
+            savedDocument=ProcessedDocumentResponse(
+                docType=saved_doc.docType,
+                cloudinaryUrl=saved_doc.cloudinaryUrl,
+                fields=saved_doc.fields,
+                processedAt=saved_doc.processedAt,
+                confidence=saved_doc.confidence,
+                modelUsed=saved_doc.modelUsed,
+                validationIssues=saved_doc.validationIssues
+            ),
+            message=f"Document {request.docType} processed and saved successfully"
+        )
+        
+        logger.info(f"Successfully processed {request.docType} for student {request.studentId}")
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error processing document: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
+    finally:
+        # Clean up temporary file
+        if temp_file_path:
+            CloudinaryService.cleanup_temp_file(temp_file_path)
+
+@app.get("/students/{student_id}/documents", response_model=StudentDocumentsResponse)
+async def get_student_documents(student_id: str):
+    """
+    Get all documents for a specific student
+    
+    Returns all processed documents stored for the given student ID
+    """
+    try:
+        student = await StudentDocument.find_one(StudentDocument.studentId == student_id)
+        
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} not found"
+            )
+        
+        # Convert documents to response format
+        processed_docs = []
+        for doc in student.documents:
+            processed_docs.append(ProcessedDocumentResponse(
+                docType=doc.docType,
+                cloudinaryUrl=doc.cloudinaryUrl,
+                fields=doc.fields,
+                processedAt=doc.processedAt,
+                confidence=doc.confidence,
+                modelUsed=doc.modelUsed,
+                validationIssues=doc.validationIssues
+            ))
+        
+        return StudentDocumentsResponse(
+            success=True,
+            studentId=student_id,
+            documents=processed_docs,
+            totalDocuments=len(processed_docs),
+            createdAt=student.createdAt,
+            updatedAt=student.updatedAt
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving student documents: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve student documents: {str(e)}"
+        )
+
+@app.get("/students/{student_id}/documents/{doc_type}", response_model=ProcessedDocumentResponse)
+async def get_student_document_by_type(student_id: str, doc_type: str):
+    """
+    Get the latest document of a specific type for a student
+    """
+    try:
+        student = await StudentDocument.find_one(StudentDocument.studentId == student_id)
+        
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} not found"
+            )
+        
+        # Get the latest document of specified type
+        doc = await student.get_latest_document(doc_type)
+        
+        if not doc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document type {doc_type} not found for student {student_id}"
+            )
+        
+        return ProcessedDocumentResponse(
+            docType=doc.docType,
+            cloudinaryUrl=doc.cloudinaryUrl,
+            fields=doc.fields,
+            processedAt=doc.processedAt,
+            confidence=doc.confidence,
+            modelUsed=doc.modelUsed,
+            validationIssues=doc.validationIssues
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving student document: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve document: {str(e)}"
+        )
 
 @app.get("/schemas", response_model=Dict[str, DocumentSchema])
 async def get_schemas():
