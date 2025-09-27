@@ -35,3 +35,8 @@ pillow
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 dotenv
+beanie
+motor
+aiohttp>=3.9.0
+requests>=2.31.0
+pydantic_settings>=2.0.0
