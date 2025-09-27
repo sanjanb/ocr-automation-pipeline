@@ -345,10 +345,10 @@ async def health_check():
 @app.post("/process-doc", response_model=ProcessDocumentResponse)
 async def process_document_from_cloudinary(request: ProcessDocumentRequest):
     """
-    Process a document from Cloudinary URL and store in MongoDB
+    Process a document from Cloudinary URL or local file path and store in MongoDB
     
     Main endpoint for the document processing microservice:
-    1. Downloads image from Cloudinary URL
+    1. Downloads image from Cloudinary URL OR uses local file path
     2. Processes with Gemini API to extract structured data
     3. Normalizes fields based on document type
     4. Stores/updates in MongoDB under student record
@@ -362,12 +362,34 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
         )
     
     temp_file_path = None
+    use_local_file = False
     
     try:
         logger.info(f"Processing document for student {request.studentId}: {request.docType}")
         
-        # Download image from Cloudinary
-        temp_file_path = await download_image_from_url(request.cloudinaryUrl)
+        # Determine file path - either download from Cloudinary or use local file
+        if request.cloudinaryUrl:
+            # Download image from Cloudinary
+            temp_file_path = await download_image_from_url(request.cloudinaryUrl)
+            logger.info(f"Downloaded image from Cloudinary: {temp_file_path}")
+        elif request.documentPath:
+            # Use local file path for testing
+            import os
+            temp_file_path = os.path.abspath(request.documentPath)
+            use_local_file = True
+            
+            # Verify file exists
+            if not os.path.exists(temp_file_path):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Local document file not found: {request.documentPath}"
+                )
+            logger.info(f"Using local test file: {temp_file_path}")
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either cloudinaryUrl or documentPath must be provided"
+            )
         
         # Convert external document type to internal schema type
         internal_doc_type = get_internal_doc_type(request.docType)
@@ -388,6 +410,7 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
         doc_entry = DocumentEntry(
             docType=request.docType,  # Store external format
             cloudinaryUrl=request.cloudinaryUrl,
+            documentPath=request.documentPath if use_local_file else None,
             fields=normalized_fields,
             confidence=result.confidence_score,
             modelUsed=result.model_used,
@@ -416,6 +439,7 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
             savedDocument=ProcessedDocumentResponse(
                 docType=saved_doc.docType,
                 cloudinaryUrl=saved_doc.cloudinaryUrl,
+                documentPath=saved_doc.documentPath if hasattr(saved_doc, 'documentPath') else None,
                 fields=saved_doc.fields,
                 processedAt=saved_doc.processedAt,
                 confidence=saved_doc.confidence,
@@ -437,8 +461,8 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
             detail=f"Internal server error: {str(e)}"
         )
     finally:
-        # Clean up temporary file
-        if temp_file_path:
+        # Clean up temporary file only if it was downloaded (not local)
+        if temp_file_path and not use_local_file:
             CloudinaryService.cleanup_temp_file(temp_file_path)
 
 @app.get("/students/{student_id}/documents", response_model=StudentDocumentsResponse)

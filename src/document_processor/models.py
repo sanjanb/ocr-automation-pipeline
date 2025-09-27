@@ -11,7 +11,8 @@ class ProcessDocumentRequest(BaseModel):
     """Request model for /process-doc endpoint"""
     studentId: str = Field(..., min_length=1, max_length=50, description="Unique student identifier")
     docType: str = Field(..., description="Document type (AadharCard, MarkSheet10, MarkSheet12, etc.)")
-    cloudinaryUrl: str = Field(..., description="Cloudinary URL of the document image")
+    cloudinaryUrl: Optional[str] = Field(None, description="Cloudinary URL of the document image")
+    documentPath: Optional[str] = Field(None, description="Local file path for testing (alternative to cloudinaryUrl)")
     
     @validator('docType')
     def validate_doc_type(cls, v):
@@ -33,9 +34,32 @@ class ProcessDocumentRequest(BaseModel):
         return v
     
     @validator('cloudinaryUrl')
-    def validate_cloudinary_url(cls, v):
-        if not v.startswith('https://res.cloudinary.com'):
+    def validate_cloudinary_url(cls, v, values):
+        if v is not None and not v.startswith('https://res.cloudinary.com'):
             raise ValueError('Invalid Cloudinary URL format')
+        return v
+    
+    @validator('documentPath')
+    def validate_document_path(cls, v, values):
+        """Validate local document path if provided"""
+        if v is not None:
+            # Check if it's a relative path starting with assets/test_docs
+            if not v.startswith('assets/test_docs/'):
+                raise ValueError('Document path must start with assets/test_docs/')
+            # Check file extension
+            valid_extensions = ['.jpg', '.jpeg', '.png', '.pdf', '.webp']
+            if not any(v.lower().endswith(ext) for ext in valid_extensions):
+                raise ValueError(f'Invalid file extension. Supported: {valid_extensions}')
+        return v
+    
+    @validator('documentPath')
+    def validate_either_url_or_path(cls, v, values):
+        """Ensure either cloudinaryUrl or documentPath is provided, but not both"""
+        cloudinary_url = values.get('cloudinaryUrl')
+        if cloudinary_url is None and v is None:
+            raise ValueError('Either cloudinaryUrl or documentPath must be provided')
+        if cloudinary_url is not None and v is not None:
+            raise ValueError('Provide either cloudinaryUrl or documentPath, not both')
         return v
     
     class ConfigDict:
@@ -43,14 +67,15 @@ class ProcessDocumentRequest(BaseModel):
             "example": {
                 "studentId": "12345",
                 "docType": "AadharCard",
-                "cloudinaryUrl": "https://res.cloudinary.com/demo/image/upload/v1234567890/abc.jpg"
+                "documentPath": "assets/test_docs/aadhaar_sample.jpg"
             }
         }
 
 class ProcessedDocumentResponse(BaseModel):
     """Response model for processed document"""
     docType: str = Field(..., description="Type of document processed")
-    cloudinaryUrl: str = Field(..., description="Source Cloudinary URL")
+    cloudinaryUrl: Optional[str] = Field(None, description="Source Cloudinary URL")
+    documentPath: Optional[str] = Field(None, description="Source local file path")
     fields: Dict[str, Any] = Field(..., description="Normalized extracted fields")
     processedAt: datetime = Field(..., description="Processing timestamp")
     confidence: float = Field(..., description="Processing confidence score (0.0-1.0)")
@@ -71,7 +96,7 @@ class ProcessDocumentResponse(BaseModel):
                 "studentId": "12345",
                 "savedDocument": {
                     "docType": "AadharCard",
-                    "cloudinaryUrl": "https://res.cloudinary.com/demo/image/upload/abc.jpg",
+                    "documentPath": "assets/test_docs/aadhaar_sample.jpg",
                     "fields": {
                         "Name": "Sanjan Acharya",
                         "DOB": "2002-06-15",

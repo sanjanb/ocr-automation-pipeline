@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 class DocumentEntry(BaseModel):
     """Individual document entry within a student record"""
     docType: str = Field(..., description="Type of document (AadharCard, MarkSheet10, etc.)")
-    cloudinaryUrl: str = Field(..., description="Cloudinary URL of the document image")
+    cloudinaryUrl: Optional[str] = Field(None, description="Cloudinary URL of the document image")
+    documentPath: Optional[str] = Field(None, description="Local file path for testing")
     fields: Dict[str, Any] = Field(..., description="Extracted document fields")
     processedAt: datetime = Field(default_factory=datetime.utcnow, description="When the document was processed")
     confidence: float = Field(..., description="Processing confidence score")

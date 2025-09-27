@@ -39,10 +39,18 @@ class CloudinaryService:
             if not cloudinary_url.startswith('https://res.cloudinary.com'):
                 raise ValueError("Invalid Cloudinary URL format")
             
-            # Create session with timeout
+            # Create session with timeout and SSL settings
             timeout = aiohttp.ClientTimeout(total=self.timeout)
             
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            # Create SSL context that's more permissive for demo purposes
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            
+            async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
                 logger.info(f"Downloading image from: {cloudinary_url}")
                 
                 async with session.get(cloudinary_url) as response:
@@ -171,7 +179,15 @@ class CloudinaryService:
         try:
             timeout = aiohttp.ClientTimeout(total=10)
             
-            async with aiohttp.ClientSession(timeout=timeout) as session:
+            # Create SSL context that's more permissive
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connector = aiohttp.TCPConnector(ssl=ssl_context)
+            
+            async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
                 # Use HEAD request to get headers only
                 async with session.head(cloudinary_url) as response:
                     if response.status != 200:
