@@ -117,6 +117,62 @@ class DocumentProcessingRequest(BaseModel):
     batch_name: Optional[str] = Field(None, description="Batch identifier for grouping documents")
     callback_url: Optional[str] = Field(None, description="URL to send results to when processing is complete")
 
+# Models for fetching documents from MongoDB collections
+class MongoDBFetchRequest(BaseModel):
+    """Request model for fetching documents from MongoDB and processing them"""
+    collection_name: str = Field(..., description="MongoDB collection name containing document URIs")
+    filter_criteria: Optional[Dict[str, Any]] = Field(None, description="MongoDB query filter (e.g., {'student_id': 'STUDENT_123'})")
+    uri_field_name: str = Field("cloudinary_url", description="Field name containing the Cloudinary URI")
+    document_type_field: Optional[str] = Field("document_type", description="Field name containing document type")
+    student_id_field: Optional[str] = Field("student_id", description="Field name containing student ID")
+    batch_size: int = Field(10, description="Maximum documents to process in one batch")
+    callback_url: Optional[str] = Field(None, description="URL to send results when processing is complete")
+    additional_fields: Optional[List[str]] = Field(None, description="Additional fields to include in processing metadata")
+
+class MongoDBDocument(BaseModel):
+    """Model representing a document fetched from MongoDB"""
+    document_id: str
+    cloudinary_url: str
+    document_type: Optional[str] = None
+    student_id: Optional[str] = None
+    additional_data: Optional[Dict[str, Any]] = None
+
+class DocumentProcessingResult(BaseModel):
+    """Result for a single document processing"""
+    uri: Optional[str] = None
+    success: bool
+    document_type: str
+    extracted_data: Dict[str, Any]
+    processing_time: float
+    validation_issues: List[str]
+    confidence_score: float
+    model_used: str
+    error_message: Optional[str] = None
+    mongodb_stored: bool = False
+
+class MongoDBFetchResponse(BaseModel):
+    """Response for MongoDB fetch and process operation"""
+    success: bool
+    total_documents_found: int
+    documents_processed: int
+    documents_failed: int
+    collection_name: str
+    filter_applied: Optional[Dict[str, Any]]
+    processing_results: List[DocumentProcessingResult]
+    total_processing_time: float
+    message: str
+
+class BatchProcessingResponse(BaseModel):
+    """Response for batch document processing"""
+    success: bool
+    batch_name: Optional[str]
+    total_documents: int
+    processed_documents: int
+    failed_documents: int
+    results: List[DocumentProcessingResult]
+    total_processing_time: float
+    message: str
+
 class DocumentProcessingResult(BaseModel):
     """Result for a single document processing"""
     uri: Optional[str] = None
@@ -495,6 +551,7 @@ async def get_service_info():
             "service_info": f"http://{local_ip}:{server_port}/service-info",
             "single_document_processing": f"http://{local_ip}:{server_port}/api/process",
             "batch_document_processing": f"http://{local_ip}:{server_port}/api/process/documents",
+            "mongodb_fetch_and_process": f"http://{local_ip}:{server_port}/api/fetch-and-process",
             "cloudinary_document_processing": f"http://{local_ip}:{server_port}/process-doc",
             "student_documents": f"http://{local_ip}:{server_port}/students/{{student_id}}/documents",
             "api_documentation": f"http://{local_ip}:{server_port}/docs"
@@ -1222,6 +1279,287 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
     
     logger.info(f"Batch processing completed: {processed_count} successful, {failed_count} failed")
     return response
+
+@app.post("/api/fetch-and-process", response_model=MongoDBFetchResponse)
+async def fetch_documents_from_mongodb_and_process(request: MongoDBFetchRequest):
+    """
+    Fetch documents from MongoDB collection and process their Cloudinary URIs
+    
+    This endpoint:
+    1. Connects to the specified MongoDB collection
+    2. Queries documents based on filter criteria
+    3. Extracts Cloudinary URIs from each document
+    4. Downloads and processes each document through OCR
+    5. Stores processed results in the main documents collection
+    6. Returns processing summary
+    
+    **Example request:**
+    ```json
+    {
+        "collection_name": "raw_documents",
+        "filter_criteria": {"student_id": "STUDENT_123", "processed": false},
+        "uri_field_name": "cloudinary_url",
+        "document_type_field": "doc_type",
+        "student_id_field": "student_id",
+        "batch_size": 5
+    }
+    ```
+    
+    **Use Cases:**
+    - Process documents uploaded to a staging collection
+    - Batch process unprocessed documents
+    - Re-process documents with updated models
+    - Process documents for specific students or document types
+    """
+    if not processor:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Document processor not available"
+        )
+    
+    start_time = time.time()
+    processing_results = []
+    processed_count = 0
+    failed_count = 0
+    
+    try:
+        # Get database connection
+        db_manager = await get_database()
+        db = db_manager.db
+        
+        # Access the specified collection
+        collection = db[request.collection_name]
+        
+        # Build MongoDB query
+        query = request.filter_criteria or {}
+        
+        # Limit results to batch size
+        cursor = collection.find(query).limit(request.batch_size)
+        documents = await cursor.to_list(length=request.batch_size)
+        
+        logger.info(f"Found {len(documents)} documents in collection '{request.collection_name}' with filter: {query}")
+        
+        if not documents:
+            return MongoDBFetchResponse(
+                success=True,
+                total_documents_found=0,
+                documents_processed=0,
+                documents_failed=0,
+                collection_name=request.collection_name,
+                filter_applied=query,
+                processing_results=[],
+                total_processing_time=time.time() - start_time,
+                message="No documents found matching the criteria"
+            )
+        
+        # Process each document
+        for doc in documents:
+            try:
+                # Extract URI from document
+                cloudinary_url = doc.get(request.uri_field_name)
+                if not cloudinary_url:
+                    logger.warning(f"Document {doc.get('_id')} missing URI field '{request.uri_field_name}'")
+                    failed_count += 1
+                    continue
+                
+                # Extract other fields
+                document_type = doc.get(request.document_type_field) if request.document_type_field else None
+                student_id = doc.get(request.student_id_field) if request.student_id_field else None
+                document_id = str(doc.get('_id'))
+                
+                # Extract additional fields if requested
+                additional_data = {}
+                if request.additional_fields:
+                    for field in request.additional_fields:
+                        if field in doc:
+                            additional_data[field] = doc[field]
+                
+                logger.info(f"Processing document {document_id} from {cloudinary_url}")
+                
+                # Download document from Cloudinary
+                temp_file_path = await download_document_from_uri(cloudinary_url)
+                
+                if not temp_file_path:
+                    result = DocumentProcessingResult(
+                        uri=cloudinary_url,
+                        success=False,
+                        document_type="unknown",
+                        extracted_data={"mongodb_document_id": document_id},
+                        processing_time=0.0,
+                        validation_issues=["Failed to download document from Cloudinary"],
+                        confidence_score=0.0,
+                        model_used="none",
+                        error_message=f"Could not download document from {cloudinary_url}",
+                        mongodb_stored=False
+                    )
+                    processing_results.append(result)
+                    failed_count += 1
+                    continue
+                
+                try:
+                    # Process the downloaded document with OCR
+                    processing_result = await processor.process_document_async(temp_file_path, document_type)
+                    
+                    # Enhance extracted data with MongoDB document info
+                    enhanced_extracted_data = processing_result.extracted_data.copy()
+                    enhanced_extracted_data.update({
+                        "mongodb_document_id": document_id,
+                        "source_collection": request.collection_name,
+                        "original_cloudinary_url": cloudinary_url
+                    })
+                    
+                    # Add additional fields from original document
+                    if additional_data:
+                        enhanced_extracted_data["mongodb_additional_data"] = additional_data
+                    
+                    # Store in MongoDB if student_id is available
+                    mongodb_stored = False
+                    if student_id and processing_result.success:
+                        try:
+                            # Use document type from result if available, fallback to MongoDB or 'other'
+                            detected_doc_type = (
+                                processing_result.document_type if processing_result.document_type != 'unknown' 
+                                else document_type or 'other'
+                            )
+                            
+                            # Normalize extracted fields
+                            normalized_fields = normalize_fields(enhanced_extracted_data, detected_doc_type)
+                            
+                            # Create document entry for database
+                            doc_entry = DocumentEntry(
+                                docType=detected_doc_type,
+                                cloudinaryUrl=cloudinary_url,
+                                documentPath=None,
+                                fields=normalized_fields,
+                                confidence=processing_result.confidence_score,
+                                modelUsed=processing_result.model_used,
+                                validationIssues=processing_result.validation_issues
+                            )
+                            
+                            # Find or create student record
+                            student = await StudentDocument.find_or_create_student(student_id)
+                            
+                            # Add document to student record
+                            await student.add_document(doc_entry)
+                            mongodb_stored = True
+                            
+                            logger.info(f"Document {document_id} stored in MongoDB for student {student_id}")
+                            
+                        except Exception as e:
+                            logger.error(f"Failed to store document {document_id} in MongoDB: {e}")
+                            mongodb_stored = False
+                    
+                    # Create processing result
+                    result = DocumentProcessingResult(
+                        uri=cloudinary_url,
+                        success=processing_result.success,
+                        document_type=processing_result.document_type,
+                        extracted_data=enhanced_extracted_data,
+                        processing_time=processing_result.processing_time,
+                        validation_issues=processing_result.validation_issues,
+                        confidence_score=processing_result.confidence_score,
+                        model_used=processing_result.model_used,
+                        error_message=processing_result.error_message,
+                        mongodb_stored=mongodb_stored
+                    )
+                    
+                    if processing_result.success:
+                        processed_count += 1
+                    else:
+                        failed_count += 1
+                        
+                    processing_results.append(result)
+                    
+                finally:
+                    # Clean up temp file
+                    try:
+                        if temp_file_path and os.path.exists(temp_file_path):
+                            Path(temp_file_path).unlink(missing_ok=True)
+                    except Exception as cleanup_error:
+                        logger.warning(f"Failed to cleanup temp file {temp_file_path}: {cleanup_error}")
+                        
+            except Exception as e:
+                logger.error(f"Error processing document {doc.get('_id')}: {e}")
+                result = DocumentProcessingResult(
+                    uri=doc.get(request.uri_field_name, "unknown"),
+                    success=False,
+                    document_type="unknown",
+                    extracted_data={"mongodb_document_id": str(doc.get('_id'))},
+                    processing_time=0.0,
+                    validation_issues=[f"Processing error: {str(e)}"],
+                    confidence_score=0.0,
+                    model_used="none",
+                    error_message=str(e),
+                    mongodb_stored=False
+                )
+                processing_results.append(result)
+                failed_count += 1
+    
+    except Exception as e:
+        logger.error(f"Error accessing MongoDB collection '{request.collection_name}': {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to access MongoDB collection: {str(e)}"
+        )
+    
+    total_processing_time = time.time() - start_time
+    
+    # Create response
+    response = MongoDBFetchResponse(
+        success=processed_count > 0,
+        total_documents_found=len(documents) if 'documents' in locals() else 0,
+        documents_processed=processed_count,
+        documents_failed=failed_count,
+        collection_name=request.collection_name,
+        filter_applied=query,
+        processing_results=processing_results,
+        total_processing_time=total_processing_time,
+        message=f"Processed {processed_count}/{len(documents) if 'documents' in locals() else 0} documents from MongoDB collection"
+    )
+    
+    # Send callback if URL provided
+    if request.callback_url and processed_count > 0:
+        try:
+            # Convert response to dict for callback
+            callback_data = response.dict()
+            callback_data["callback_type"] = "mongodb_fetch_processing"
+            
+            await send_mongodb_callback(request.callback_url, callback_data)
+            logger.info(f"MongoDB fetch callback sent to {request.callback_url}")
+        except Exception as e:
+            logger.error(f"Failed to send callback to {request.callback_url}: {e}")
+    
+    logger.info(f"MongoDB fetch processing completed: {processed_count} successful, {failed_count} failed from collection '{request.collection_name}'")
+    return response
+
+async def send_mongodb_callback(callback_url: str, response_data: Dict[str, Any]):
+    """Send MongoDB processing results to callback URL"""
+    try:
+        import asyncio
+        import concurrent.futures
+        
+        def send_callback_sync():
+            response = requests.post(
+                callback_url, 
+                json=response_data,
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            return response.status_code
+        
+        # Run the sync callback in a thread pool to avoid blocking
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            status_code = await loop.run_in_executor(executor, send_callback_sync)
+            
+        if status_code == 200:
+            logger.info(f"MongoDB callback successfully sent to {callback_url}")
+        else:
+            logger.warning(f"MongoDB callback to {callback_url} returned status {status_code}")
+                    
+    except Exception as e:
+        logger.error(f"Failed to send MongoDB callback to {callback_url}: {e}")
+        raise
 
 async def download_document_from_uri(uri: str) -> Optional[str]:
     """Download document from URI and save to temp file"""
