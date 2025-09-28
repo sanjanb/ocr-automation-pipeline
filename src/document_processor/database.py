@@ -22,6 +22,12 @@ class DocumentEntry(BaseModel):
     processedAt: datetime = Field(default_factory=datetime.utcnow, description="When the document was processed")
     confidence: float = Field(..., description="Processing confidence score")
     validationIssues: List[str] = Field(default_factory=list, description="Validation issues found")
+    
+    # VTU Approval fields
+    vtuApproved: Optional[bool] = Field(None, description="VTU approval status")
+    vtuResponse: Optional[Dict[str, Any]] = Field(None, description="VTU response data")
+    vtuApprovedAt: Optional[str] = Field(None, description="VTU approval timestamp")
+    updatedAt: Optional[datetime] = Field(None, description="Last update timestamp")
 
 class StudentDocument(Document):
     """Student document collection in MongoDB"""
@@ -29,6 +35,7 @@ class StudentDocument(Document):
     documents: List[DocumentEntry] = Field(default_factory=list, description="List of processed documents")
     createdAt: datetime = Field(default_factory=datetime.utcnow, description="Record creation timestamp")
     updatedAt: datetime = Field(default_factory=datetime.utcnow, description="Last update timestamp")
+    approved: bool = Field(default=False, description="VTU approval status")
     
     class Settings:
         name = "students"
@@ -65,9 +72,15 @@ class StudentDocument(Document):
         """Find existing student or create new one"""
         student = await cls.find_one(cls.studentId == student_id)
         if not student:
-            student = cls(studentId=student_id)
+            student = cls(studentId=student_id, approved=False)
             await student.insert()
-            logger.info(f"Created new student record: {student_id}")
+            logger.info(f"Created new student record: {student_id} with approved=False")
+        else:
+            # If student exists but doesn't have approved field, add it
+            if not hasattr(student, 'approved') or student.approved is None:
+                student.approved = False
+                await student.save()
+                logger.info(f"Updated existing student {student_id} with approved=False")
         return student
     
     async def get_documents_by_type(self, doc_type: str) -> List[DocumentEntry]:
@@ -95,12 +108,12 @@ class DatabaseManager:
     async def connect_db(self, connection_string: str = None):
         """Initialize database connection"""
         if not connection_string:
-            connection_string = os.getenv("MONGODB_URL", "mongodb://localhost:27017/document_processor")
+            connection_string = os.getenv("MONGODB_URL", "mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
         
         try:
             self.client = AsyncIOMotorClient(connection_string)
-            # Extract database name from connection string
-            db_name = connection_string.split('/')[-1] or "document_processor"
+            # Use the database name from environment variable or default
+            db_name = os.getenv("DATABASE_NAME", "admission_automation")
             self.database = self.client[db_name]
             
             # Initialize Beanie with document models
