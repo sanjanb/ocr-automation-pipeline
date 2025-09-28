@@ -11,15 +11,36 @@ from typing import Optional
 import aiohttp
 import asyncio
 from PIL import Image
+import hashlib
+import time
+import base64
+import hmac
 
 logger = logging.getLogger(__name__)
 
 class CloudinaryService:
     """Service for handling Cloudinary image operations"""
     
-    def __init__(self, timeout: int = 30):
+    def __init__(self, timeout: int = 30, cloud_name: str = None, api_key: str = None, api_secret: str = None):
         self.timeout = timeout
         self.supported_formats = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp']
+        self.cloud_name = cloud_name or os.getenv("CLOUDINARY_CLOUD_NAME", "dal5z9kro")
+        self.api_key = api_key or os.getenv("CLOUDINARY_API_KEY", "684378512361438")
+        self.api_secret = api_secret or os.getenv("CLOUDINARY_API_SECRET", "sLxod3S2D-mj_BchllBRxxfnZmY")
+    
+    def _generate_authenticated_url(self, public_id: str) -> str:
+        """Generate an authenticated Cloudinary URL"""
+        timestamp = str(int(time.time()))
+        
+        # Create signature
+        params = f"public_id={public_id}&timestamp={timestamp}{self.api_secret}"
+        signature = hashlib.sha1(params.encode()).hexdigest()
+        
+        # Build authenticated URL
+        base_url = f"https://res.cloudinary.com/{self.cloud_name}/image/upload"
+        auth_params = f"api_key={self.api_key}&timestamp={timestamp}&signature={signature}"
+        
+        return f"{base_url}/{auth_params}/{public_id}"
     
     async def download_image(self, cloudinary_url: str) -> str:
         """
@@ -53,11 +74,32 @@ class CloudinaryService:
             async with aiohttp.ClientSession(timeout=timeout, connector=connector) as session:
                 logger.info(f"Downloading image from: {cloudinary_url}")
                 
-                async with session.get(cloudinary_url) as response:
-                    # Check if request was successful
-                    if response.status != 200:
-                        raise Exception(f"Failed to download image: HTTP {response.status}")
+                # Try regular URL first
+                response = await session.get(cloudinary_url)
+                
+                # If unauthorized, try with authentication
+                if response.status == 401:
+                    logger.info("Unauthorized access, trying with authentication...")
+                    await response.close()  # Close the first response
                     
+                    # Extract public_id from URL
+                    public_id = cloudinary_url.split('/')[-1]
+                    if '/' in public_id:
+                        public_id = '/'.join(cloudinary_url.split('/')[-2:])
+                    
+                    # Generate authenticated URL
+                    auth_url = self._generate_authenticated_url(public_id)
+                    logger.info(f"Trying authenticated URL: {auth_url}")
+                    
+                    response = await session.get(auth_url)
+                    if response.status != 200:
+                        await response.close()
+                        raise Exception(f"Failed to download image with authentication: HTTP {response.status}")
+                elif response.status != 200:
+                    await response.close()
+                    raise Exception(f"Failed to download image: HTTP {response.status}")
+                
+                try:
                     # Check content type
                     content_type = response.headers.get('content-type', '')
                     if not content_type.startswith('image/'):
@@ -89,6 +131,11 @@ class CloudinaryService:
                     
                     logger.info(f"Image downloaded successfully: {temp_file.name}")
                     return temp_file.name
+                
+                finally:
+                    # Always close the response
+                    if 'response' in locals():
+                        await response.close()
         
         except Exception as e:
             logger.error(f"Failed to download image from {cloudinary_url}: {e}")

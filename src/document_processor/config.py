@@ -16,8 +16,13 @@ class Settings(BaseSettings):
     gemini_model: str = Field("gemini-2.0-flash-exp", env="GEMINI_MODEL", description="Gemini model to use")
     
     # Database Configuration
-    mongodb_url: str = Field("mongodb://localhost:27017/document_processor", env="MONGODB_URL", description="MongoDB connection string")
+    mongodb_url: str = Field("mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", env="MONGODB_URL", description="MongoDB connection string")
     database_name: str = Field("document_processor", env="DATABASE_NAME", description="Database name")
+    
+    # Cloudinary Configuration
+    cloudinary_cloud_name: str = Field("dal5z9kro", env="CLOUDINARY_CLOUD_NAME", description="Cloudinary cloud name")
+    cloudinary_api_key: str = Field("684378512361438", env="CLOUDINARY_API_KEY", description="Cloudinary API key")
+    cloudinary_api_secret: str = Field("sLxod3S2D-mj_BchllBRxxfnZmY", env="CLOUDINARY_API_SECRET", description="Cloudinary API secret")
     
     # Server Configuration
     host: str = Field("0.0.0.0", env="HOST", description="Server host")

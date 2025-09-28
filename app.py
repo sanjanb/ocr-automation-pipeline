@@ -7,6 +7,7 @@ import os
 import tempfile
 import logging
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
@@ -164,6 +165,7 @@ class BatchProcessingResponse(BaseModel):
     """Response for batch document processing"""
     success: bool
     batch_name: Optional[str]
+    student_id: Optional[str] = None
     total_documents: int
     processed_documents: int
     failed_documents: int
@@ -515,6 +517,61 @@ async def health_check():
         database_connected=db_healthy,
         gemini_configured=bool(processor)  # Check if processor is available instead
     )
+
+@app.get("/api/ping")
+async def ping():
+    """Simple ping endpoint for Spring Boot server connectivity test"""
+    return {
+        "status": "SUCCESS",
+        "message": "Python server is responding",
+        "timestamp": datetime.utcnow().isoformat(),
+        "server": "document-processor-python"
+    }
+
+@app.get("/api/test-cloudinary/{public_id}")
+async def test_cloudinary_url(public_id: str):
+    """Test different Cloudinary URL formats to find one that works"""
+    import requests
+    
+    base_url = f"https://res.cloudinary.com/dal5z9kro/image/upload/{public_id}"
+    
+    url_variants = [
+        base_url,
+        f"https://res.cloudinary.com/dal5z9kro/image/upload/q_auto/{public_id}",
+        f"https://res.cloudinary.com/dal5z9kro/image/upload/f_auto/{public_id}",
+        f"https://res.cloudinary.com/dal5z9kro/image/upload/q_auto,f_auto/{public_id}",
+        f"https://res.cloudinary.com/dal5z9kro/image/upload/w_auto/{public_id}",
+        f"https://res.cloudinary.com/dal5z9kro/image/upload/c_auto/{public_id}",
+    ]
+    
+    results = []
+    
+    for i, url in enumerate(url_variants):
+        try:
+            response = requests.head(url, timeout=10)
+            results.append({
+                "variant": i + 1,
+                "url": url,
+                "status_code": response.status_code,
+                "content_type": response.headers.get('content-type', 'unknown'),
+                "content_length": response.headers.get('content-length', 'unknown'),
+                "success": response.status_code == 200
+            })
+            response.close()
+        except Exception as e:
+            results.append({
+                "variant": i + 1,
+                "url": url,
+                "status_code": "error",
+                "error": str(e),
+                "success": False
+            })
+    
+    return {
+        "public_id": public_id,
+        "test_results": results,
+        "working_urls": [r for r in results if r["success"]]
+    }
 
 @app.get("/service-info")
 async def get_service_info():
@@ -931,6 +988,461 @@ async def get_student_document_by_type(student_id: str, doc_type: str):
             detail=f"Failed to retrieve document: {str(e)}"
         )
 
+@app.put("/students/{student_id}/vtu-approval")
+async def update_student_vtu_approval(student_id: str, request: Dict[str, Any]):
+    """
+    Update student documents with VTU approval status
+    """
+    try:
+        logger.info(f"Updating VTU approval for student {student_id}")
+        
+        vtu_approved = request.get("vtuApproved", False)
+        vtu_response = request.get("vtuResponse", {})
+        approved_at = request.get("approvedAt", datetime.now().isoformat())
+        
+        # Find the student document
+        student = await StudentDocument.find_one(StudentDocument.studentId == student_id)
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} not found"
+            )
+        
+        # Update VTU approval status for all documents using MongoDB update
+        from motor.motor_asyncio import AsyncIOMotorClient
+        import os
+        
+        # Get MongoDB connection
+        connection_string = os.getenv("MONGODB_URL", "mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+        db_name = os.getenv("DATABASE_NAME", "admission_automation")
+        
+        client = AsyncIOMotorClient(connection_string)
+        db = client[db_name]
+        collection = db["students"]
+        
+        # Update student approval status from false to true
+        update_result = await collection.update_one(
+            {"studentId": student_id},
+            {
+                "$set": {
+                    "documents.$[].vtuApproved": vtu_approved,
+                    "documents.$[].vtuResponse": vtu_response,
+                    "documents.$[].vtuApprovedAt": approved_at,
+                    "documents.$[].updatedAt": datetime.now(),
+                    "approved": vtu_approved,  # Update approved field from false to true
+                    "updatedAt": datetime.now()
+                }
+            }
+        )
+        
+        logger.info(f"MongoDB update result: {update_result.modified_count} documents modified")
+        
+        # Also update the student object for consistency
+        student.updatedAt = datetime.now()
+        await student.save()
+        
+        logger.info(f"Successfully updated VTU approval for student {student_id}: {vtu_approved}")
+        
+        return {
+            "success": True,
+            "message": f"Student {student_id} VTU approval status updated successfully",
+            "studentId": student_id,
+            "vtuApproved": vtu_approved,
+            "updatedDocumentsCount": len(student.documents),
+            "approvedAt": approved_at
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating VTU approval for student {student_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update VTU approval: {str(e)}"
+        )
+
+@app.get("/students/{student_id}/status")
+async def get_student_status(student_id: str):
+    """
+    Get student status including VTU approval information
+    """
+    try:
+        logger.info(f"Getting status for student {student_id}")
+        
+        # Find the student document
+        student = await StudentDocument.find_one(StudentDocument.studentId == student_id)
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} not found"
+            )
+        
+        # Check VTU approval status
+        is_approved = student.approved
+        total_documents = len(student.documents)
+        
+        return {
+            "studentId": student_id,
+            "totalDocuments": total_documents,
+            "isApproved": is_approved,
+            "approved": is_approved,
+            "documents": [
+                {
+                    "docType": doc.docType,
+                    "vtuApproved": getattr(doc, 'vtuApproved', None),
+                    "vtuApprovedAt": getattr(doc, 'vtuApprovedAt', None),
+                    "hasVtuResponse": hasattr(doc, 'vtuResponse') and doc.vtuResponse is not None
+                }
+                for doc in student.documents
+            ],
+            "createdAt": student.createdAt,
+            "updatedAt": student.updatedAt
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting student status for {student_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get student status: {str(e)}"
+        )
+
+@app.get("/approved-students")
+async def get_approved_students():
+    """
+    Get all students with VTU approval status
+    """
+    try:
+        logger.info("Fetching all approved students")
+        
+        # Find all students with VTU approved documents
+        students = await StudentDocument.find_all().to_list()
+        approved_students = []
+        
+        for student in students:
+            # Check if student is approved (approved field is true)
+            if student.approved:
+                # Extract student information from documents
+                student_info = {
+                    "studentId": student.studentId,
+                    "name": "Unknown",  # Will be extracted from documents
+                    "branch": "CSE",    # Default branch
+                    "gender": "Unknown", # Will be extracted from documents
+                    "status": "Approved",
+                    "admissionDate": student.createdAt.isoformat() if student.createdAt else None,
+                    "documents": []
+                }
+                
+                # Extract name and gender from documents
+                for doc in student.documents:
+                    if hasattr(doc, 'vtuApproved') and doc.vtuApproved:
+                        # Extract name from fields
+                        if 'fields' in doc.__dict__ and doc.fields:
+                            if 'Name' in doc.fields:
+                                student_info["name"] = doc.fields['Name']
+                            elif 'name' in doc.fields:
+                                student_info["name"] = doc.fields['name']
+                            
+                            # Extract gender (if available in fields)
+                            if 'Gender' in doc.fields:
+                                student_info["gender"] = doc.fields['Gender']
+                            elif 'gender' in doc.fields:
+                                student_info["gender"] = doc.fields['gender']
+                        
+                        # Add document info
+                        doc_info = {
+                            "docType": doc.docType,
+                            "vtuApproved": getattr(doc, 'vtuApproved', False),
+                            "vtuApprovedAt": getattr(doc, 'vtuApprovedAt', None),
+                            "confidence": doc.confidence
+                        }
+                        student_info["documents"].append(doc_info)
+                
+                approved_students.append(student_info)
+        
+        logger.info(f"Found {len(approved_students)} approved students")
+        
+        return {
+            "success": True,
+            "message": f"Found {len(approved_students)} approved students",
+            "students": approved_students,
+            "totalCount": len(approved_students)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching approved students: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch approved students: {str(e)}"
+        )
+
+@app.get("/approved-students/{student_id}")
+async def get_approved_student_by_id(student_id: str):
+    """
+    Get specific approved student by ID
+    """
+    try:
+        logger.info(f"Fetching approved student: {student_id}")
+        
+        # Find the student document
+        student = await StudentDocument.find_one(StudentDocument.studentId == student_id)
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} not found"
+            )
+        
+        # Check if student is approved (approved field is true)
+        if not student.approved:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} is not approved by VTU"
+            )
+        
+        # Extract student information
+        student_info = {
+            "studentId": student.studentId,
+            "name": "Unknown",
+            "branch": "CSE",
+            "gender": "Unknown",
+            "status": "Approved",
+            "admissionDate": student.createdAt.isoformat() if student.createdAt else None,
+            "documents": []
+        }
+        
+        # Extract name and gender from documents
+        for doc in student.documents:
+            if hasattr(doc, 'vtuApproved') and doc.vtuApproved:
+                # Extract name from fields
+                if 'fields' in doc.__dict__ and doc.fields:
+                    if 'Name' in doc.fields:
+                        student_info["name"] = doc.fields['Name']
+                    elif 'name' in doc.fields:
+                        student_info["name"] = doc.fields['name']
+                    
+                    # Extract gender (if available in fields)
+                    if 'Gender' in doc.fields:
+                        student_info["gender"] = doc.fields['Gender']
+                    elif 'gender' in doc.fields:
+                        student_info["gender"] = doc.fields['gender']
+                
+                # Add document info
+                doc_info = {
+                    "docType": doc.docType,
+                    "vtuApproved": getattr(doc, 'vtuApproved', False),
+                    "vtuApprovedAt": getattr(doc, 'vtuApprovedAt', None),
+                    "confidence": doc.confidence,
+                    "fields": doc.fields
+                }
+                student_info["documents"].append(doc_info)
+        
+        return {
+            "success": True,
+            "message": f"Approved student {student_id} found",
+            "student": student_info
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching approved student {student_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch approved student: {str(e)}"
+        )
+
+@app.get("/test-approved-field/{student_id}")
+async def test_approved_field(student_id: str):
+    """
+    Test endpoint to check if approved field is set correctly
+    """
+    try:
+        logger.info(f"Testing approved field for student: {student_id}")
+        
+        # Find the student document
+        student = await StudentDocument.find_one(StudentDocument.studentId == student_id)
+        if not student:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Student {student_id} not found"
+            )
+        
+        return {
+            "studentId": student_id,
+            "approved": student.approved,
+            "updatedAt": student.updatedAt,
+            "message": f"Student {student_id} approved status: {student.approved}"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error testing approved field for student {student_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to test approved field: {str(e)}"
+        )
+
+@app.get("/all-students-status")
+async def get_all_students_status():
+    """
+    Get all students and their approval status for testing
+    """
+    try:
+        logger.info("Fetching all students status")
+        
+        # Find all students
+        students = await StudentDocument.find_all().to_list()
+        
+        students_status = []
+        for student in students:
+            students_status.append({
+                "studentId": student.studentId,
+                "approved": student.approved,
+                "documentsCount": len(student.documents),
+                "createdAt": student.createdAt.isoformat() if student.createdAt else None,
+                "updatedAt": student.updatedAt.isoformat() if student.updatedAt else None
+            })
+        
+        return {
+            "success": True,
+            "message": f"Found {len(students_status)} students",
+            "students": students_status,
+            "totalCount": len(students_status)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching all students status: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch students status: {str(e)}"
+        )
+
+@app.post("/migrate-approval-fields")
+async def migrate_approval_fields():
+    """
+    Migrate existing students to add approved field if missing
+    """
+    try:
+        logger.info("Starting migration of approval fields")
+        
+        # Get MongoDB connection
+        from motor.motor_asyncio import AsyncIOMotorClient
+        import os
+        
+        connection_string = os.getenv("MONGODB_URL", "mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+        db_name = os.getenv("DATABASE_NAME", "admission_automation")
+        
+        client = AsyncIOMotorClient(connection_string)
+        db = client[db_name]
+        collection = db["students"]
+        
+        # Find all students that don't have the approved field
+        students_without_approved = await collection.find({"approved": {"$exists": False}}).to_list(length=None)
+        
+        logger.info(f"Found {len(students_without_approved)} students without approved field")
+        
+        # Update all students to add approved: false
+        update_result = await collection.update_many(
+            {"approved": {"$exists": False}},
+            {"$set": {"approved": False}}
+        )
+        
+        logger.info(f"Migration completed: {update_result.modified_count} students updated")
+        
+        return {
+            "success": True,
+            "message": f"Migration completed: {update_result.modified_count} students updated with approved: false",
+            "studentsFound": len(students_without_approved),
+            "studentsUpdated": update_result.modified_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Error during migration: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Migration failed: {str(e)}"
+        )
+
+@app.get("/debug-student-creation/{student_id}")
+async def debug_student_creation(student_id: str):
+    """
+    Debug endpoint to test student creation with approved field
+    """
+    try:
+        logger.info(f"Testing student creation for: {student_id}")
+        
+        # Test the find_or_create_student method
+        student = await StudentDocument.find_or_create_student(student_id)
+        
+        return {
+            "studentId": student.studentId,
+            "approved": student.approved,
+            "hasApprovedField": hasattr(student, 'approved'),
+            "documentsCount": len(student.documents),
+            "createdAt": student.createdAt.isoformat() if student.createdAt else None,
+            "updatedAt": student.updatedAt.isoformat() if student.updatedAt else None,
+            "message": f"Student {student_id} created/retrieved successfully with approved={student.approved}"
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in debug student creation: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Debug failed: {str(e)}"
+        )
+
+@app.get("/check-student-structure/{student_id}")
+async def check_student_structure(student_id: str):
+    """
+    Check the exact structure of a student document in MongoDB
+    """
+    try:
+        logger.info(f"Checking student structure for: {student_id}")
+        
+        # Get MongoDB connection
+        from motor.motor_asyncio import AsyncIOMotorClient
+        import os
+        
+        connection_string = os.getenv("MONGODB_URL", "mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+        db_name = os.getenv("DATABASE_NAME", "admission_automation")
+        
+        client = AsyncIOMotorClient(connection_string)
+        db = client[db_name]
+        collection = db["students"]
+        
+        # Find the student document directly from MongoDB
+        student_doc = await collection.find_one({"studentId": student_id})
+        
+        if not student_doc:
+            return {
+                "studentId": student_id,
+                "found": False,
+                "message": f"Student {student_id} not found in MongoDB"
+            }
+        
+        # Check if approved field exists
+        has_approved = "approved" in student_doc
+        approved_value = student_doc.get("approved", "NOT_SET")
+        
+        return {
+            "studentId": student_id,
+            "found": True,
+            "hasApprovedField": has_approved,
+            "approvedValue": approved_value,
+            "allFields": list(student_doc.keys()),
+            "documentCount": len(student_doc.get("documents", [])),
+            "rawDocument": student_doc
+        }
+        
+    except Exception as e:
+        logger.error(f"Error checking student structure: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Check failed: {str(e)}"
+        )
+
 @app.get("/schemas", response_model=Dict[str, DocumentSchema])
 async def get_schemas():
     """Get all document schemas"""
@@ -1187,11 +1699,39 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
                         # Find or create student record
                         student = await StudentDocument.find_or_create_student(request.student_id)
                         
+                        # Ensure approved field is set to false in the student object
+                        student.approved = False
+                        await student.save()
+                        
                         # Add document to student record
                         await student.add_document(doc_entry)
+                        
+                        # Double-check with direct MongoDB update to ensure field exists
+                        from motor.motor_asyncio import AsyncIOMotorClient
+                        import os
+                        
+                        connection_string = os.getenv("MONGODB_URL", "mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+                        db_name = os.getenv("DATABASE_NAME", "admission_automation")
+                        
+                        client = AsyncIOMotorClient(connection_string)
+                        db = client[db_name]
+                        collection = db["students"]
+                        
+                        # Ensure approved field is set to false (direct MongoDB update)
+                        update_result = await collection.update_one(
+                            {"studentId": request.student_id},
+                            {"$set": {"approved": False}},
+                            upsert=False
+                        )
+                        
+                        # Verify the field was set
+                        updated_student = await collection.find_one({"studentId": request.student_id})
+                        approved_status = updated_student.get("approved", "NOT_SET") if updated_student else "STUDENT_NOT_FOUND"
+                        
                         mongodb_stored = True
                         
                         logger.info(f"Document from {uri} stored in MongoDB for student {request.student_id}")
+                        logger.info(f"Approved field status: {approved_status}, Update result: {update_result.modified_count} documents modified")
                         
                     except Exception as e:
                         logger.error(f"Failed to store document from {uri} in MongoDB: {e}")
@@ -1248,6 +1788,7 @@ async def process_documents_from_uris(request: DocumentProcessingRequest):
     response = BatchProcessingResponse(
         success=processed_count > 0,
         batch_name=request.batch_name,
+        student_id=request.student_id,
         total_documents=len(request.document_uris),
         processed_documents=processed_count,
         failed_documents=failed_count,
@@ -1549,9 +2090,43 @@ async def download_document_from_uri(uri: str) -> Optional[str]:
     try:
         import asyncio
         import concurrent.futures
+        import hashlib
+        import time
         
         def download_sync():
+            # Try regular download first
             response = requests.get(uri, timeout=30, stream=True)
+            
+            # If unauthorized and it's a Cloudinary URL, try different URL formats
+            if response.status_code == 401 and 'res.cloudinary.com' in uri:
+                logger.info("Unauthorized access to Cloudinary, trying different URL formats...")
+                response.close()  # Close the first response
+                
+                # Try different URL formats that might work
+                url_variants = [
+                    uri,  # Original URL
+                    uri.replace('/upload/', '/upload/q_auto/'),  # Add quality parameter
+                    uri.replace('/upload/', '/upload/f_auto/'),  # Add format parameter
+                    uri.replace('/upload/', '/upload/q_auto,f_auto/'),  # Add both parameters
+                ]
+                
+                for i, variant_url in enumerate(url_variants):
+                    logger.info(f"Trying URL variant {i+1}: {variant_url}")
+                    try:
+                        response = requests.get(variant_url, timeout=30, stream=True)
+                        if response.status_code == 200:
+                            logger.info(f"Success with URL variant {i+1}!")
+                            break
+                        else:
+                            response.close()
+                            logger.warning(f"URL variant {i+1} failed: HTTP {response.status_code}")
+                    except Exception as e:
+                        logger.warning(f"URL variant {i+1} exception: {e}")
+                        continue
+                else:
+                    logger.error("All URL variants failed")
+                    return None
+            
             if response.status_code == 200:
                 # Get file extension from URI or content type
                 content_type = response.headers.get('content-type', '')
@@ -1573,11 +2148,13 @@ async def download_document_from_uri(uri: str) -> Optional[str]:
                 for chunk in response.iter_content(chunk_size=8192):
                     temp_file.write(chunk)
                 temp_file.close()
+                response.close()
                 
                 logger.info(f"Downloaded document from {uri} to {temp_path}")
                 return temp_path
             else:
                 logger.error(f"Failed to download {uri}: HTTP {response.status_code}")
+                response.close()
                 return None
         
         # Run the sync download in a thread pool to avoid blocking
