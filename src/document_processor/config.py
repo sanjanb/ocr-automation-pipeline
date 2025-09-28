@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     gemini_model: str = Field("gemini-2.0-flash-exp", env="GEMINI_MODEL", description="Gemini model to use")
     
     # Database Configuration
-    mongodb_url: str = Field("mongodb+srv://photosvvce_db_user:7wo5MumT2Pmih2Rk@cluster0.ujzukh7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", env="MONGODB_URL", description="MongoDB connection string")
+    mongodb_url: str = Field("DBLINK", env="MONGODB_URL", description="MongoDB connection string")
     database_name: str = Field("document_processor", env="DATABASE_NAME", description="Database name")
     
     # Cloudinary Configuration
