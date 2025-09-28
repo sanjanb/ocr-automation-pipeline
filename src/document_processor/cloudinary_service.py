@@ -24,9 +24,9 @@ class CloudinaryService:
     def __init__(self, timeout: int = 30, cloud_name: str = None, api_key: str = None, api_secret: str = None):
         self.timeout = timeout
         self.supported_formats = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp']
-        self.cloud_name = cloud_name or os.getenv("CLOUDINARY_CLOUD_NAME", "dal5z9kro")
-        self.api_key = api_key or os.getenv("CLOUDINARY_API_KEY", "684378512361438")
-        self.api_secret = api_secret or os.getenv("CLOUDINARY_API_SECRET", "sLxod3S2D-mj_BchllBRxxfnZmY")
+        self.cloud_name = cloud_name or os.getenv("CLOUDINARY_CLOUD_NAME", "")
+        self.api_key = api_key or os.getenv("CLOUDINARY_API_KEY", "")
+        self.api_secret = api_secret or os.getenv("CLOUDINARY_API_SECRET", "")
     
     def _generate_authenticated_url(self, public_id: str) -> str:
         """Generate an authenticated Cloudinary URL"""
