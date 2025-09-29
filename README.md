@@ -1,18 +1,11 @@
-# Smart Docume- **SLM Model Integration**: Advanced AI processing with confidence scoring and validation
+# Smart Document Processor
 
-- **Lightning Fast**: 2-5 second processing with async FastAPI endpoints
-- **MongoDB Storage**: Complete student document management with VTU approval workflows
-- **Batch Processing**: Process multiple documents from URIs with callback support
-- **Service Integration**: Microservice architecture with Spring Boot integration capabilities
-- **Production Ready**: Docker deployment with health checks and monitoring
-- **Advanced Features**: Cloudinary integration, document validation, and approval trackingessor
-
-[![CI/CD Pipeline](https://github.com/sanjanb/ocr-automation-pipeline/workflows/CI/CD%20Pipeline/badge.svg)](## **API Endpoints**ttps://github.com/sanjanb/ocr-automation-pipeline/actions)
+[![CI/CD Pipeline](https://github.com/s## **API Endpoints**njanb/ocr-automation-pipeline/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/sanjanb/ocr-automation-pipeline/actions)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![Smart Document Processor Interface](assets/Screenshot 2025-09-29 163803.png)
+![Smart Document Processor Interface](assets/Screenshot%202025-09-29%20163803.png)
 
 > **AI-powered document processing microservice using SLM Model with FastAPI**  
 > Complete OCR automation pipeline with MongoDB storage, batch processing, and VTU approval workflows.
@@ -21,11 +14,11 @@
 
 - **SLM Model Integration**: Advanced AI processing with confidence scoring and validation
 - **Lightning Fast**: 2-5 second processing with async FastAPI endpoints
-- **🗄️ MongoDB Storage**: Complete student document management with VTU approval workflows
-- **📦 Batch Processing**: Process multiple documents from URIs with callback support
-- **🔄 Service Integration**: Microservice architecture with Spring Boot integration capabilities
-- **🐳 Production Ready**: Docker deployment with health checks and monitoring
-- **📊 Advanced Features**: Cloudinary integration, document validation, and approval tracking
+- **MongoDB Storage**: Complete student document management with VTU approval workflows
+- **Batch Processing**: Process multiple documents from URIs with callback support
+- **Service Integration**: Microservice architecture with Spring Boot integration capabilities
+- **Production Ready**: Docker deployment with health checks and monitoring
+- **Advanced Features**: Cloudinary integration, document validation, and approval tracking
 
 ## **Quick Start**
 
