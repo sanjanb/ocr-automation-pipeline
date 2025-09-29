@@ -1,5 +1,4 @@
-# Smart Document Processor - AI-Powered OCR Microservice# Smart Document Processor - AI-Powered OCR Microservice
-
+# Smart Document Processor - AI-Powered OCR Microservice
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
@@ -12,7 +11,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)
+![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)
 
 A **production-ready FastAPI microservice** for AI-powered document processing using Google's Gemini 2.0 Flash model. Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.A **production-ready FastAPI microservice** for AI-powered document processing using Google's Gemini 2.0 Flash model. Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.
 
