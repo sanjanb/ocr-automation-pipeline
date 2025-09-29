@@ -7,12 +7,12 @@
 
 ![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)
 
-> **AI-powered document processing using Gemini API with FastAPI**  
+> **AI-powered document processing using SLM Model with FastAPI**  
 > Transform document images into structured JSON in seconds, not hours.
 
 ## **What This Does**
 
-- **Direct AI Processing**: Gemini 1.5 Flash reads images and extracts structured data in one step
+- **Direct AI Processing**: SLM Model reads images and extracts structured data in one step
 - **Lightning Fast**: 2-5 second processing vs traditional 30+ second OCR pipelines
 - **Smart Validation**: AI-powered completeness checking and error detection
 - **Production Ready**: FastAPI with automatic documentation, async support, and Docker deployment
@@ -31,7 +31,7 @@ cd ocr-automation-pipeline
 pip install -r requirements.txt
 
 # 3. Set up environment
-echo "GEMINI_API_KEY=your_api_key_here" > .env
+echo "GEMINI_API_KEY=your_slm_api_key_here" > .env
 
 # 4. Run the application
 uvicorn app:app --reload
@@ -49,7 +49,7 @@ git clone https://github.com/sanjanb/ocr-automation-pipeline.git
 cd ocr-automation-pipeline
 
 # 2. Run with Docker Compose
-echo "GEMINI_API_KEY=your_api_key_here" > .env
+echo "GEMINI_API_KEY=your_slm_api_key_here" > .env
 docker-compose up -d
 
 # 3. Access application
@@ -57,9 +57,9 @@ docker-compose up -d
 # Health Check: http://localhost:8000/health
 ```
 
-### **Get Gemini API Key**
+### **Get SLM API Key**
 
-1. Visit: [Google AI Studio](https://makersuite.google.com/app/apikey)
+1. Obtain your SLM model API key from your provider
 2. Create new project and API key
 3. Copy key to your `.env` file
 
@@ -68,7 +68,7 @@ docker-compose up -d
 ```mermaid
 graph TD
     A[Document Upload] --> B[FastAPI Endpoint]
-    B --> C[Gemini 1.5 Flash]
+    B --> C[SLM Model]
     C --> D[JSON Extraction]
     D --> E[AI Validation]
     E --> F[Structured Response]
@@ -146,7 +146,7 @@ results = asyncio.run(process_documents(["doc1.jpg", "doc2.jpg"]))
   "confidence_score": 0.92,
   "validation_issues": [],
   "processing_time": 2.1,
-  "model_used": "gemini-2.0-flash-exp"
+  "model_used": "slm-model-default"
 }
 ```
 
@@ -177,7 +177,7 @@ docker build -t document-processor:latest .
 # 2. Run with production settings
 docker run -d \
   -p 8000:8000 \
-  -e GEMINI_API_KEY=your_key \
+  -e SLM_API_KEY=your_slm_api_key \
   -e DEBUG=false \
   -e LOG_LEVEL=INFO \
   --name document-processor \
