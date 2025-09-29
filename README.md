@@ -1,921 +1,1791 @@
-# Smart Document Processor - AI-Powered OCR Microservice# Smart Document Processor - AI-Powered OCR Microservice
+# Smart Document Processor - AI-Powered OCR Microservice# Smart Document Processor - AI-Powered OCR Microservice# Smart Document Processor - AI-Powered OCR Microservice
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
 
-[![SLM](https://img.shields.io/badge/AI-SLM%20Model-orange.svg)](https://ai.google.dev)[![SLM](https://img.shields.io/badge/AI-SLM%20Model-orange.svg)](https://ai.google.dev)
+[![SLM](https://img.shields.io/badge/AI-SLM%20Model-orange.svg)](https://ai.google.dev)[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB-green.svg)](https://mongodb.com)
+
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)[![SLM](https://img.shields.io/badge/AI-SLM%20Model-orange.svg)](https://ai.google.dev)[![SLM](https://img.shields.io/badge/AI-SLM%20Model-orange.svg)](https://ai.google.dev)
+
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB-green.svg)](https://mongodb.com)[![MongoDB](https://img.shields.io/badge/Database-MongoDB-green.svg)](https://mongodb.com)
 
+![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)
+
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+
+A **production-ready FastAPI microservice** for AI-powered document processing using Small Language Model (SLM). Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## Quick Start
+
 ![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)![Smart Document Processor Interface](assets/Screenshot%202025-09-26%20210220.png)
 
-A **production-ready FastAPI microservice** for AI-powered document processing using Small Language Model (SLM). Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.A **production-ready FastAPI microservice** for AI-powered document processing using Small Language Model (SLM). Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.
+``````bash
 
-## Quick Start## Quick Start **What This Does**
+# 1. Clone the repositoryA **production-ready FastAPI microservice** for AI-powered document processing using Small Language Model (SLM). Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.A **production-ready FastAPI microservice** for AI-powered document processing using Small Language Model (SLM). Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.
 
-```bash`````bash## Quick Start
+git clone https://github.com/sanjanb/ocr-automation-pipeline.git
 
-# 1. Clone the repository
+cd ocr-automation-pipeline## Quick Start## Quick Start **What This Does**
+
+
+
+# 2. Set up environment```bash`````bash## Quick Start
+
+python -m venv venv
+
+source venv/bin/activate  # Linux/macOS# 1. Clone the repository
+
+# or venv\Scripts\activate  # Windows
 
 git clone https://github.com/sanjanb/ocr-automation-pipeline.git# 1. Clone the repository
 
-cd ocr-automation-pipeline
+# 3. Install dependencies
 
-git clone https://github.com/sanjanb/ocr-automation-pipeline.git- **Direct AI Processing**: Gemini 1.5 Flash reads images and extracts structured data in one step
+pip install -r requirements.txtcd ocr-automation-pipeline
 
-# 2. Set up environment
 
-python -m venv venvcd ocr-automation-pipeline
 
-source venv/bin/activate # Linux/macOS
+# 4. Configure API keygit clone https://github.com/sanjanb/ocr-automation-pipeline.git- **Direct AI Processing**: Gemini 1.5 Flash reads images and extracts structured data in one step
 
-# or venv\Scripts\activate # Windows````bash- **Lightning Fast**: 2-5 second processing vs traditional 30+ second OCR pipelines
+cp .env.example .env
 
-# 3. Install dependencies# 2. Set up environment
+# Edit .env and add your SLM API key# 2. Set up environment
 
-pip install -r requirements.txt
 
-python -m venv venv# 1. Clone the repository- **Smart Validation**: AI-powered completeness checking and error detection
 
-# 4. Configure API key
-
-cp .env.example .envsource venv/bin/activate # Linux/macOS
-
-# Edit .env and add your SLM API key
-
-# or venv\Scripts\activate # Windowsgit clone https://github.com/sanjanb/ocr-automation-pipeline.git- **Production Ready**: FastAPI with automatic documentation, async support, and Docker deployment
-
-# 5. Start the service
+# 5. Start the servicepython -m venv venvcd ocr-automation-pipeline
 
 uvicorn app:app --reload
 
-```
+```source venv/bin/activate # Linux/macOS
 
-# 3. Install dependenciescd ocr-automation-pipeline- **Developer Friendly**: Modern Python, comprehensive tests, and CI/CD pipeline
 
-**Access Points:**
 
-- **Web Interface**: http://localhost:8000pip install -r requirements.txt
+**Access Points:**# or venv\Scripts\activate # Windows````bash- **Lightning Fast**: 2-5 second processing vs traditional 30+ second OCR pipelines
 
-- **API Documentation**: http://localhost:8000/docs
+- **Web Interface**: http://localhost:8000
+
+- **API Documentation**: http://localhost:8000/docs# 3. Install dependencies# 2. Set up environment
 
 - **Health Check**: http://localhost:8000/health
 
+pip install -r requirements.txt
 
+## Table of Contents
 
-## Table of Contents# 4. Configure API key
+python -m venv venv# 1. Clone the repository- **Smart Validation**: AI-powered completeness checking and error detection
 
+- [Architecture Overview](#architecture-overview)
 
+- [Key Features](#key-features)# 4. Configure API key
 
-- [Architecture Overview](#architecture-overview)cp .env.example .env# 2. Set up environment## **Quick Start**
+- [Installation & Setup](#installation--setup)
 
-- [Key Features](#key-features)
+- [API Integration Guide](#api-integration-guide)cp .env.example .envsource venv/bin/activate # Linux/macOS
 
-- [Installation & Setup](#installation--setup)# Edit .env and add your GEMINI_API_KEY
+- [Docker Deployment](#docker-deployment)
 
-- [API Integration Guide](#api-integration-guide)
+- [Testing](#testing)# Edit .env and add your SLM API key
 
-- [Docker Deployment](#docker-deployment)python -m venv venv
+- [Supported Documents](#supported-documents)
 
-- [Testing](#testing)
+- [Security & Configuration](#security--configuration)# or venv\Scripts\activate # Windowsgit clone https://github.com/sanjanb/ocr-automation-pipeline.git- **Production Ready**: FastAPI with automatic documentation, async support, and Docker deployment
 
-- [Supported Documents](#supported-documents)# 5. Start the service
+- [Contributing](#contributing)
 
-- [Security & Configuration](#security--configuration)
-
-- [Contributing](#contributing)uvicorn app:app --reloadsource venv/bin/activate  # Linux/macOS### **Option 1: Direct Installation**
-
-- [Support](#support)
-
-```
-
-## Architecture Overview
-
-## Table of Contentspip
-
-`````````mermaid
-
-graph TB- [Architecture Overview](#architecture-overview)cd ocr-automation-pipeline
-
-    subgraph "Client Applications"
-
-        A[Web Interface]- [Key Features](#key-features)
-
-        B[Spring Boot App]
-
-        C[Mobile App]- [Installation & Setup](#installation--setup)# 4. Configure API key
-
-        D[External Services]
-
-    end- [API Integration Guide](#api-integration-guide)
+- [Support](#support)# 5. Start the service
 
 
 
-    subgraph "FastAPI Microservice"- [Docker Deployment](#docker-deployment)cp .env.example .env# 2. Install dependencies
+## Architecture Overviewuvicorn app:app --reload
 
-        E[FastAPI Router]
 
-        F[Document Processor]- [Testing](#testing)
+
+```mermaid```
+
+graph TB
+
+    subgraph "Client Applications"# 3. Install dependenciescd ocr-automation-pipeline- **Developer Friendly**: Modern Python, comprehensive tests, and CI/CD pipeline
+
+        A[Web Interface]
+
+        B[Spring Boot App]**Access Points:**
+
+        C[Mobile App]
+
+        D[External Services]- **Web Interface**: http://localhost:8000pip install -r requirements.txt
+
+    end
+
+    - **API Documentation**: http://localhost:8000/docs
+
+    subgraph "FastAPI Microservice"
+
+        E[FastAPI Router]- **Health Check**: http://localhost:8000/health
+
+        F[Document Processor]
 
         G[AI Processing Engine]
 
-        H[Data Normalizer]- [Supported Documents](#supported-documents)# Edit .env and add your GEMINI_API_KEYpip install -r requirements.txt
+        H[Data Normalizer]
 
-    end
+    end## Table of Contents# 4. Configure API key
 
-    - [Security & Configuration](#security--configuration)
+
 
     subgraph "Storage & AI"
 
-        I[MongoDB Database]- [Contributing](#contributing)
+        I[MongoDB Database]
 
-        J[SLM Model]
+        J[SLM Model]- [Architecture Overview](#architecture-overview)cp .env.example .env# 2. Set up environment## **Quick Start**
 
-        K[Cloudinary CDN]- [Support](#support)
+        K[Cloudinary CDN]
 
-    end
-
-    ## Architecture Overview
-
-    A --> E
-
-    B --> Euvicorn app:app --reloadecho "GEMINI_API_KEY=your_api_key_here" > .env
-
-    C --> E
-
-    D --> E````````mermaid
+    end- [Key Features](#key-features)
 
 
 
-    E --> Fgraph TB````
+    A --> E- [Installation & Setup](#installation--setup)# Edit .env and add your GEMINI_API_KEY
 
-    F --> G
+    B --> E
 
-    G --> J    subgraph "Client Applications"
+    C --> E- [API Integration Guide](#api-integration-guide)
 
-    F --> H
+    D --> E
 
-    H --> I        A[Web Interface]# 4. Run the application
+    - [Docker Deployment](#docker-deployment)python -m venv venv
 
-    F --> K
+    E --> F
 
-            B[Spring Boot App]
+    F --> G- [Testing](#testing)
 
-    J --> G
+    G --> J
 
-    G --> F        C[Mobile App]**🌐 Access Points:**uvicorn app:app --reload
+    F --> H- [Supported Documents](#supported-documents)# 5. Start the service
 
-    F --> E
+    H --> I
 
-```        D[External Services]
-
-
-
-## Key Features    end- **Web Interface**: http://localhost:8000
+    F --> K- [Security & Configuration](#security--configuration)
 
 
+
+    J --> G- [Contributing](#contributing)uvicorn app:app --reloadsource venv/bin/activate  # Linux/macOS### **Option 1: Direct Installation**
+
+    G --> F
+
+    F --> E- [Support](#support)
+
+``````
+
+``````````
+
+## Key Features
+
+## Architecture Overview
 
 ### AI-Powered Processing
 
-- **SLM Model Integration**: Direct image-to-JSON extraction
+- **SLM Model Integration**: Direct image-to-JSON extraction## Table of Contentspip
 
-- **Auto Document Detection**: Intelligent type recognition    subgraph "FastAPI Microservice"- **API Documentation**: http://localhost:8000/docs# 5. Open browser
+- **Auto Document Detection**: Intelligent type recognition
 
-- **High Accuracy**: Confidence scoring and validation
+- **High Accuracy**: Confidence scoring and validation`````````mermaid
 
-- **Multi-format Support**: JPEG, PNG, WebP, PDF processing        E[FastAPI Router]
+- **Multi-format Support**: JPEG, PNG, WebP, PDF processing
 
+graph TB- [Architecture Overview](#architecture-overview)cd ocr-automation-pipeline
 
+### Production-Ready API
 
-### Production-Ready API        F[Document Processor]- **Health Check**: http://localhost:8000/health# Web UI: http://localhost:8000
+- **FastAPI Framework**: Modern async web framework    subgraph "Client Applications"
 
-- **FastAPI Framework**: Modern async web framework
+- **OpenAPI Documentation**: Interactive Swagger UI
 
-- **OpenAPI Documentation**: Interactive Swagger UI        G[AI Processing Engine]
+- **RESTful Endpoints**: Standard HTTP methods        A[Web Interface]- [Key Features](#key-features)
 
-- **RESTful Endpoints**: Standard HTTP methods
+- **CORS Support**: Cross-origin resource sharing
 
-- **CORS Support**: Cross-origin resource sharing        H[Data Normalizer]# API Docs: http://localhost:8000/docs
-
-- **Rate Limiting**: DoS protection
-
-    end
-
-### Document Types Supported
-
-- **Aadhaar Card**: Full data extraction    ## 📋 Table of Contents```
-
-- **Academic Records**: 10th & 12th marksheets
-
-- **Certificates**: Transfer, migration, caste, domicile    subgraph "Storage & AI"
-
-- **Entrance Documents**: Scorecards and admit cards
-
-- **Identity Documents**: Passport photos        I[MongoDB Database]- [🏗️ Architecture Overview](#architecture-overview)### **Option 2: Docker**
+- **Rate Limiting**: DoS protection        B[Spring Boot App]
 
 
 
-### Integration Options        J[Gemini 2.0 Flash]
+### Document Types Supported        C[Mobile App]- [Installation & Setup](#installation--setup)# 4. Configure API key
 
-- **Single Document Processing**: Upload and process immediately
+- **Aadhaar Card**: Full data extraction
 
-- **Batch Processing**: Multiple documents from URLs        K[Cloudinary CDN]- [✨ Key Features](#key-features)
+- **Academic Records**: 10th & 12th marksheets        D[External Services]
 
-- **MongoDB Integration**: Automatic data storage
+- **Certificates**: Transfer, migration, caste, domicile
 
-- **Webhook Callbacks**: Async result delivery    end
+- **Entrance Documents**: Scorecards and admit cards    end- [API Integration Guide](#api-integration-guide)
 
-- **Service Registration**: External service connectivity
-
-    - [🔧 Installation & Setup](#installation--setup)```bash
-
-### Advanced Features
-
-- **Data Normalization**: Consistent field formatting    A --> E
-
-- **Validation Rules**: Document-specific checks
-
-- **Confidence Thresholds**: Quality assurance    B --> E- [🔌 API Integration Guide](#api-integration-guide)# 1. Clone and build
-
-- **Error Handling**: Comprehensive error responses
-
-- **Monitoring**: Health checks and logging    C --> E
+- **Identity Documents**: Passport photos
 
 
 
-## Installation & Setup    D --> E- [🐳 Docker Deployment](#docker-deployment)git clone https://github.com/sanjanb/ocr-automation-pipeline.git
+### Integration Options
+
+- **Single Document Processing**: Upload and process immediately    subgraph "FastAPI Microservice"- [Docker Deployment](#docker-deployment)cp .env.example .env# 2. Install dependencies
+
+- **Batch Processing**: Multiple documents from URLs
+
+- **MongoDB Integration**: Automatic data storage        E[FastAPI Router]
+
+- **Webhook Callbacks**: Async result delivery
+
+- **Service Registration**: External service connectivity        F[Document Processor]- [Testing](#testing)
 
 
+
+### Advanced Features        G[AI Processing Engine]
+
+- **Data Normalization**: Consistent field formatting
+
+- **Validation Rules**: Document-specific checks        H[Data Normalizer]- [Supported Documents](#supported-documents)# Edit .env and add your GEMINI_API_KEYpip install -r requirements.txt
+
+- **Confidence Thresholds**: Quality assurance
+
+- **Error Handling**: Comprehensive error responses    end
+
+- **Monitoring**: Health checks and logging
+
+    - [Security & Configuration](#security--configuration)
+
+## Installation & Setup
+
+    subgraph "Storage & AI"
 
 ### Prerequisites
 
-- **Python**: 3.10 or higher
+- **Python**: 3.10 or higher        I[MongoDB Database]- [Contributing](#contributing)
 
-- **MongoDB**: 4.4+ (optional, for data storage)    E --> F- [🧪 Testing](#testing)cd ocr-automation-pipeline
+- **MongoDB**: 4.4+ (optional, for data storage)
 
-- **SLM API Key**: Required for document processing
+- **SLM API Key**: Required for document processing        J[SLM Model]
 
-    F --> G
 
-### Local Development Setup
 
-    G --> J- [📚 Supported Documents](#supported-documents)
+### Local Development Setup        K[Cloudinary CDN]- [Support](#support)
 
-1. **Clone Repository**
 
-   ```bash    F --> H
 
-   git clone https://github.com/sanjanb/ocr-automation-pipeline.git
-
-   cd ocr-automation-pipeline    H --> I- [🔒 Security & Configuration](#security--configuration)# 2. Run with Docker Compose
-
-`````````
-
-    F --> K
-
-2. **Create Virtual Environment**
-
-   ```bash - [🤝 Contributing](#contributing)echo "GEMINI_API_KEY=your_api_key_here" > .env
-
-   python -m venv venv
-
-       J --> G
-
-   # Activate (choose based on your OS)
-
-   source venv/bin/activate      # Linux/macOS    G --> F- [📞 Support](#support)docker-compose up -d
-
-   venv\Scripts\activate         # Windows PowerShell
-
-   venv\Scripts\activate.bat     # Windows Command Prompt    F --> E
-
-   ```
-
-````## Architecture Overview# 3. Access application
-
-3. **Install Dependencies**
+1. **Clone Repository**    end
 
    ```bash
 
-   pip install --upgrade pip
+   git clone https://github.com/sanjanb/ocr-automation-pipeline.git    ## Architecture Overview
 
-   pip install -r requirements.txt## Key Features# Web UI: http://localhost:8000
+   cd ocr-automation-pipeline
 
-````
+   ```    A --> E
 
-4. **Environment Configuration**
 
-   ```bash### AI-Powered Processing```````mermaid# Health Check: http://localhost:8000/health
 
-   cp .env.example .env
+2. **Create Virtual Environment**    B --> Euvicorn app:app --reloadecho "GEMINI_API_KEY=your_api_key_here" > .env
 
-   ````- **Gemini 2.0 Flash Integration**: Direct image-to-JSON extraction
+   ```bash
 
+   python -m venv venv    C --> E
 
 
-   Edit `.env` file:- **Auto Document Detection**: Intelligent type recognitiongraph TB```
 
-   ```env
+   # Activate (choose based on your OS)    D --> E````````mermaid
 
-   # Required: SLM model API key for document processing- **High Accuracy**: Confidence scoring and validation
+   source venv/bin/activate      # Linux/macOS
 
-   GEMINI_API_KEY=your_slm_api_key_here
+   venv\Scripts\activate         # Windows PowerShell
 
-   - **Multi-format Support**: JPEG, PNG, WebP, PDF processing    subgraph "Client Applications"
+   venv\Scripts\activate.bat     # Windows Command Prompt
 
-   # Optional: Database (remove if not using MongoDB)
+   ```    E --> Fgraph TB````
 
-   MONGODB_URL=mongodb://localhost:27017/document_processor
 
 
+3. **Install Dependencies**    F --> G
 
-   # Server Configuration### Production-Ready API        A[Web Interface]### **Get Gemini API Key**
+   ```bash
 
-   HOST=0.0.0.0
+   pip install --upgrade pip    G --> J    subgraph "Client Applications"
 
-   PORT=8000- **FastAPI Framework**: Modern async web framework
+   pip install -r requirements.txt
 
-   DEBUG=false
+   ```    F --> H
 
-   LOG_LEVEL=INFO- **OpenAPI Documentation**: Interactive Swagger UI        B[Spring Boot App]
 
-   ````
 
-- **RESTful Endpoints**: Standard HTTP methods
+4. **Environment Configuration**    H --> I        A[Web Interface]# 4. Run the application
 
-5. **Start the Service**
+   ```bash
 
-   ````bash- **CORS Support**: Cross-origin resource sharing        C[Mobile App]1. Visit: [Google AI Studio](https://makersuite.google.com/app/apikey)
+   cp .env.example .env    F --> K
 
-   # Development mode (with auto-reload)
+``````````
 
-   uvicorn app:app --reload --host 0.0.0.0 --port 8000- **Rate Limiting**: DoS protection
+               B[Spring Boot App]
 
+Edit `.env` file:
 
+````env J --> G
 
-   # Production mode        D[External Services]2. Create new project and API key
+# Required: SLM model API key for document processing
 
-   uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+GEMINI_API_KEY=your_slm_api_key_here    G --> F        C[Mobile App]**🌐 Access Points:**uvicorn app:app --reload
 
-   ```### Document Types Supported
 
-   ````
 
-6. **Verify Installation**- **Aadhaar Card**: Full data extraction end3. Copy key to your `.env` file
+# Optional: Database (remove if not using MongoDB)    F --> E
 
-   ````bash
+MONGODB_URL=mongodb://localhost:27017/document_processor
 
-   # Test health endpoint- **Academic Records**: 10th & 12th marksheets
+```        D[External Services]
 
-   curl http://localhost:8000/health
-
-   - **Certificates**: Transfer, migration, caste, domicile
-
-   # Should return: {"status":"healthy","version":"2.0.0","slm_configured":true,...}
-
-   ```- **Entrance Documents**: Scorecards and admit cards
-   ````
-
-### MongoDB Setup (Optional)- **Identity Documents**: Passport photos subgraph "FastAPI Microservice"## **Architecture**
-
-If you want to store processed documents:
-
-````bash### Integration Options        E[FastAPI Router]
-
-# Option 1: Docker MongoDB
-
-docker run -d -p 27017:27017 --name mongodb mongo:latest- **Single Document Processing**: Upload and process immediately
-
-
-
-# Option 2: Install locally- **Batch Processing**: Multiple documents from URLs        F[Document Processor]```mermaid
-
-# macOS: brew install mongodb-community
-
-# Ubuntu: sudo apt-get install mongodb- **MongoDB Integration**: Automatic data storage
-
-# Windows: Download from mongodb.com
-
-- **Webhook Callbacks**: Async result delivery        G[AI Processing Engine]graph TD
-
-# Verify MongoDB connection
-
-curl http://localhost:8000/health- **Service Registration**: External service connectivity
-
-# Check database_connected: true
-
-```        H[Data Normalizer]    A[Document Upload] --> B[FastAPI Endpoint]
-
-
-
-## API Integration Guide### Advanced Features
-
-
-
-### REST API Endpoints- **Data Normalization**: Consistent field formatting    end    B --> C[Gemini 1.5 Flash]
-
-
-
-#### **Single Document Processing**- **Validation Rules**: Document-specific checks
-
-```bash
-
-POST /api/process- **Confidence Thresholds**: Quality assurance        C --> D[JSON Extraction]
-
-Content-Type: multipart/form-data
-
-- **Error Handling**: Comprehensive error responses
-
-# Form fields:
-
-- file: [IMAGE/PDF FILE]- **Monitoring**: Health checks and logging    subgraph "Storage & AI"    D --> E[AI Validation]
-
-- document_type: "aadhaar_card" (optional)
-
-- student_id: "STUDENT_123" (optional, for MongoDB storage)
-
-````
-
-## Installation & Setup I[MongoDB Database] E --> F[Structured Response]
-
-**Example using curl:**
-
-```bash
-
-curl -X POST "http://localhost:8000/api/process" \
-
-  -F "file=@/path/to/aadhaar.jpg" \### Prerequisites        J[Gemini 2.0 Flash]
-
-  -F "document_type=aadhaar_card" \
-
-  -F "student_id=STUDENT_123"- **Python**: 3.10 or higher
-
-```
-
-- **MongoDB**: 4.4+ (optional, for data storage) K[Cloudinary CDN] G[Web Interface] --> A
-
-**Example Response:**
-
-`````````json- **Gemini API Key**: [Get from Google AI Studio](https://makersuite.google.com/app/apikey)
-
-{
-
-  "success": true,    end    H[API Client] --> A
-
-  "document_type": "aadhaar_card",
-
-  "confidence_score": 0.95,### Local Development Setup
-
-  "processing_time": 2.34,
-
-  "extracted_data": {        I[Batch Processing] --> A
-
-    "name": "राम प्रसाद शर्मा",
-
-    "aadhaar_number": "1234 5678 9012",1. **Clone Repository**
-
-    "date_of_birth": "01/01/1990",
-
-    "gender": "MALE",   ```bash    A --> E```
-
-    "address": "123 Sample Street, City, State - 123456"
-
-  },   git clone https://github.com/sanjanb/ocr-automation-pipeline.git
-
-  "validation_issues": [],
-
-  "metadata": {   cd ocr-automation-pipeline    B --> E
-
-    "mongodb_stored": true,
-
-    "student_id": "STUDENT_123"````````
-
-  }
-
-}    C --> E## **Supported Documents**
-
-`````````
-
-2. **Create Virtual Environment**
-
-#### **Batch Processing from URLs**
-
-`bash   `bash D --> E
-
-POST /api/process/documents
-
-Content-Type: application/json python -m venv venv
-
-{ | Document | Required Fields | Validation Rules | Use Case |
-
-"document_uris": [
-
-    "https://example.com/doc1.jpg",   # Activate (choose based on your OS)
-
-    "https://example.com/doc2.pdf"
-
-], source venv/bin/activate # Linux/macOS E --> F| ---------------------------- | --------------------------------------- | ---------------------- | --------------------- |
-
-"student_id": "STUDENT_123",
-
-"document_type": "marksheet_10th", venv\Scripts\activate # Windows PowerShell
-
-"batch_name": "admission_batch_1",
-
-"callback_url": "https://your-app.com/callback" venv\Scripts\activate.bat # Windows Command Prompt F --> G| 🆔 **Aadhaar Card** | Name, Number, DOB, Address | 12-digit validation | Identity verification |
-
-}
-
-`   `
-
-#### **MongoDB Fetch and Process** G --> J| 📜 **10th/12th Marksheet** | Student, Roll No, Board, Year, Subjects | Grade validation | Academic verification |
-
-````bash
-
-POST /api/fetch-and-process3. **Install Dependencies**
-
-Content-Type: application/json
-
-   ```bash F --> H| 📄 **Transfer Certificate**  | Student, Father, School, Class          | Date format validation | School transfers      |
-
-{
-
-  "collection_name": "raw_documents",   pip install --upgrade pip
-
-  "filter_criteria": {"student_id": "STUDENT_123"},
-
-  "uri_field_name": "cloudinary_url",   pip install -r requirements.txt    H --> I| 🎓 **Migration Certificate** | Student, University, Course             | Year validation        | University transfers  |
-
-  "batch_size": 10
-
-}   ```
-
-````
-
-F --> K| 📊 **Entrance Scorecard** | Candidate, Exam, Score, Rank | Numeric validation | Competitive exams |
-
-### Integration Examples
-
-4. **Environment Configuration**
-
-#### **JavaScript/Node.js**
-
-```javascript ````bash | 🎫 **Admit Card** | Candidate, Exam, Date, Center | Date/time validation | Exam identification |
-
-const axios = require('axios');
-
-const FormData = require('form-data'); cp .env.example .env
-
-const fs = require('fs');
-
-````J --> G| 📋 **Caste Certificate**     | Name, Father, Caste, Category           | Category validation    | Government benefits   |
-
-// Single document processing
-
-async function processDocument(filePath, documentType) {
-
-const form = new FormData();
-
-form.append('file', fs.createReadStream(filePath));   Edit `.env` file:    G --> F| 🏠 **Domicile Certificate**  | Name, State, District                   | Geographic validation  | Residence proof       |
-
-form.append('document_type', documentType);
-
-form.append('student_id', 'STUDENT_123');   ```env
-
-
-
-const response = await axios.post('http://localhost:8000/api/process', form, {   # Required: Get from https://makersuite.google.com/app/apikey    F --> E
-
- headers: form.getHeaders()
-
-});   GEMINI_API_KEY=your_actual_api_key_here
-
-
-
-return response.data;   ```## 🔌 **API Usage**
-
-}
-
-# Optional: Database (remove if not using MongoDB)
-
-// Batch processing
-
-async function processBatch(documentUris, studentId) {   MONGODB_URL=mongodb://localhost:27017/document_processor
-
-const response = await axios.post('http://localhost:8000/api/process/documents', {
-
- document_uris: documentUris,
-
- student_id: studentId,
-
- document_type: 'aadhaar_card'   # Server Configuration## ✨ Key Features### **Process Single Document**
-
-});
+# Server Configuration
 
 HOST=0.0.0.0
 
-return response.data;
+PORT=8000
 
-}   PORT=8000
+DEBUG=false## Key Features    end- **Web Interface**: http://localhost:8000
+
+LOG_LEVEL=INFO
 
 ````
 
-DEBUG=false
+5. **Start the Service**### AI-Powered Processing
 
-#### **Python Client**
+   ```bash
 
-`python   LOG_LEVEL=INFO### 🧠 AI-Powered Processing`python
+   # Development mode (with auto-reload)- **SLM Model Integration**: Direct image-to-JSON extraction
 
-import requests
+   uvicorn app:app --reload --host 0.0.0.0 --port 8000
 
-`````````
+   - **Auto Document Detection**: Intelligent type recognition    subgraph "FastAPI Microservice"- **API Documentation**: http://localhost:8000/docs# 5. Open browser
 
-# Single document processing
+   # Production mode
 
-def process_document(file_path, document_type="aadhaar_card"):- **Gemini 2.0 Flash Integration**: Direct image-to-JSON extractionimport requests
+   uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1- **High Accuracy**: Confidence scoring and validation
 
- with open(file_path, 'rb') as f:
+   ```
 
-     files = {'file': f}5. **Start the Service**
+- **Multi-format Support**: JPEG, PNG, WebP, PDF processing E[FastAPI Router]
 
-     data = {
+6. **Verify Installation**
 
-         'document_type': document_type,   ````bash- **Auto Document Detection**: Intelligent type recognition
+   ```bash
 
-         'student_id': 'STUDENT_123'
+   # Test health endpoint
 
-     }   # Development mode (with auto-reload)
-
-     response = requests.post('http://localhost:8000/api/process',
-
-                            files=files, data=data)   uvicorn app:app --reload --host 0.0.0.0 --port 8000- **High Accuracy**: Confidence scoring and validation# Upload and process
-
- return response.json()
+   curl http://localhost:8000/health### Production-Ready API        F[Document Processor]- **Health Check**: http://localhost:8000/health# Web UI: http://localhost:8000
 
 
 
-# Batch processing
+   # Should return: {"status":"healthy","version":"2.0.0","slm_configured":true,...}- **FastAPI Framework**: Modern async web framework
 
-def process_batch(document_uris, student_id):   # Production mode- **Multi-format Support**: JPEG, PNG, WebP, PDF processingwith open("document.jpg", "rb") as f:
+   ```
 
- payload = {
+- **OpenAPI Documentation**: Interactive Swagger UI G[AI Processing Engine]
 
-     'document_uris': document_uris,   uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+### MongoDB Setup (Optional)
 
-     'student_id': student_id,
+- **RESTful Endpoints**: Standard HTTP methods
 
-     'document_type': 'marksheet_10th'   ```    response = requests.post(
+If you want to store processed documents:
 
- }
-
- response = requests.post('http://localhost:8000/api/process/documents',    ````
-
-                        json=payload)
-
- return response.json()6. **Verify Installation**### 🌐 Production-Ready API "http://localhost:8000/api/process",
-
-```
+- **CORS Support**: Cross-origin resource sharing H[Data Normalizer]# API Docs: http://localhost:8000/docs
 
 ````bash
 
-#### **Java/Spring Boot**
+# Option 1: Docker MongoDB- **Rate Limiting**: DoS protection
 
-```java   # Test health endpoint- **FastAPI Framework**: Modern async web framework        files={"file": f},
+docker run -d -p 27017:27017 --name mongodb mongo:latest
 
-@Service
+    end
 
-public class DocumentProcessorService {   curl http://localhost:8000/health
+# Option 2: Install locally
 
+# macOS: brew install mongodb-community### Document Types Supported
 
+# Ubuntu: sudo apt-get install mongodb
 
- @Value("${ocr.service.base-url:http://localhost:8000}")   - **OpenAPI Documentation**: Interactive Swagger UI        data={"document_type": "aadhaar_card"}
+# Windows: Download from mongodb.com- **Aadhaar Card**: Full data extraction    ## 📋 Table of Contents```
 
- private String ocrServiceUrl;
 
-    # Should return: {"status":"healthy","version":"2.0.0",...}
 
- private final WebClient webClient;
-
-    ```- **RESTful Endpoints**: Standard HTTP methods    )
-
- public DocumentProcessorService(WebClient.Builder webClientBuilder) {   ````
-
-     this.webClient = webClientBuilder
-
-         .baseUrl(ocrServiceUrl)### MongoDB Setup (Optional)- **CORS Support**: Cross-origin resource sharing
-
-         .build();
-
- }If you want to store processed documents:- **Rate Limiting**: DoS protectionresult = response.json()
-
-
-
- // Single document processing````bashprint(f"Confidence: {result['confidence_score']:.1%}")
-
- public Mono<ProcessingResult> processDocument(MultipartFile file,
-
-                                             String documentType, # Option 1: Docker MongoDB
-
-                                             String studentId) {
-
-     MultiValueMap<String, HttpEntity<?>> parts = new LinkedMultiValueMap<>();docker run -d -p 27017:27017 --name mongodb mongo:latest### 📁 Document Types Supportedprint(f"Data: {result['extracted_data']}")
-
-     parts.add("file", new FileSystemResource(file.getResource().getFile()));
-
-     parts.add("document_type", new HttpEntity<>(documentType));
-
-     parts.add("student_id", new HttpEntity<>(studentId));
-
-     # Option 2: Install locally- **Aadhaar Card**: Full data extraction```
-
-     return webClient.post()
-
-         .uri("/api/process")# macOS: brew install mongodb-community
-
-         .contentType(MediaType.MULTIPART_FORM_DATA)
-
-         .body(BodyInserters.fromMultipartData(parts))# Ubuntu: sudo apt-get install mongodb- **Academic Records**: 10th & 12th marksheets
-
-         .retrieve()
-
-         .bodyToMono(ProcessingResult.class);# Windows: Download from mongodb.com
-
- }
-
- - **Certificates**: Transfer, migration, caste, domicile### **Batch Processing**
-
- // Batch processing
-
- public Mono<BatchProcessingResult> processBatch(BatchRequest request) {# Verify MongoDB connection
-
-     return webClient.post()
-
-         .uri("/api/process/documents")curl http://localhost:8000/health- **Entrance Documents**: Scorecards and admit cards
-
-         .contentType(MediaType.APPLICATION_JSON)
-
-         .bodyValue(request)# Check database_connected: true
-
-         .retrieve()
-
-         .bodyToMono(BatchProcessingResult.class);```- **Identity Documents**: Passport photos```python
-
- }
-
-}
-
-```
-
-## API Integration Guideimport asyncio
-
-## Docker Deployment
-
-
-
-### Docker Build & Run
-
-### REST API Endpoints### 🔄 Integration Optionsimport aiohttp
-
-```bash
-
-# Build image
-
-docker build -t smart-document-processor .
-
-#### **Single Document Processing**- **Single Document Processing**: Upload and process immediately
-
-# Run container
-
-docker run -d \```bash
-
---name doc-processor \
-
--p 8000:8000 \POST /api/process- **Batch Processing**: Multiple documents from URLsasync def process_documents(file_paths):
-
--e GEMINI_API_KEY=your_slm_api_key_here \
-
--e DEBUG=false \Content-Type: multipart/form-data
-
-smart-document-processor
-
-- **MongoDB Integration**: Automatic data storage    async with aiohttp.ClientSession() as session:
-
-# Check logs
-
-docker logs doc-processor# Form fields:
-
-
-
-# Test health- file: [IMAGE/PDF FILE]- **Webhook Callbacks**: Async result delivery        tasks = []
+# Verify MongoDB connection- **Academic Records**: 10th & 12th marksheets
 
 curl http://localhost:8000/health
 
-```- document_type: "aadhaar_card" (optional)
+# Check database_connected: true- **Certificates**: Transfer, migration, caste, domicile    subgraph "Storage & AI"
+
+````
+
+- **Entrance Documents**: Scorecards and admit cards
+
+## API Integration Guide
+
+- **Identity Documents**: Passport photos I[MongoDB Database]- [🏗️ Architecture Overview](#architecture-overview)### **Option 2: Docker**
+
+### REST API Endpoints
+
+#### Single Document Processing
+
+``````````bash### Integration Options        J[Gemini 2.0 Flash]
+
+POST /api/process
+
+Content-Type: multipart/form-data- **Single Document Processing**: Upload and process immediately
 
 
 
-### Docker Compose (Recommended)- student_id: "STUDENT_123" (optional, for MongoDB storage)- **Service Registration**: External service connectivity        for file_path in file_paths:
+# Form fields:- **Batch Processing**: Multiple documents from URLs        K[Cloudinary CDN]- [✨ Key Features](#key-features)
+
+- file: [IMAGE/PDF FILE]
+
+- document_type: "aadhaar_card" (optional)- **MongoDB Integration**: Automatic data storage
+
+- student_id: "STUDENT_123" (optional, for MongoDB storage)
+
+```- **Webhook Callbacks**: Async result delivery    end
 
 
 
-Create `docker-compose.yml`:````
-
-```yaml
-
-version: '3.8'            task = process_single_document(session, file_path)
-
-services:
-
-document-processor:**Example using curl:**
-
- build: .
-
- ports:```bash### 🎯 Advanced Features            tasks.append(task)
-
-   - "8000:8000"
-
- environment:curl -X POST "http://localhost:8000/api/process" \
-
-   - GEMINI_API_KEY=${SLM_API_KEY}
-
-   - MONGODB_URL=mongodb://mongodb:27017/document_processor  -F "file=@/path/to/aadhaar.jpg" \- **Data Normalization**: Consistent field formatting
-
-   - DEBUG=false
-
- depends_on:  -F "document_type=aadhaar_card" \
-
-   - mongodb
-
- restart: unless-stopped  -F "student_id=STUDENT_123"- **Validation Rules**: Document-specific checks        results = await asyncio.gather(*tasks)
-
-
-
-mongodb:```
-
- image: mongo:7-jammy
-
- ports:- **Confidence Thresholds**: Quality assurance return results
-
-   - "27017:27017"
-
- volumes:**Example Response:**
-
-   - mongodb_data:/data/db
-
- restart: unless-stopped````json- **Error Handling**: Comprehensive error responses
-
-
-
-volumes:{
-
-mongodb_data:
-
-```  "success": true,- **Monitoring**: Health checks and logging# Process multiple documents concurrently
-
-
-
-Start services:  "document_type": "aadhaar_card",
+**Example using curl:**- **Service Registration**: External service connectivity
 
 ```bash
 
-# Set environment variable  "confidence_score": 0.95,results = asyncio.run(process_documents(["doc1.jpg", "doc2.jpg"]))
+curl -X POST "http://localhost:8000/api/process" \    - [🔧 Installation & Setup](#installation--setup)```bash
 
-export SLM_API_KEY=your_slm_api_key_here
+  -F "file=@/path/to/aadhaar.jpg" \
 
-"processing_time": 2.34,
+  -F "document_type=aadhaar_card" \### Advanced Features
 
-# Start all services
+  -F "student_id=STUDENT_123"
 
-docker-compose up -d  "extracted_data": {## 🔧 Installation & Setup```
+```- **Data Normalization**: Consistent field formatting    A --> E
 
 
 
-# View logs    "name": "राम प्रसाद शर्मा",
+**Example Response:**- **Validation Rules**: Document-specific checks
 
-docker-compose logs -f
+```json
 
- "aadhaar_number": "1234 5678 9012",
+{- **Confidence Thresholds**: Quality assurance    B --> E- [🔌 API Integration Guide](#api-integration-guide)# 1. Clone and build
 
-# Stop services
+  "success": true,
 
-docker-compose down    "date_of_birth": "01/01/1990",
+  "document_type": "aadhaar_card",- **Error Handling**: Comprehensive error responses
+
+  "confidence_score": 0.95,
+
+  "processing_time": 2.34,- **Monitoring**: Health checks and logging    C --> E
+
+  "extracted_data": {
+
+    "name": "राम प्रसाद शर्मा",
+
+    "aadhaar_number": "1234 5678 9012",
+
+    "date_of_birth": "01/01/1990",## Installation & Setup    D --> E- [🐳 Docker Deployment](#docker-deployment)git clone https://github.com/sanjanb/ocr-automation-pipeline.git
+
+    "gender": "MALE",
+
+    "address": "123 Sample Street, City, State - 123456"
+
+  },
+
+  "validation_issues": [],### Prerequisites
+
+  "metadata": {
+
+    "mongodb_stored": true,- **Python**: 3.10 or higher
+
+    "student_id": "STUDENT_123"
+
+  }- **MongoDB**: 4.4+ (optional, for data storage)    E --> F- [🧪 Testing](#testing)cd ocr-automation-pipeline
+
+}
+
+```- **SLM API Key**: Required for document processing
+
+
+
+#### Batch Processing from URLs    F --> G
+
+```bash
+
+POST /api/process/documents### Local Development Setup
+
+Content-Type: application/json
+
+    G --> J- [📚 Supported Documents](#supported-documents)
+
+{
+
+  "document_uris": [1. **Clone Repository**
+
+    "https://example.com/doc1.jpg",
+
+    "https://example.com/doc2.pdf"   ```bash    F --> H
+
+  ],
+
+  "student_id": "STUDENT_123",   git clone https://github.com/sanjanb/ocr-automation-pipeline.git
+
+  "document_type": "marksheet_10th",
+
+  "batch_name": "admission_batch_1",   cd ocr-automation-pipeline    H --> I- [🔒 Security & Configuration](#security--configuration)# 2. Run with Docker Compose
+
+  "callback_url": "https://your-app.com/callback"
+
+}`````````
+
+``````````
+
+    F --> K
+
+#### MongoDB Fetch and Process
+
+````````bash2. **Create Virtual Environment**
+
+POST /api/fetch-and-process
+
+Content-Type: application/json   ```bash - [🤝 Contributing](#contributing)echo "GEMINI_API_KEY=your_api_key_here" > .env
+
+
+
+{   python -m venv venv
+
+  "collection_name": "raw_documents",
+
+  "filter_criteria": {"student_id": "STUDENT_123"},       J --> G
+
+  "uri_field_name": "cloudinary_url",
+
+  "batch_size": 10   # Activate (choose based on your OS)
+
+}
+
+```   source venv/bin/activate      # Linux/macOS    G --> F- [📞 Support](#support)docker-compose up -d
+
+
+
+### Integration Examples   venv\Scripts\activate         # Windows PowerShell
+
+
+
+#### JavaScript/Node.js   venv\Scripts\activate.bat     # Windows Command Prompt    F --> E
+
+```javascript
+
+const axios = require('axios');   ```
+
+const FormData = require('form-data');
+
+const fs = require('fs');````## Architecture Overview# 3. Access application
+
+
+
+// Single document processing3. **Install Dependencies**
+
+async function processDocument(filePath, documentType) {
+
+  const form = new FormData();   ```bash
+
+  form.append('file', fs.createReadStream(filePath));
+
+  form.append('document_type', documentType);   pip install --upgrade pip
+
+  form.append('student_id', 'STUDENT_123');
+
+   pip install -r requirements.txt## Key Features# Web UI: http://localhost:8000
+
+  const response = await axios.post('http://localhost:8000/api/process', form, {
+
+    headers: form.getHeaders()````
+
+  });
+
+4. **Environment Configuration**
+
+  return response.data;
+
+}   ```bash### AI-Powered Processing```````mermaid# Health Check: http://localhost:8000/health
+
+
+
+// Batch processing   cp .env.example .env
+
+async function processBatch(documentUris, studentId) {
+
+  const response = await axios.post('http://localhost:8000/api/process/documents', {   ````- **Gemini 2.0 Flash Integration**: Direct image-to-JSON extraction
+
+    document_uris: documentUris,
+
+    student_id: studentId,
+
+    document_type: 'aadhaar_card'
+
+  });   Edit `.env` file:- **Auto Document Detection**: Intelligent type recognitiongraph TB```
+
+
+
+  return response.data;   ```env
+
+}
+
+```   # Required: SLM model API key for document processing- **High Accuracy**: Confidence scoring and validation
+
+
+
+#### Python Client   GEMINI_API_KEY=your_slm_api_key_here
+
+```python
+
+import requests   - **Multi-format Support**: JPEG, PNG, WebP, PDF processing    subgraph "Client Applications"
+
+
+
+# Single document processing   # Optional: Database (remove if not using MongoDB)
+
+def process_document(file_path, document_type="aadhaar_card"):
+
+    with open(file_path, 'rb') as f:   MONGODB_URL=mongodb://localhost:27017/document_processor
+
+        files = {'file': f}
+
+        data = {
+
+            'document_type': document_type,
+
+            'student_id': 'STUDENT_123'   # Server Configuration### Production-Ready API        A[Web Interface]### **Get Gemini API Key**
+
+        }
+
+        response = requests.post('http://localhost:8000/api/process',    HOST=0.0.0.0
+
+                               files=files, data=data)
+
+    return response.json()   PORT=8000- **FastAPI Framework**: Modern async web framework
+
+
+
+# Batch processing   DEBUG=false
+
+def process_batch(document_uris, student_id):
+
+    payload = {   LOG_LEVEL=INFO- **OpenAPI Documentation**: Interactive Swagger UI        B[Spring Boot App]
+
+        'document_uris': document_uris,
+
+        'student_id': student_id,   ````
+
+        'document_type': 'marksheet_10th'
+
+    }- **RESTful Endpoints**: Standard HTTP methods
+
+    response = requests.post('http://localhost:8000/api/process/documents',
+
+                           json=payload)5. **Start the Service**
+
+    return response.json()
+
+```   ````bash- **CORS Support**: Cross-origin resource sharing        C[Mobile App]1. Visit: [Google AI Studio](https://makersuite.google.com/app/apikey)
+
+
+
+#### Java/Spring Boot   # Development mode (with auto-reload)
+
+```java
+
+@Service   uvicorn app:app --reload --host 0.0.0.0 --port 8000- **Rate Limiting**: DoS protection
+
+public class DocumentProcessorService {
+
+
+
+    @Value("${ocr.service.base-url:http://localhost:8000}")
+
+    private String ocrServiceUrl;   # Production mode        D[External Services]2. Create new project and API key
+
+
+
+    private final WebClient webClient;   uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+
+
+
+    public DocumentProcessorService(WebClient.Builder webClientBuilder) {   ```### Document Types Supported
+
+        this.webClient = webClientBuilder
+
+            .baseUrl(ocrServiceUrl)   ````
+
+            .build();
+
+    }6. **Verify Installation**- **Aadhaar Card**: Full data extraction end3. Copy key to your `.env` file
+
+
+
+    // Single document processing   ````bash
+
+    public Mono<ProcessingResult> processDocument(MultipartFile file,
+
+                                                String documentType,    # Test health endpoint- **Academic Records**: 10th & 12th marksheets
+
+                                                String studentId) {
+
+        MultiValueMap<String, HttpEntity<?>> parts = new LinkedMultiValueMap<>();   curl http://localhost:8000/health
+
+        parts.add("file", new FileSystemResource(file.getResource().getFile()));
+
+        parts.add("document_type", new HttpEntity<>(documentType));   - **Certificates**: Transfer, migration, caste, domicile
+
+        parts.add("student_id", new HttpEntity<>(studentId));
+
+           # Should return: {"status":"healthy","version":"2.0.0","slm_configured":true,...}
+
+        return webClient.post()
+
+            .uri("/api/process")   ```- **Entrance Documents**: Scorecards and admit cards
+
+            .contentType(MediaType.MULTIPART_FORM_DATA)   ````
+
+            .body(BodyInserters.fromMultipartData(parts))
+
+            .retrieve()### MongoDB Setup (Optional)- **Identity Documents**: Passport photos subgraph "FastAPI Microservice"## **Architecture**
+
+            .bodyToMono(ProcessingResult.class);
+
+    }If you want to store processed documents:
+
+
+
+    // Batch processing````bash### Integration Options        E[FastAPI Router]
+
+    public Mono<BatchProcessingResult> processBatch(BatchRequest request) {
+
+        return webClient.post()# Option 1: Docker MongoDB
+
+            .uri("/api/process/documents")
+
+            .contentType(MediaType.APPLICATION_JSON)docker run -d -p 27017:27017 --name mongodb mongo:latest- **Single Document Processing**: Upload and process immediately
+
+            .bodyValue(request)
+
+            .retrieve()
+
+            .bodyToMono(BatchProcessingResult.class);
+
+    }# Option 2: Install locally- **Batch Processing**: Multiple documents from URLs        F[Document Processor]```mermaid
+
+}
+
+```# macOS: brew install mongodb-community
+
+
+
+#### cURL Examples# Ubuntu: sudo apt-get install mongodb- **MongoDB Integration**: Automatic data storage
+
+```bash
+
+# Single document processing# Windows: Download from mongodb.com
+
+curl -X POST "http://localhost:8000/api/process" \
+
+  -F "file=@document.jpg" \- **Webhook Callbacks**: Async result delivery        G[AI Processing Engine]graph TD
+
+  -F "document_type=aadhaar_card" \
+
+  -F "student_id=STUDENT_123"# Verify MongoDB connection
+
+
+
+# Batch processingcurl http://localhost:8000/health- **Service Registration**: External service connectivity
+
+curl -X POST "http://localhost:8000/api/process/documents" \
+
+  -H "Content-Type: application/json" \# Check database_connected: true
+
+  -d '{
+
+    "document_uris": ["https://example.com/doc1.jpg"],```        H[Data Normalizer]    A[Document Upload] --> B[FastAPI Endpoint]
+
+    "student_id": "STUDENT_123",
+
+    "document_type": "marksheet_10th"
+
+  }'
+
+## API Integration Guide### Advanced Features
+
+# Health check
+
+curl http://localhost:8000/health
+
+
+
+# Get supported document schemas### REST API Endpoints- **Data Normalization**: Consistent field formatting    end    B --> C[Gemini 1.5 Flash]
+
+curl http://localhost:8000/schemas
+
+````````
+
+## Docker Deployment#### **Single Document Processing**- **Validation Rules**: Document-specific checks
+
+### Docker Build & Run```bash
+
+```bashPOST /api/process- **Confidence Thresholds**: Quality assurance        C --> D[JSON Extraction]
+
+# Build image
+
+docker build -t smart-document-processor .Content-Type: multipart/form-data
+
+
+
+# Run container- **Error Handling**: Comprehensive error responses
+
+docker run -d \
+
+  --name doc-processor \# Form fields:
+
+  -p 8000:8000 \
+
+  -e GEMINI_API_KEY=your_slm_api_key_here \- file: [IMAGE/PDF FILE]- **Monitoring**: Health checks and logging    subgraph "Storage & AI"    D --> E[AI Validation]
+
+  -e DEBUG=false \
+
+  smart-document-processor- document_type: "aadhaar_card" (optional)
+
+
+
+# Check logs- student_id: "STUDENT_123" (optional, for MongoDB storage)
+
+docker logs doc-processor
 
 ```
 
+# Test health
+
+curl http://localhost:8000/health## Installation & Setup I[MongoDB Database] E --> F[Structured Response]
+
+``````````
+
+**Example using curl:**
+
+### Docker Compose (Recommended)
+
+```bash
+
+Create `docker-compose.yml`:
+
+```yamlcurl -X POST "http://localhost:8000/api/process" \
+
+version: '3.8'
+
+services:  -F "file=@/path/to/aadhaar.jpg" \### Prerequisites        J[Gemini 2.0 Flash]
+
+  document-processor:
+
+    build: .  -F "document_type=aadhaar_card" \
+
+    ports:
+
+      - "8000:8000"  -F "student_id=STUDENT_123"- **Python**: 3.10 or higher
+
+    environment:
+
+      - GEMINI_API_KEY=${SLM_API_KEY}```
+
+      - MONGODB_URL=mongodb://mongodb:27017/document_processor
+
+      - DEBUG=false- **MongoDB**: 4.4+ (optional, for data storage) K[Cloudinary CDN] G[Web Interface] --> A
+
+    depends_on:
+
+      - mongodb**Example Response:**
+
+    restart: unless-stopped
+
+`````````json- **Gemini API Key**: [Get from Google AI Studio](https://makersuite.google.com/app/apikey)
+
+  mongodb:
+
+    image: mongo:7-jammy{
+
+    ports:
+
+      - "27017:27017"  "success": true,    end    H[API Client] --> A
+
+    volumes:
+
+      - mongodb_data:/data/db  "document_type": "aadhaar_card",
+
+    restart: unless-stopped
+
+  "confidence_score": 0.95,### Local Development Setup
+
+volumes:
+
+  mongodb_data:  "processing_time": 2.34,
+
+``````````
+
+"extracted_data": { I[Batch Processing] --> A
+
+Start services:
+
+``````````bash "name": "राम प्रसाद शर्मा",
+
+# Set environment variable
+
+export SLM_API_KEY=your_slm_api_key_here    "aadhaar_number": "1234 5678 9012",1. **Clone Repository**
+
+
+
+# Start all services    "date_of_birth": "01/01/1990",
+
+docker-compose up -d
+
+    "gender": "MALE",   ```bash    A --> E```
+
+# View logs
+
+docker-compose logs -f    "address": "123 Sample Street, City, State - 123456"
+
+
+
+# Stop services  },   git clone https://github.com/sanjanb/ocr-automation-pipeline.git
+
+docker-compose down
+
+```  "validation_issues": [],
+
+
+
+### Cloud Deployment  "metadata": {   cd ocr-automation-pipeline    B --> E
+
+
+
+#### Azure Container Apps    "mongodb_stored": true,
+
+```bash
+
+# Login to Azure    "student_id": "STUDENT_123"````````
+
+az login
+
+  }
+
+# Create resource group
+
+az group create --name ocr-service --location eastus}    C --> E## **Supported Documents**
+
+
+
+# Create container app environment`````````
+
+az containerapp env create \
+
+  --name ocr-env \2. **Create Virtual Environment**
+
+  --resource-group ocr-service \
+
+  --location eastus#### **Batch Processing from URLs**
+
+
+
+# Deploy container app`bash   `bash D --> E
+
+az containerapp create \
+
+  --name smart-doc-processor \POST /api/process/documents
+
+  --resource-group ocr-service \
+
+  --environment ocr-env \Content-Type: application/json python -m venv venv
+
+  --image your-registry/smart-document-processor:latest \
+
+  --target-port 8000 \{ | Document | Required Fields | Validation Rules | Use Case |
+
+  --ingress external \
+
+  --env-vars GEMINI_API_KEY=your_slm_api_key_here"document_uris": [
+
+``````````
+
+    "https://example.com/doc1.jpg",   # Activate (choose based on your OS)
+
+#### AWS ECS/Fargate
+
+```bash "https://example.com/doc2.pdf"
+
+# Build and push to ECR
+
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789.dkr.ecr.us-east-1.amazonaws.com], source venv/bin/activate # Linux/macOS E --> F| ---------------------------- | --------------------------------------- | ---------------------- | --------------------- |
+
+
+
+docker tag smart-document-processor:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/smart-document-processor:latest"student_id": "STUDENT_123",
+
+
+
+docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/smart-document-processor:latest"document_type": "marksheet_10th", venv\Scripts\activate # Windows PowerShell
+
+
+
+# Create ECS service using AWS CLI or Console"batch_name": "admission_batch_1",
+
+```
+
+"callback_url": "https://your-app.com/callback" venv\Scripts\activate.bat # Windows Command Prompt F --> G| 🆔 **Aadhaar Card** | Name, Number, DOB, Address | 12-digit validation | Identity verification |
+
+#### Google Cloud Run
+
+`````bash}
+
+# Build and deploy
+
+gcloud builds submit --tag gcr.io/PROJECT-ID/smart-document-processor`   `
+
+
+
+gcloud run deploy smart-document-processor \#### **MongoDB Fetch and Process** G --> J| 📜 **10th/12th Marksheet** | Student, Roll No, Board, Year, Subjects | Grade validation | Academic verification |
+
+  --image gcr.io/PROJECT-ID/smart-document-processor \
+
+  --platform managed \````bash
+
+  --region us-central1 \
+
+  --allow-unauthenticated \POST /api/fetch-and-process3. **Install Dependencies**
+
+  --set-env-vars GEMINI_API_KEY=your_slm_api_key_here
+
+```Content-Type: application/json
+
+
+
+## Testing   ```bash F --> H| 📄 **Transfer Certificate**  | Student, Father, School, Class          | Date format validation | School transfers      |
+
+
+
+### Run Tests{
+
+
+
+```bash  "collection_name": "raw_documents",   pip install --upgrade pip
+
+# Install development dependencies
+
+pip install -r requirements-dev.txt  "filter_criteria": {"student_id": "STUDENT_123"},
+
+
+
+# Run all tests  "uri_field_name": "cloudinary_url",   pip install -r requirements.txt    H --> I| 🎓 **Migration Certificate** | Student, University, Course             | Year validation        | University transfers  |
+
+pytest
+
+  "batch_size": 10
+
+# Run with coverage
+
+pytest --cov=src --cov-report=html --cov-report=term}   ```
+
+
+
+# Run specific test file````
+
+pytest tests/test_api.py -v
+
+F --> K| 📊 **Entrance Scorecard** | Candidate, Exam, Score, Rank | Numeric validation | Competitive exams |
+
+# Run specific test
+
+pytest tests/test_core.py::test_document_processing -v### Integration Examples
+
+`````
+
+4. **Environment Configuration**
+
+### Test Coverage Report
+
+#### **JavaScript/Node.js**
+
+`````bash
+
+# Generate HTML coverage report```javascript ````bash | 🎫 **Admit Card** | Candidate, Exam, Date, Center | Date/time validation | Exam identification |
+
+pytest --cov=src --cov-report=html
+
+const axios = require('axios');
+
+# Open in browser
+
+open htmlcov/index.html  # macOSconst FormData = require('form-data'); cp .env.example .env
+
+xdg-open htmlcov/index.html  # Linux
+
+start htmlcov/index.html  # Windowsconst fs = require('fs');
+
+`````
+
+`````J --> G| 📋 **Caste Certificate**     | Name, Father, Caste, Category           | Category validation    | Government benefits   |
+
+### API Testing
+
+// Single document processing
+
+```bash
+
+# Test health endpointasync function processDocument(filePath, documentType) {
+
+curl http://localhost:8000/health
+
+const form = new FormData();
+
+# Test with sample document
+
+curl -X POST "http://localhost:8000/api/process" \form.append('file', fs.createReadStream(filePath));   Edit `.env` file:    G --> F| 🏠 **Domicile Certificate**  | Name, State, District                   | Geographic validation  | Residence proof       |
+
+  -F "file=@tests/fixtures/sample_aadhaar.jpg" \
+
+  -F "document_type=aadhaar_card"form.append('document_type', documentType);
+
+
+
+# Test batch processingform.append('student_id', 'STUDENT_123');   ```env
+
+curl -X POST "http://localhost:8000/api/process/documents" \
+
+  -H "Content-Type: application/json" \
+
+  -d '{"document_uris": ["https://example.com/test.jpg"]}'
+
+```const response = await axios.post('http://localhost:8000/api/process', form, {   # Required: Get from https://makersuite.google.com/app/apikey    F --> E
+
+
+
+## Supported Documents headers: form.getHeaders()
+
+
+
+### Government Documents});   GEMINI_API_KEY=your_actual_api_key_here
+
+
+
+| Document Type | Code | Fields Extracted | Confidence |
+
+|--------------|------|------------------|------------|
+
+| **Aadhaar Card** | `aadhaar_card` | Name, Number, DOB, Gender, Address | 95%+ |return response.data;   ```## 🔌 **API Usage**
+
+| **Caste Certificate** | `caste_certificate` | Name, Caste, Issue Date, Authority | 90%+ |
+
+| **Domicile Certificate** | `domicile_certificate` | Name, State, Issue Date, Validity | 88%+ |}
+
+
+
+### Academic Documents# Optional: Database (remove if not using MongoDB)
+
+
+
+| Document Type | Code | Fields Extracted | Confidence |// Batch processing
+
+|--------------|------|------------------|------------|
+
+| **10th Marksheet** | `marksheet_10th` | Name, Roll No, Marks, Board, Year | 92%+ |async function processBatch(documentUris, studentId) {   MONGODB_URL=mongodb://localhost:27017/document_processor
+
+| **12th Marksheet** | `marksheet_12th` | Name, Roll No, Marks, Stream, Board | 93%+ |
+
+| **Transfer Certificate** | `transfer_certificate` | Name, Class, School, Issue Date | 89%+ |const response = await axios.post('http://localhost:8000/api/process/documents', {
+
+| **Migration Certificate** | `migration_certificate` | Name, Course, University, Issue Date | 87%+ |
+
+ document_uris: documentUris,
+
+### Entrance & Admission
+
+ student_id: studentId,
+
+| Document Type | Code | Fields Extracted | Confidence |
+
+|--------------|------|------------------|------------| document_type: 'aadhaar_card'   # Server Configuration## ✨ Key Features### **Process Single Document**
+
+| **Entrance Scorecard** | `entrance_scorecard` | Name, Roll No, Score, Rank, Exam | 91%+ |
+
+| **Admit Card** | `admit_card` | Name, Roll No, Exam Center, Date | 94%+ |});
+
+| **Passport Photo** | `passport_photo` | Face Detection, Quality Check | 96%+ |
+
+HOST=0.0.0.0
+
+### Adding New Document Types
+
+return response.data;
+
+To add support for new document types:
+
+}   PORT=8000
+
+1. **Define Schema** in `src/document_processor/schemas.py`:
+
+   ```python````
+
+   DOCUMENT_SCHEMAS['new_document'] = {
+
+       'description': 'New Document Type',DEBUG=false
+
+       'required_fields': ['field1', 'field2'],
+
+       'optional_fields': ['field3'],#### **Python Client**
+
+       'validation_rules': {
+
+           'field1': 'Pattern or validation rule'`python   LOG_LEVEL=INFO### 🧠 AI-Powered Processing`python
+
+       }
+
+   }import requests
+
+   ```
+
+`````
+
+2. **Update Normalizer** in `src/document_processor/normalizer.py`:
+
+   ````python# Single document processing
+
+   def normalize_new_document(data: dict) -> dict:
+
+       return {def process_document(file_path, document_type="aadhaar_card"):- **Gemini 2.0 Flash Integration**: Direct image-to-JSON extractionimport requests
+
+           'field1': normalize_text(data.get('field1')),
+
+           'field2': normalize_date(data.get('field2')) with open(file_path, 'rb') as f:
+
+       }
+
+   ```     files = {'file': f}5. **Start the Service**
+
+   ````
+
+3. **Add Tests** in `tests/test_new_document.py` data = {
+
+4. **Update Documentation** 'document_type': document_type, ````bash- **Auto Document Detection**: Intelligent type recognition
+
+## Security & Configuration 'student_id': 'STUDENT_123'
+
+### Security Features } # Development mode (with auto-reload)
+
+- **Input Validation**: All uploads sanitized and validated response = requests.post('http://localhost:8000/api/process',
+
+- **Rate Limiting**: DoS protection with configurable limits
+
+- **API Key Security**: Environment-based secret management files=files, data=data) uvicorn app:app --reload --host 0.0.0.0 --port 8000- **High Accuracy**: Confidence scoring and validation# Upload and process
+
+- **File Type Validation**: Only allowed formats processed
+
+- **Size Limits**: Configurable maximum file sizes return response.json()
+
+- **Error Sanitization**: No sensitive data in error responses
+
+- **HTTPS Support**: SSL/TLS ready for production
+
+### Configuration Options# Batch processing
+
+Edit `.env` file for customization:def process_batch(document_uris, student_id): # Production mode- **Multi-format Support**: JPEG, PNG, WebP, PDF processingwith open("document.jpg", "rb") as f:
+
+`````env payload = {
+
+# AI Configuration
+
+GEMINI_API_KEY=your_slm_api_key_here     'document_uris': document_uris,   uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+
+GEMINI_MODEL=slm-model-default
+
+     'student_id': student_id,
+
+# Server Configuration
+
+HOST=0.0.0.0     'document_type': 'marksheet_10th'   ```    response = requests.post(
+
+PORT=8000
+
+DEBUG=false }
+
+LOG_LEVEL=INFO
+
+ response = requests.post('http://localhost:8000/api/process/documents',    ````
+
+# Processing Configuration
+
+MAX_FILE_SIZE=10485760        # 10MB                        json=payload)
+
+PROCESSING_TIMEOUT=60         # seconds
+
+MIN_CONFIDENCE_THRESHOLD=0.5  # minimum confidence return response.json()6. **Verify Installation**### 🌐 Production-Ready API "http://localhost:8000/api/process",
+
+
+
+# Database Configuration (optional)```
+
+MONGODB_URL=mongodb://localhost:27017/document_processor
+
+````bash
+
+# Rate Limiting
+
+RATE_LIMIT_PER_HOUR=100#### **Java/Spring Boot**
+
+RATE_LIMIT_BURST=10
+
+```java   # Test health endpoint- **FastAPI Framework**: Modern async web framework        files={"file": f},
+
+# CORS (comma-separated origins)
+
+CORS_ORIGINS=http://localhost:3000,http://localhost:8080@Service
+
+`````
+
+public class DocumentProcessorService { curl http://localhost:8000/health
+
+### Production Security Checklist
+
+- [ ] **Environment Variables**: All secrets in environment, not code
+
+- [ ] **HTTPS**: SSL/TLS certificates configured @Value("${ocr.service.base-url:http://localhost:8000}") - **OpenAPI Documentation**: Interactive Swagger UI data={"document_type": "aadhaar_card"}
+
+- [ ] **Rate Limiting**: Appropriate limits set
+
+- [ ] **Input Validation**: All inputs sanitized private String ocrServiceUrl;
+
+- [ ] **Logging**: Security events logged
+
+- [ ] **Monitoring**: Health checks and alerts configured # Should return: {"status":"healthy","version":"2.0.0",...}
+
+- [ ] **Updates**: Dependencies regularly updated
+
+- [ ] **Backup**: Data backup strategy implemented private final WebClient webClient;
+
+## Performance & Scaling ```- **RESTful Endpoints**: Standard HTTP methods )
+
+### Benchmarks public DocumentProcessorService(WebClient.Builder webClientBuilder) { ````
+
+| Metric | Value | Notes | this.webClient = webClientBuilder
+
+|--------|--------|-------|
+
+| **Processing Time** | 2-4 seconds | Average per document | .baseUrl(ocrServiceUrl)### MongoDB Setup (Optional)- **CORS Support**: Cross-origin resource sharing
+
+| **Memory Usage** | <500MB | Efficient processing |
+
+| **Concurrent Users** | 50-100 | Single instance | .build();
+
+| **Throughput** | 15-25 docs/min | Depends on document complexity |
+
+| **Docker Image Size** | ~150MB | Optimized build | }If you want to store processed documents:- **Rate Limiting**: DoS protectionresult = response.json()
+
+### Performance Optimization
+
+#### Single Instance Optimization // Single document processing````bashprint(f"Confidence: {result['confidence_score']:.1%}")
+
+```bash
+
+# Use multiple workers public Mono<ProcessingResult> processDocument(MultipartFile file,
+
+uvicorn app:app --workers 4 --host 0.0.0.0 --port 8000
+
+                                             String documentType, # Option 1: Docker MongoDB
+
+# Optimize for production
+
+uvicorn app:app --workers 2 --worker-class uvicorn.workers.UvicornWorker                                             String studentId) {
+
+```
+
+     MultiValueMap<String, HttpEntity<?>> parts = new LinkedMultiValueMap<>();docker run -d -p 27017:27017 --name mongodb mongo:latest### 📁 Document Types Supportedprint(f"Data: {result['extracted_data']}")
+
+#### Load Balancing Setup
+
+     parts.add("file", new FileSystemResource(file.getResource().getFile()));
+
+**nginx.conf example:**
+
+````nginx parts.add("document_type", new HttpEntity<>(documentType));
+
+upstream document_processor {
+
+    server 127.0.0.1:8000;     parts.add("student_id", new HttpEntity<>(studentId));
+
+    server 127.0.0.1:8001;
+
+    server 127.0.0.1:8002;     # Option 2: Install locally- **Aadhaar Card**: Full data extraction```
+
+}
+
+     return webClient.post()
+
+server {
+
+    listen 80;         .uri("/api/process")# macOS: brew install mongodb-community
+
+    server_name your-domain.com;
+
+             .contentType(MediaType.MULTIPART_FORM_DATA)
+
+    location / {
+
+        proxy_pass http://document_processor;         .body(BodyInserters.fromMultipartData(parts))# Ubuntu: sudo apt-get install mongodb- **Academic Records**: 10th & 12th marksheets
+
+        proxy_set_header Host $host;
+
+        proxy_set_header X-Real-IP $remote_addr;         .retrieve()
+
+    }
+
+}         .bodyToMono(ProcessingResult.class);# Windows: Download from mongodb.com
+
+````
+
+}
+
+#### Kubernetes Deployment
+
+- **Certificates**: Transfer, migration, caste, domicile### **Batch Processing**
+
+````yaml
+
+# deployment.yaml // Batch processing
+
+apiVersion: apps/v1
+
+kind: Deployment public Mono<BatchProcessingResult> processBatch(BatchRequest request) {# Verify MongoDB connection
+
+metadata:
+
+  name: document-processor     return webClient.post()
+
+spec:
+
+  replicas: 3         .uri("/api/process/documents")curl http://localhost:8000/health- **Entrance Documents**: Scorecards and admit cards
+
+  selector:
+
+    matchLabels:         .contentType(MediaType.APPLICATION_JSON)
+
+      app: document-processor
+
+  template:         .bodyValue(request)# Check database_connected: true
+
+    metadata:
+
+      labels:         .retrieve()
+
+        app: document-processor
+
+    spec:         .bodyToMono(BatchProcessingResult.class);```- **Identity Documents**: Passport photos```python
+
+      containers:
+
+      - name: document-processor }
+
+        image: smart-document-processor:latest
+
+        ports:}
+
+        - containerPort: 8000
+
+        env:```
+
+        - name: GEMINI_API_KEY
+
+          valueFrom:## API Integration Guideimport asyncio
+
+            secretKeyRef:
+
+              name: slm-secret## Docker Deployment
+
+              key: api-key
+
+        resources:
+
+          requests:
+
+            memory: "256Mi"### Docker Build & Run
+
+            cpu: "200m"
+
+          limits:### REST API Endpoints### 🔄 Integration Optionsimport aiohttp
+
+            memory: "512Mi"
+
+            cpu: "500m"```bash
+
+---
+
+apiVersion: v1# Build image
+
+kind: Service
+
+metadata:docker build -t smart-document-processor .
+
+  name: document-processor-service
+
+spec:#### **Single Document Processing**- **Single Document Processing**: Upload and process immediately
+
+  selector:
+
+    app: document-processor# Run container
+
+  ports:
+
+  - protocol: TCPdocker run -d \```bash
+
+    port: 80
+
+    targetPort: 8000--name doc-processor \
+
+  type: LoadBalancer
+
+```-p 8000:8000 \POST /api/process- **Batch Processing**: Multiple documents from URLsasync def process_documents(file_paths):
+
+
+
+## Contributing-e GEMINI_API_KEY=your_slm_api_key_here \
+
+
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.-e DEBUG=false \Content-Type: multipart/form-data
+
+
+
+### Development Setupsmart-document-processor
+
+
+
+1. **Fork & Clone**- **MongoDB Integration**: Automatic data storage    async with aiohttp.ClientSession() as session:
+
+   ```bash
+
+   git clone https://github.com/your-username/ocr-automation-pipeline.git# Check logs
+
+   cd ocr-automation-pipeline
+
+   ```docker logs doc-processor# Form fields:
+
+
+
+2. **Create Development Environment**
+
+   ```bash
+
+   python -m venv venv# Test health- file: [IMAGE/PDF FILE]- **Webhook Callbacks**: Async result delivery        tasks = []
+
+   source venv/bin/activate
+
+   pip install -r requirements-dev.txtcurl http://localhost:8000/health
+
+````
+
+`````- document_type: "aadhaar_card" (optional)
+
+3. **Install Pre-commit Hooks**
+
+   ```bash
+
+   pre-commit install
+
+   ```### Docker Compose (Recommended)- student_id: "STUDENT_123" (optional, for MongoDB storage)- **Service Registration**: External service connectivity        for file_path in file_paths:
+
+
+
+4. **Run Tests**
+
+   ```bash
+
+   pytest --cov=srcCreate `docker-compose.yml`:````
+
+`````
+
+`````yaml
+
+5. **Create Pull Request**
+
+   - Follow conventional commit messagesversion: '3.8'            task = process_single_document(session, file_path)
+
+   - Add tests for new features
+
+   - Update documentationservices:
+
+
+
+### Contribution Typesdocument-processor:**Example using curl:**
+
+
+
+- **Bug Fixes**: Fix issues and improve reliability build: .
+
+- **Features**: Add new document types or capabilities
+
+- **Documentation**: Improve guides and examples ports:```bash### 🎯 Advanced Features            tasks.append(task)
+
+- **Performance**: Optimize processing speed
+
+- **Security**: Enhance security measures   - "8000:8000"
+
+- **Testing**: Improve test coverage
+
+ environment:curl -X POST "http://localhost:8000/api/process" \
+
+## Support
+
+   - GEMINI_API_KEY=${SLM_API_KEY}
+
+### Documentation
+
+   - MONGODB_URL=mongodb://mongodb:27017/document_processor  -F "file=@/path/to/aadhaar.jpg" \- **Data Normalization**: Consistent field formatting
+
+- **[API Reference](Docs/API.md)**: Complete endpoint documentation
+
+- **[Setup Guide](Docs/SETUP.md)**: Detailed installation instructions   - DEBUG=false
+
+- **[Security Policy](SECURITY.md)**: Security best practices
+
+- **[Changelog](CHANGELOG.md)**: Version history depends_on:  -F "document_type=aadhaar_card" \
+
+
+
+### Getting Help   - mongodb
+
+
+
+- **Issues**: [GitHub Issues](https://github.com/sanjanb/ocr-automation-pipeline/issues) restart: unless-stopped  -F "student_id=STUDENT_123"- **Validation Rules**: Document-specific checks        results = await asyncio.gather(*tasks)
+
+- **Discussions**: [GitHub Discussions](https://github.com/sanjanb/ocr-automation-pipeline/discussions)
+
+- **Email**: [Contact the maintainers](mailto:support@example.com)
+
+
+
+### Bug Reportsmongodb:```
+
+
+
+Please include: image: mongo:7-jammy
+
+- Environment details (Python version, OS)
+
+- Steps to reproduce ports:- **Confidence Thresholds**: Quality assurance return results
+
+- Expected vs actual behavior
+
+- Sample document (if possible)   - "27017:27017"
+
+- Error logs
+
+ volumes:**Example Response:**
+
+### Feature Requests
+
+   - mongodb_data:/data/db
+
+Please include:
+
+- Use case description restart: unless-stopped````json- **Error Handling**: Comprehensive error responses
+
+- Expected behavior
+
+- Implementation suggestions
+
+- Priority level
+
+volumes:{
+
+## License
+
+mongodb_data:
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+```  "success": true,- **Monitoring**: Health checks and logging# Process multiple documents concurrently
+
+### Commercial Use
+
+
+
+This software is free for commercial use. Attribution is appreciated but not required.
+
+Start services:  "document_type": "aadhaar_card",
+
+## Project Status
+
+```bash
+
+- **Active Development**: Regular updates and maintenance
+
+- **Production Ready**: Used in real-world applications# Set environment variable  "confidence_score": 0.95,results = asyncio.run(process_documents(["doc1.jpg", "doc2.jpg"]))
+
+- **Well Documented**: Comprehensive guides and examples
+
+- **Community Supported**: Open to contributionsexport SLM_API_KEY=your_slm_api_key_here
+
+
+
+**Latest Version**: 2.0.0 (FastAPI Migration Complete)"processing_time": 2.34,
+
+
+
+---# Start all services
+
+
+
+## Acknowledgmentsdocker-compose up -d  "extracted_data": {## 🔧 Installation & Setup```
+
+
+
+- **Small Language Model (SLM)** for efficient document processing capabilities
+
+- **FastAPI Team** for the excellent async web framework
+
+- **MongoDB Team** for flexible document storage# View logs    "name": "राम प्रसाद शर्मा",
+
+- **Open Source Community** for inspiration and contributions
+
+docker-compose logs -f
+
+---
+
+ "aadhaar_number": "1234 5678 9012",
+
+<div align="center">
+
+# Stop services
+
+**Star this repository if it helps you build better document processing solutions!**
+
+docker-compose down    "date_of_birth": "01/01/1990",
+
+[Back to Top](#smart-document-processor---ai-powered-ocr-microservice)
+
+`````
+
+</div>
  "gender": "MALE",### Prerequisites### **Validation Results**
 
 ### Cloud Deployment
 
- "address": "123 Sample Street, City, State - 123456"
+"address": "123 Sample Street, City, State - 123456"
 
 #### **Azure Container Apps**
 
-```bash  },- **Python**: 3.10 or higher
+````````bash },- **Python**: 3.10 or higher
 
 # Deploy container app
 
@@ -997,15 +1867,15 @@ pytest tests/test_api.py -v
 
 pytest tests/test_core.py::test_document_processing -v  "document_type": "marksheet_10th",   ```  },
 
-```
+````````
 
 "batch_name": "admission_batch_1",
 
 ### API Testing
 
-"callback_url": "https://your-app.com/callback"  "confidence_score": 0.92,
+"callback_url": "https://your-app.com/callback" "confidence_score": 0.92,
 
-```bash
+`````````bash
 
 # Test health endpoint}
 
@@ -1199,7 +2069,7 @@ CORS_ORIGINS=http://localhost:3000,http://localhost:8080
 
 ## Performance & Scaling
 
-```
+`````````
 
 ### Benchmarks
 
@@ -1227,7 +2097,7 @@ GEMINI_API_KEY=your_actual_api_key_here### **Production Deployment**
 
 #### **Single Instance Optimization**
 
-```bashdef process_document(file_path, document_type="aadhaar_card"):   MONGODB_URL=mongodb://localhost:27017/document_processor# 1. Build production image
+````````bashdef process_document(file_path, document_type="aadhaar_card"):   MONGODB_URL=mongodb://localhost:27017/document_processor# 1. Build production image
 
 # Use multiple workers
 
@@ -1353,13 +2223,13 @@ source venv/bin/activate
 
 pip install -r requirements-dev.txt private final WebClient webClient;
 
-```
+````````
 
- uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
 
 3. **Run Tests**
 
-```bash public DocumentProcessorService(WebClient.Builder webClientBuilder) {
+`````bash public DocumentProcessorService(WebClient.Builder webClientBuilder) {
 
 pytest --cov=src
 
@@ -1580,7 +2450,7 @@ docker logs doc-processor
 
 curl http://localhost:8000/health- document_type: "aadhaar_card" (optional)2. Create feature branch (`git checkout -b feature/amazing-feature`)
 
-```
+`````
 
 - student_id: "STUDENT_123" (optional, for MongoDB storage)3. Commit changes (`git commit -m 'Add amazing feature'`)
 
@@ -1590,7 +2460,7 @@ curl http://localhost:8000/health- document_type: "aadhaar_card" (optional)2. Cr
 
 Create `docker-compose.yml`:
 
-```yaml5. Open Pull Request
+````yaml5. Open Pull Request
 
 version: '3.8'
 
@@ -1640,13 +2510,13 @@ volumes:
 
 mongodb_data:  "success": true,
 
-```
+````
 
 "document_type": "aadhaar_card",- Modern, responsive design
 
 Start services:
 
-```bash  "confidence_score": 0.95,- Mobile-friendly upload
+````bash "confidence_score": 0.95,- Mobile-friendly upload
 
 # Set environment variable
 
@@ -1724,7 +2594,7 @@ az containerapp create \
 
 --env-vars GEMINI_API_KEY=your_api_key_herePOST /api/process/documents
 
-```
+````
 
 Content-Type: application/json## 🏆 **Why Choose This Solution?**
 
@@ -1754,7 +2624,7 @@ docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/smart-document-processor:l
 
 #### **Google Cloud Run**
 
-```bash  "student_id": "STUDENT_123",- **Technical Depth**: Modern architecture, comprehensive features
+```````bash "student_id": "STUDENT_123",- **Technical Depth**: Modern architecture, comprehensive features
 
 # Build and deploy
 
@@ -1816,7 +2686,7 @@ pytest tests/test_api.py -v
 
 pytest tests/test_core.py::test_document_processing -v  "uri_field_name": "cloudinary_url",
 
-```
+```````
 
 "batch_size": 10## **Support**
 
@@ -1824,7 +2694,7 @@ pytest tests/test_core.py::test_document_processing -v  "uri_field_name": "cloud
 
 }
 
-```bash
+````bash
 
 # Generate HTML coverage report```- 🐛 **Issues**: [GitHub Issues](https://github.com/sanjanb/ocr-automation-pipeline/issues)
 
@@ -1840,13 +2710,13 @@ xdg-open htmlcov/index.html  # Linux
 
 start htmlcov/index.html  # Windows- **Examples**: [Examples Repository](https://github.com/sanjanb/ocr-automation-pipeline/tree/main/examples)
 
-```
+````
 
 #### **JavaScript/Node.js**
 
 ### API Testing
 
-```javascript---
+```````javascript---
 
 ```bash
 
@@ -2310,13 +3180,13 @@ git clone https://github.com/your-username/ocr-automation-pipeline.git  --env-va
 
 cd ocr-automation-pipeline```
 
-```
+```````
 
 #### **AWS ECS/Fargate**
 
 2. **Create Development Environment**
 
-```bash```bash
+`bash`bash
 
 python -m venv venv# Build and push to ECR
 
@@ -2324,7 +3194,7 @@ source venv/bin/activateaws ecr get-login-password --region us-east-1 | docker l
 
 pip install -r requirements-dev.txt
 
-```docker tag smart-document-processor:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/smart-document-processor:latest
+````docker tag smart-document-processor:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/smart-document-processor:latest
 
 
 
@@ -2334,7 +3204,7 @@ pip install -r requirements-dev.txt
 
 pre-commit install# Create ECS service using AWS CLI or Console
 
-`````````
+````
 
 4. **Run Tests**#### **Google Cloud Run**
 
