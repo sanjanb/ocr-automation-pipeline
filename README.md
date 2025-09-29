@@ -1,6 +1,6 @@
 # Smart Document Processor
 
-[![CI/CD Pipeline](https://github.com/s## **API Endpoints**njanb/ocr-automation-pipeline/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/sanjanb/ocr-automation-pipeline/actions)
+[![CI/CD Pipeline](https://github.com/sanjanb/ocr-automation-pipeline/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/sanjanb/ocr-automation-pipeline/actions)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
