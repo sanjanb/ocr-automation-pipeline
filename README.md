@@ -15,7 +15,7 @@
 
 A **production-ready FastAPI microservice** for AI-powered document processing using Google's Gemini 2.0 Flash model. Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.A **production-ready FastAPI microservice** for AI-powered document processing using Google's Gemini 2.0 Flash model. Extract structured data from Indian documents including Aadhaar cards, marksheets, certificates, and more.
 
-## Quick Start## **What This Does**
+## Quick Start **What This Does**
 
 `````bash## Quick Start
 
@@ -57,17 +57,8 @@ uvicorn app:app --reloadsource venv/bin/activate  # Linux/macOS### **Option 1: D
 
 `````
 
-# or venv\Scripts\activate # Windows
 
-**Access Points:**
-
-- **Web Interface**: http://localhost:8000```bash
-
-- **API Documentation**: http://localhost:8000/docs
-
-- **Health Check**: http://localhost:8000/health# 3. Install dependencies# 1. Clone repository
-
-## Table of Contentspip install -r requirements.txtgit clone https://github.com/sanjanb/ocr-automation-pipeline.git
+## Table of Contentspip
 
 - [Architecture Overview](#architecture-overview)cd ocr-automation-pipeline
 
@@ -88,8 +79,6 @@ uvicorn app:app --reloadsource venv/bin/activate  # Linux/macOS### **Option 1: D
 - [Contributing](#contributing)
 
 - [Support](#support)
-
-# 5. Start the service# 3. Set up environment
 
 ## Architecture Overview
 
