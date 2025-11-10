@@ -380,7 +380,7 @@ async def root():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>🚀 Quantum Document Processor</title>
+        <title>Quantum Document Processor</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
