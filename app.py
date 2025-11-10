@@ -1100,30 +1100,30 @@ async def root():
                 const progressContainer = `
                     <div class="progress-container">
                         <div class="progress-header">
-                            <div class="progress-title">🔄 Processing Document</div>
-                            <div class="progress-subtitle">AI-powered extraction in progress...</div>
+                            <div class="progress-title">⟨ QUANTUM NEURAL PROCESSING ⟩</div>
+                            <div class="progress-subtitle">█ Cyber-Enhanced Document Analysis Protocol █</div>
                         </div>
                         
                         <div class="progress-stages">
                             <div class="progress-stage" id="stage-upload">
-                                <div class="stage-icon">📄</div>
-                                <div class="stage-label">Upload</div>
+                                <div class="stage-icon">⬆</div>
+                                <div class="stage-label">SYNC</div>
                             </div>
                             <div class="progress-stage" id="stage-analysis">
-                                <div class="stage-icon">🔍</div>
-                                <div class="stage-label">Analysis</div>
+                                <div class="stage-icon">◉</div>
+                                <div class="stage-label">SCAN</div>
                             </div>
                             <div class="progress-stage" id="stage-extraction">
-                                <div class="stage-icon">⚡</div>
-                                <div class="stage-label">Extraction</div>
+                                <div class="stage-icon">⟠</div>
+                                <div class="stage-label">DECODE</div>
                             </div>
                             <div class="progress-stage" id="stage-validation">
-                                <div class="stage-icon">✅</div>
-                                <div class="stage-label">Validation</div>
+                                <div class="stage-icon">◈</div>
+                                <div class="stage-label">VERIFY</div>
                             </div>
                             <div class="progress-stage" id="stage-storage">
-                                <div class="stage-icon">💾</div>
-                                <div class="stage-label">Storage</div>
+                                <div class="stage-icon">◇</div>
+                                <div class="stage-label">MATRIX</div>
                             </div>
                         </div>
                         
@@ -1131,7 +1131,7 @@ async def root():
                             <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
                         </div>
                         
-                        <div class="progress-text" id="progress-text">Initializing processing pipeline...</div>
+                        <div class="progress-text" id="progress-text">► Initializing quantum processing matrix...</div>
                     </div>
                 `;
                 
@@ -1159,12 +1159,12 @@ async def root():
                     });
                 };
                 
-                // Start progress simulation
-                updateProgress('upload', 10, 'Uploading document...');
+                // Start progress simulation with cyberpunk text
+                updateProgress('upload', 10, '► Establishing quantum uplink...');
                 
-                setTimeout(() => updateProgress('analysis', 25, 'Analyzing document structure...'), 500);
-                setTimeout(() => updateProgress('extraction', 60, 'Extracting data with SLM model...'), 1200);
-                setTimeout(() => updateProgress('validation', 85, 'Validating extracted information...'), 2500);
+                setTimeout(() => updateProgress('analysis', 25, '◉ Neural pattern recognition active...'), 600);
+                setTimeout(() => updateProgress('extraction', 60, '⟠ Decrypting data matrix with SLM protocol...'), 1400);
+                setTimeout(() => updateProgress('validation', 85, '◈ Cross-referencing cyber database...'), 2800);
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -1183,8 +1183,8 @@ async def root():
                     const result = response.data;
                     
                     if (result.success) {
-                        // Complete progress
-                        updateProgress('storage', 100, 'Processing completed successfully! 🎉');
+                        // Complete progress with futuristic message
+                        updateProgress('storage', 100, '◇ Data successfully integrated into neural matrix! ⟨ SUCCESS ⟩');
                         
                         // Wait a moment to show completion, then show results
                         setTimeout(() => {
@@ -1241,8 +1241,8 @@ async def root():
                             `;
                         }, 1000); // Wait 1 second to show completion before results
                     } else {
-                        // Update progress to show error
-                        updateProgress('extraction', 60, 'Processing encountered an issue...');
+                        // Update progress to show error with cyberpunk styling
+                        updateProgress('extraction', 60, '⟠ Neural interference detected... ⟨ RETRY PROTOCOL ACTIVE ⟩');
                         
                         setTimeout(() => {
                             resultDiv.className = 'result error';
