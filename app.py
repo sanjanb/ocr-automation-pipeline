@@ -108,6 +108,14 @@ def sanitize_error_for_frontend(error_message: str, extracted_data: dict = None)
         else:
             return "Document processing temporarily unavailable. Please try again in a moment."
     
+    # Check for model availability errors
+    if any(keyword in error_lower for keyword in ['model', 'not found', 'api version', 'v1beta', 'generatecontent']):
+        # Check if we have any extracted data (fallback worked)
+        if extracted_data and any(value for value in extracted_data.values() if value):
+            return "Document processed successfully using backup system"
+        else:
+            return "Document processing temporarily unavailable due to service updates. Please try again."
+    
     # Check for other common API errors to hide
     if any(keyword in error_lower for keyword in ['api key', 'authentication', 'unauthorized']):
         return "Service temporarily unavailable. Please contact support."
