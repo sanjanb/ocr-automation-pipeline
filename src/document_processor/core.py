@@ -67,15 +67,15 @@ class DocumentProcessor:
         # Initialize model with priority order
         model_options = [
             model_name,
-            os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),  # Use env variable
-            'gemini-1.5-flash',  # More stable fallback
-            'gemini-1.5-pro',
-            'gemini-pro-vision'
+            os.getenv("GEMINI_MODEL", "gemini-pro"),  # Use env variable
+            'gemini-pro',  # Most stable and widely available
+            'gemini-pro-vision',
+            'gemini-1.5-pro'
         ] if model_name else [
-            os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),  # Use env variable first
-            'gemini-1.5-flash',  # Stable model
-            'gemini-1.5-pro',
-            'gemini-pro-vision'
+            os.getenv("GEMINI_MODEL", "gemini-pro"),  # Use env variable first
+            'gemini-pro',  # Most stable model
+            'gemini-pro-vision',
+            'gemini-1.5-pro'
         ]
         
         self.model = None
