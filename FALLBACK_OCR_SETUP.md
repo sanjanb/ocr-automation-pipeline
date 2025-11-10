@@ -3,6 +3,7 @@
 ## Install Tesseract OCR (Optional - for quota fallback)
 
 ### Windows
+
 ```bash
 # Download and install from: https://github.com/UB-Mannheim/tesseract/wiki
 # Or use chocolatey:
@@ -14,6 +15,7 @@ pip install pytesseract
 ```
 
 ### Linux (Ubuntu/Debian)
+
 ```bash
 sudo apt-get update
 sudo apt-get install tesseract-ocr
@@ -21,12 +23,14 @@ pip install pytesseract
 ```
 
 ### macOS
+
 ```bash
 brew install tesseract
 pip install pytesseract
 ```
 
 ## Quick Test
+
 ```python
 import pytesseract
 from PIL import Image
@@ -38,12 +42,14 @@ print(text)
 ```
 
 ## Benefits
+
 - Provides basic text extraction when Gemini API quota is exceeded
 - No API costs for fallback processing
 - Works offline
 - Handles basic document text extraction
 
 ## Limitations
+
 - Lower accuracy compared to Gemini AI
 - No structured data extraction
 - Requires manual field mapping
