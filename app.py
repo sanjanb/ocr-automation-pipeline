@@ -954,8 +954,8 @@ async def root():
                             `;
                         }, 1000); // Wait 1 second to show completion before results
                     } else {
-                        // Update progress to show error with cyberpunk styling
-                        updateProgress('extraction', 60, '⟠ Neural interference detected... ⟨ RETRY PROTOCOL ACTIVE ⟩');
+                        // Update progress to show processing issue
+                        updateProgress('extraction', 60, 'Processing encountered an issue...');
                         
                         setTimeout(() => {
                             resultDiv.className = 'result error';
