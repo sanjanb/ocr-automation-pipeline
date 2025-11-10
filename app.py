@@ -850,24 +850,34 @@ async def root():
                             `;
                         }, 1000); // Wait 1 second to show completion before results
                     } else {
-                        resultDiv.className = 'result error';
-                        resultDiv.innerHTML = `
-                            <h3>⏳ Processing Issue</h3>
-                            <p><strong>Status:</strong> ${result.error_message || 'Processing temporarily unavailable'}</p>
-                            <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                                <small><strong>💡 Tip:</strong> Please try again in a moment. The system is optimizing performance.</small>
-                            </div>
-                        `;
+                        // Update progress to show error
+                        updateProgress('extraction', 60, 'Processing encountered an issue...');
+                        
+                        setTimeout(() => {
+                            resultDiv.className = 'result error';
+                            resultDiv.innerHTML = `
+                                <h3>⏳ Processing Issue</h3>
+                                <p><strong>Status:</strong> ${result.error_message || 'Processing temporarily unavailable'}</p>
+                                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                                    <small><strong>💡 Tip:</strong> Please try again in a moment. The system is optimizing performance.</small>
+                                </div>
+                            `;
+                        }, 1000);
                     }
                 } catch (error) {
-                    resultDiv.className = 'result error';
-                    resultDiv.innerHTML = `
-                        <h3>⏳ Connection Issue</h3>
-                        <p><strong>Status:</strong> Unable to connect to processing service</p>
-                        <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                            <small><strong>💡 Solution:</strong> Please check your connection and try again.</small>
-                        </div>
-                    `;
+                    // Update progress to show connection error
+                    updateProgress('analysis', 20, 'Connection issue detected...');
+                    
+                    setTimeout(() => {
+                        resultDiv.className = 'result error';
+                        resultDiv.innerHTML = `
+                            <h3>⏳ Connection Issue</h3>
+                            <p><strong>Status:</strong> Unable to connect to processing service</p>
+                            <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                                <small><strong>💡 Solution:</strong> Please check your connection and try again.</small>
+                            </div>
+                        `;
+                    }, 1000);
                 }
                 
                 // Reset button
