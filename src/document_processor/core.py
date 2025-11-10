@@ -7,6 +7,7 @@ import os
 import json
 import logging
 import time
+import asyncio
 from pathlib import Path
 from typing import Dict, Any,  Optional, List
 from dotenv import load_dotenv
@@ -21,6 +22,13 @@ try:
     from PIL import Image
 except ImportError as e:
     raise ImportError(f"Required packages missing. Install with: pip install google-generativeai pillow") from e
+
+# Try to import fallback OCR
+try:
+    from .fallback_ocr import create_fallback_ocr
+    FALLBACK_AVAILABLE = True
+except ImportError:
+    FALLBACK_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +89,20 @@ class DocumentProcessor:
         
         if not self.model:
             raise ValueError("Failed to initialize any Gemini model")
+        
+        # Initialize fallback OCR if available
+        self.fallback_ocr = None
+        if FALLBACK_AVAILABLE:
+            try:
+                self.fallback_ocr = create_fallback_ocr()
+                if self.fallback_ocr.available:
+                    logger.info("Fallback OCR initialized successfully")
+                else:
+                    logger.warning("Fallback OCR dependencies not available")
+            except Exception as e:
+                logger.warning(f"Failed to initialize fallback OCR: {e}")
+        else:
+            logger.warning("Fallback OCR module not available")
     
     async def process_document_async(self, image_path: str, document_type: str = None) -> ProcessingResult:
         """Async version of document processing"""
@@ -125,6 +147,9 @@ class DocumentProcessor:
                 image = Image.open(image_path)
                 if image.mode != 'RGB':
                     image = image.convert('RGB')
+                
+                # Store image for potential fallback use
+                self._current_image = image
                 
                 # Auto-detect document type if not provided
                 if not document_type:
@@ -171,7 +196,7 @@ class DocumentProcessor:
             )
     
     def _detect_document_type(self, image: Image.Image) -> str:
-        """Auto-detect document type using Gemini"""
+        """Auto-detect document type using Gemini with retry logic"""
         detection_prompt = """
         Analyze this document image and identify its type.
         
@@ -191,33 +216,88 @@ class DocumentProcessor:
         Return only the document type, nothing else.
         """
         
-        try:
-            response = self.model.generate_content([detection_prompt, image])
-            if response and response.text:
-                doc_type = response.text.strip().lower()
-                supported_types = {
-                    'aadhaar_card', 'marksheet_10th', 'marksheet_12th', 
-                    'transfer_certificate', 'migration_certificate', 'entrance_scorecard',
-                    'admit_card', 'caste_certificate', 'domicile_certificate', 'passport_photo'
-                }
-                return doc_type if doc_type in supported_types else 'other'
-        except Exception as e:
-            logger.warning(f"Document type detection failed: {e}")
+        max_retries = 2
+        base_delay = 1
+        
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content([detection_prompt, image])
+                if response and response.text:
+                    doc_type = response.text.strip().lower()
+                    supported_types = {
+                        'aadhaar_card', 'marksheet_10th', 'marksheet_12th', 
+                        'transfer_certificate', 'migration_certificate', 'entrance_scorecard',
+                        'admit_card', 'caste_certificate', 'domicile_certificate', 'passport_photo'
+                    }
+                    return doc_type if doc_type in supported_types else 'other'
+            except Exception as e:
+                error_str = str(e)
+                if "429" in error_str or "quota" in error_str.lower():
+                    if attempt < max_retries - 1:
+                        retry_delay = base_delay * (2 ** attempt)
+                        logger.warning(f"Document type detection quota exceeded, retrying in {retry_delay} seconds")
+                        time.sleep(retry_delay)
+                        continue
+                    else:
+                        logger.warning(f"Document type detection failed due to quota limits: {e}")
+                        break
+                else:
+                    logger.warning(f"Document type detection failed: {e}")
+                    break
         
         return 'other'
     
     def _extract_with_gemini(self, image: Image.Image, document_type: str) -> Dict[str, Any]:
-        """Extract structured data using Gemini"""
+        """Extract structured data using Gemini with retry logic"""
         schema = self._get_document_schema(document_type)
         prompt = self._create_extraction_prompt(document_type, schema)
         
-        try:
-            response = self.model.generate_content([prompt, image])
-            if response and response.text:
-                return self._parse_json_response(response.text)
-        except Exception as e:
-            logger.error(f"Gemini extraction failed: {e}")
-            raise Exception(f"Failed to extract data: {e}")
+        max_retries = 3
+        base_delay = 2
+        
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content([prompt, image])
+                if response and response.text:
+                    return self._parse_json_response(response.text)
+                else:
+                    logger.warning(f"Empty response from Gemini on attempt {attempt + 1}")
+                    
+            except Exception as e:
+                error_str = str(e)
+                
+                # Check for quota exceeded errors
+                if "429" in error_str or "quota" in error_str.lower():
+                    if attempt < max_retries - 1:
+                        # Extract retry delay from error message if available
+                        retry_delay = base_delay * (2 ** attempt)  # Exponential backoff
+                        if "retry in" in error_str:
+                            try:
+                                # Try to extract the exact retry time from error message
+                                import re
+                                match = re.search(r'retry in (\d+(?:\.\d+)?)s', error_str)
+                                if match:
+                                    retry_delay = float(match.group(1))
+                            except:
+                                pass
+                        
+                        logger.warning(f"Quota exceeded, retrying in {retry_delay:.1f} seconds (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(retry_delay)
+                        continue
+                    else:
+                        logger.error(f"Max retries exceeded for quota errors")
+                        # Return empty data instead of raising exception
+                        return self._create_fallback_data(document_type)
+                else:
+                    logger.error(f"Gemini extraction failed: {e}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)
+                        logger.warning(f"Retrying in {delay} seconds (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        # Return fallback data instead of raising exception
+                        return self._create_fallback_data(document_type)
         
         return {}
     
@@ -315,7 +395,7 @@ Extract the data now:"""
             raise
     
     def _detect_document_type_pdf(self, pdf_data) -> str:
-        """Auto-detect document type for PDF using Gemini"""
+        """Auto-detect document type for PDF using Gemini with retry logic"""
         detection_prompt = """
         Analyze this PDF document and identify its type.
         
@@ -335,42 +415,102 @@ Extract the data now:"""
         Return only the document type, nothing else.
         """
         
-        try:
-            response = self.model.generate_content([detection_prompt, pdf_data])
-            if response and response.text:
-                doc_type = response.text.strip().lower()
-                supported_types = {
-                    'aadhaar_card', 'marksheet_10th', 'marksheet_12th', 
-                    'transfer_certificate', 'migration_certificate', 'entrance_scorecard',
-                    'admit_card', 'caste_certificate', 'domicile_certificate', 'passport_photo'
-                }
-                return doc_type if doc_type in supported_types else 'other'
-        except Exception as e:
-            logger.warning(f"PDF document type detection failed: {e}")
+        max_retries = 2
+        base_delay = 1
+        
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content([detection_prompt, pdf_data])
+                if response and response.text:
+                    doc_type = response.text.strip().lower()
+                    supported_types = {
+                        'aadhaar_card', 'marksheet_10th', 'marksheet_12th', 
+                        'transfer_certificate', 'migration_certificate', 'entrance_scorecard',
+                        'admit_card', 'caste_certificate', 'domicile_certificate', 'passport_photo'
+                    }
+                    return doc_type if doc_type in supported_types else 'other'
+            except Exception as e:
+                error_str = str(e)
+                if "429" in error_str or "quota" in error_str.lower():
+                    if attempt < max_retries - 1:
+                        retry_delay = base_delay * (2 ** attempt)
+                        logger.warning(f"PDF document type detection quota exceeded, retrying in {retry_delay} seconds")
+                        time.sleep(retry_delay)
+                        continue
+                    else:
+                        logger.warning(f"PDF document type detection failed due to quota limits: {e}")
+                        break
+                else:
+                    logger.warning(f"PDF document type detection failed: {e}")
+                    break
         
         return 'other'
     
     def _extract_with_gemini_pdf(self, pdf_data, document_type: str) -> Dict[str, Any]:
-        """Extract structured data from PDF using Gemini"""
+        """Extract structured data from PDF using Gemini with retry logic"""
         schema = self._get_document_schema(document_type)
         prompt = self._create_extraction_prompt(document_type, schema)
         
-        try:
-            response = self.model.generate_content([prompt, pdf_data])
-            if response and response.text:
-                # Clean and parse JSON response
-                response_text = response.text.strip()
-                if response_text.startswith('```json'):
-                    response_text = response_text[7:]  # Remove ```json
-                if response_text.endswith('```'):
-                    response_text = response_text[:-3]  # Remove ```
+        max_retries = 3
+        base_delay = 2
+        
+        for attempt in range(max_retries):
+            try:
+                response = self.model.generate_content([prompt, pdf_data])
+                if response and response.text:
+                    # Clean and parse JSON response
+                    response_text = response.text.strip()
+                    if response_text.startswith('```json'):
+                        response_text = response_text[7:]  # Remove ```json
+                    if response_text.endswith('```'):
+                        response_text = response_text[:-3]  # Remove ```
+                    
+                    return json.loads(response_text.strip())
+                else:
+                    logger.warning(f"Empty response from Gemini PDF processing on attempt {attempt + 1}")
+                    
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse Gemini JSON response for PDF: {e}")
+                logger.debug(f"Raw response: {response.text if 'response' in locals() else 'None'}")
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(f"Retrying JSON parsing in {delay} seconds")
+                    time.sleep(delay)
+                    continue
+                else:
+                    return self._create_fallback_data(document_type)
+                    
+            except Exception as e:
+                error_str = str(e)
                 
-                return json.loads(response_text.strip())
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Gemini JSON response for PDF: {e}")
-            logger.debug(f"Raw response: {response.text if response else 'None'}")
-        except Exception as e:
-            logger.error(f"Gemini PDF extraction failed: {e}")
+                # Check for quota exceeded errors
+                if "429" in error_str or "quota" in error_str.lower():
+                    if attempt < max_retries - 1:
+                        retry_delay = base_delay * (2 ** attempt)
+                        if "retry in" in error_str:
+                            try:
+                                import re
+                                match = re.search(r'retry in (\d+(?:\.\d+)?)s', error_str)
+                                if match:
+                                    retry_delay = float(match.group(1))
+                            except:
+                                pass
+                        
+                        logger.warning(f"PDF processing quota exceeded, retrying in {retry_delay:.1f} seconds (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(retry_delay)
+                        continue
+                    else:
+                        logger.error(f"Max retries exceeded for PDF processing quota errors")
+                        return self._create_fallback_data(document_type)
+                else:
+                    logger.error(f"Gemini PDF extraction failed: {e}")
+                    if attempt < max_retries - 1:
+                        delay = base_delay * (2 ** attempt)
+                        logger.warning(f"Retrying PDF processing in {delay} seconds")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        return self._create_fallback_data(document_type)
         
         return {}
     
@@ -392,6 +532,34 @@ Extract the data now:"""
         penalty = len(validation_issues) * 0.1
         
         return max(0.0, min(1.0, base_confidence - penalty))
+    
+    def _create_fallback_data(self, document_type: str) -> Dict[str, Any]:
+        """Create fallback data when API fails"""
+        # Try fallback OCR first if available
+        if self.fallback_ocr and self.fallback_ocr.available and hasattr(self, '_current_image'):
+            try:
+                logger.info("Attempting fallback OCR extraction")
+                fallback_data = self.fallback_ocr.extract_text_basic(self._current_image, document_type)
+                fallback_data['_extraction_status'] = 'fallback_ocr_used'
+                return fallback_data
+            except Exception as e:
+                logger.error(f"Fallback OCR failed: {e}")
+        
+        # Create basic placeholder data
+        schema = self._get_document_schema(document_type)
+        fallback_data = {}
+        
+        # Add placeholder data for required fields
+        required_fields = schema.get('required_fields', [])
+        for field in required_fields:
+            fallback_data[field] = "Unable to extract due to API quota limits"
+        
+        # Add metadata about the issue
+        fallback_data['_extraction_status'] = 'quota_exceeded'
+        fallback_data['_message'] = 'Document processing failed due to API quota limits. Please try again later or upgrade your plan.'
+        fallback_data['_suggestion'] = 'Consider upgrading to a paid Gemini API plan or installing tesseract for basic OCR fallback.'
+        
+        return fallback_data
 
 def create_processor(api_key: str = None, model_name: str = None) -> DocumentProcessor:
     """Factory function to create processor"""

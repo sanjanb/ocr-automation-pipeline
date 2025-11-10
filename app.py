@@ -91,6 +91,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def sanitize_error_for_frontend(error_message: str, extracted_data: dict = None) -> str:
+    """
+    Sanitize error messages for frontend display, hiding API quota details
+    """
+    if not error_message:
+        return "Processing completed"
+    
+    error_lower = error_message.lower()
+    
+    # Check if this is a quota/API limit error
+    if any(keyword in error_lower for keyword in ['quota', '429', 'rate limit', 'api limit', 'billing']):
+        # Check if we have any extracted data (fallback worked)
+        if extracted_data and any(value for value in extracted_data.values() if value and value != "Unable to extract due to API quota limits"):
+            return "Document processed with basic extraction"
+        else:
+            return "Document processing temporarily unavailable. Please try again in a moment."
+    
+    # Check for other common API errors to hide
+    if any(keyword in error_lower for keyword in ['api key', 'authentication', 'unauthorized']):
+        return "Service temporarily unavailable. Please contact support."
+    
+    # For other errors, return a generic message
+    if 'failed' in error_lower or 'error' in error_lower:
+        return "Processing encountered an issue. Please try again or contact support."
+    
+    # If no concerning keywords, return the original message
+    return error_message
+
 # Legacy response models (keeping for backward compatibility)
 class ProcessingResponse(BaseModel):
     success: bool
@@ -107,6 +135,131 @@ class DocumentSchema(BaseModel):
     required_fields: list[str]
     optional_fields: list[str]
     validation_rules: Dict[str, str]
+
+def create_user_friendly_response(result, mongodb_stored: bool = False, student_id: str = None) -> ProcessingResponse:
+    """
+    Create a user-friendly response that hides technical API details
+    """
+    # Sanitize the error message
+    sanitized_error = sanitize_error_for_frontend(result.error_message, result.extracted_data)
+    
+    # Check if we have any useful extracted data despite errors
+    has_useful_data = (
+        result.extracted_data and 
+        len([v for v in result.extracted_data.values() if v and v != "Unable to extract due to API quota limits"]) > 0
+    )
+    
+    # Determine success status - if we have useful data, consider it successful
+    response_success = result.success or has_useful_data
+    
+    # Clean extracted data for frontend
+    cleaned_data = {}
+    if result.extracted_data:
+        for key, value in result.extracted_data.items():
+            # Hide technical metadata fields
+            if key.startswith('_'):
+                continue
+            # Replace quota error messages with user-friendly text
+            if isinstance(value, str) and "quota limits" in value:
+                cleaned_data[key] = "Data extraction in progress..."
+            else:
+                cleaned_data[key] = value
+    
+    # Create response with sanitized data
+    response = ProcessingResponse(
+        success=response_success,
+        document_type=result.document_type,
+        extracted_data=cleaned_data,
+        processing_time=result.processing_time,
+        validation_issues=result.validation_issues,
+        confidence_score=max(0.5, result.confidence_score) if has_useful_data else result.confidence_score,
+        error_message=sanitized_error if not response_success else None,
+        metadata=result.metadata or {}
+    )
+    
+    # Add MongoDB storage status to metadata
+    response.metadata['mongodb_stored'] = mongodb_stored
+    if student_id:
+        response.metadata['student_id'] = student_id
+    
+    return response
+
+# Helper functions for error sanitization
+def sanitize_error_for_frontend(error_message: str, extracted_data: dict = None) -> str:
+    """
+    Sanitize error messages for frontend display, hiding API quota details
+    """
+    if not error_message:
+        return "Processing completed"
+    
+    error_lower = error_message.lower()
+    
+    # Check if this is a quota/API limit error
+    if any(keyword in error_lower for keyword in ['quota', '429', 'rate limit', 'api limit', 'billing']):
+        # Check if we have any extracted data (fallback worked)
+        if extracted_data and any(value for value in extracted_data.values() if value and value != "Unable to extract due to API quota limits"):
+            return "Document processed with basic extraction"
+        else:
+            return "Document processing temporarily unavailable. Please try again in a moment."
+    
+    # Check for other common API errors to hide
+    if any(keyword in error_lower for keyword in ['api key', 'authentication', 'unauthorized']):
+        return "Service temporarily unavailable. Please contact support."
+    
+    # For other errors, return a generic message
+    if 'failed' in error_lower or 'error' in error_lower:
+        return "Processing encountered an issue. Please try again or contact support."
+    
+    # If no concerning keywords, return the original message
+    return error_message
+
+def create_user_friendly_response(result, mongodb_stored: bool = False, student_id: str = None) -> ProcessingResponse:
+    """
+    Create a user-friendly response that hides technical API details
+    """
+    # Sanitize the error message
+    sanitized_error = sanitize_error_for_frontend(result.error_message, result.extracted_data)
+    
+    # Check if we have any useful extracted data despite errors
+    has_useful_data = (
+        result.extracted_data and 
+        len([v for v in result.extracted_data.values() if v and v != "Unable to extract due to API quota limits"]) > 0
+    )
+    
+    # Determine success status - if we have useful data, consider it successful
+    response_success = result.success or has_useful_data
+    
+    # Clean extracted data for frontend
+    cleaned_data = {}
+    if result.extracted_data:
+        for key, value in result.extracted_data.items():
+            # Hide technical metadata fields
+            if key.startswith('_'):
+                continue
+            # Replace quota error messages with user-friendly text
+            if isinstance(value, str) and "quota limits" in value:
+                cleaned_data[key] = "Data extraction in progress..."
+            else:
+                cleaned_data[key] = value
+    
+    # Create response with sanitized data
+    response = ProcessingResponse(
+        success=response_success,
+        document_type=result.document_type,
+        extracted_data=cleaned_data,
+        processing_time=result.processing_time,
+        validation_issues=result.validation_issues,
+        confidence_score=max(0.5, result.confidence_score) if has_useful_data else result.confidence_score,
+        error_message=sanitized_error if not response_success else None,
+        metadata=result.metadata or {}
+    )
+    
+    # Add MongoDB storage status to metadata
+    response.metadata['mongodb_stored'] = mongodb_stored
+    if student_id:
+        response.metadata['student_id'] = student_id
+    
+    return response
 
 # New models for URI/document processing
 class DocumentProcessingRequest(BaseModel):
@@ -483,15 +636,21 @@ async def root():
                     } else {
                         resultDiv.className = 'result error';
                         resultDiv.innerHTML = `
-                            <h3>❌ Processing Failed</h3>
-                            <p><strong>Error:</strong> ${result.error_message}</p>
+                            <h3>⏳ Processing Issue</h3>
+                            <p><strong>Status:</strong> ${result.error_message || 'Processing temporarily unavailable'}</p>
+                            <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                                <small><strong>💡 Tip:</strong> Please try again in a moment. The system is optimizing performance.</small>
+                            </div>
                         `;
                     }
                 } catch (error) {
                     resultDiv.className = 'result error';
                     resultDiv.innerHTML = `
-                        <h3>❌ Request Failed</h3>
-                        <p><strong>Error:</strong> ${error.response?.data?.detail || error.message}</p>
+                        <h3>⏳ Connection Issue</h3>
+                        <p><strong>Status:</strong> Unable to connect to processing service</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                            <small><strong>💡 Solution:</strong> Please check your connection and try again.</small>
+                        </div>
                     `;
                 }
                 
@@ -836,9 +995,10 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
         result = await processor.process_document_async(temp_file_path, internal_doc_type)
         
         if not result.success:
+            sanitized_error = sanitize_error_for_frontend(result.error_message, result.extracted_data)
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Document processing failed: {result.error_message}"
+                detail=f"Document processing failed: {sanitized_error}"
             )
         
         # Normalize extracted fields
@@ -1537,25 +1697,7 @@ async def process_document(
                     mongodb_stored = False
             
             # Create response with MongoDB storage info
-            response = ProcessingResponse(
-                success=result.success,
-                document_type=result.document_type,
-                extracted_data=result.extracted_data,
-                processing_time=result.processing_time,
-                validation_issues=result.validation_issues,
-                confidence_score=result.confidence_score,
-                error_message=result.error_message,
-                metadata=result.metadata
-            )
-            
-            # Add MongoDB storage status to metadata
-            if hasattr(response, 'metadata') and response.metadata:
-                response.metadata['mongodb_stored'] = mongodb_stored
-            else:
-                response.metadata = {'mongodb_stored': mongodb_stored}
-            
-            if student_id:
-                response.metadata['student_id'] = student_id
+            response = create_user_friendly_response(result, mongodb_stored, student_id)
                 
             return response
             

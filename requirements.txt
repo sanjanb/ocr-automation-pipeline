@@ -40,3 +40,6 @@ motor
 aiohttp>=3.9.0
 requests>=2.31.0
 pydantic_settings>=2.0.0
+
+# Optional: Fallback OCR (install manually if needed)
+pytesseract>=0.3.10  # Uncomment to enable fallback OCR
