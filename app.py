@@ -185,34 +185,6 @@ def create_user_friendly_response(result, mongodb_stored: bool = False, student_
     return response
 
 # Helper functions for error sanitization
-def sanitize_error_for_frontend(error_message: str, extracted_data: dict = None) -> str:
-    """
-    Sanitize error messages for frontend display, hiding API quota details
-    """
-    if not error_message:
-        return "Processing completed"
-    
-    error_lower = error_message.lower()
-    
-    # Check if this is a quota/API limit error
-    if any(keyword in error_lower for keyword in ['quota', '429', 'rate limit', 'api limit', 'billing']):
-        # Check if we have any extracted data (fallback worked)
-        if extracted_data and any(value for value in extracted_data.values() if value and value != "Unable to extract due to API quota limits"):
-            return "Document processed with basic extraction"
-        else:
-            return "Document processing temporarily unavailable. Please try again in a moment."
-    
-    # Check for other common API errors to hide
-    if any(keyword in error_lower for keyword in ['api key', 'authentication', 'unauthorized']):
-        return "Service temporarily unavailable. Please contact support."
-    
-    # For other errors, return a generic message
-    if 'failed' in error_lower or 'error' in error_lower:
-        return "Processing encountered an issue. Please try again or contact support."
-    
-    # If no concerning keywords, return the original message
-    return error_message
-
 def create_user_friendly_response(result, mongodb_stored: bool = False, student_id: str = None) -> ProcessingResponse:
     """
     Create a user-friendly response that hides technical API details
