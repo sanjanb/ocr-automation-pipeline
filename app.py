@@ -407,49 +407,23 @@ async def root():
             }
             
             .header { 
-                background: 
-                    linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%),
-                    linear-gradient(45deg, #1a1a2e 0%, #16213e 100%);
-                color: #00ffff; 
+                background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+                color: white; 
                 padding: 40px;
                 text-align: center;
-                position: relative;
-                border-bottom: 1px solid rgba(0, 255, 255, 0.3);
             }
             
-            .header::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 1px;
-                background: linear-gradient(90deg, transparent, #00ffff, transparent);
-                animation: glow-line 2s ease-in-out infinite alternate;
-            }
             .header h1 { 
-                font-family: 'Orbitron', monospace;
-                font-size: 3em; 
-                font-weight: 900; 
+                font-size: 2.8em; 
+                font-weight: 700; 
                 margin-bottom: 15px;
-                text-transform: uppercase;
-                letter-spacing: 3px;
-                background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
-                background-size: 300% 300%;
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-                animation: rainbow-text 3s ease-in-out infinite;
-                text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+                letter-spacing: -1px;
             }
             
             .header p { 
-                font-family: 'Exo 2', sans-serif;
                 opacity: 0.9; 
                 font-size: 1.2em;
-                color: #00ffff;
-                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-                letter-spacing: 1px;
+                font-weight: 300;
             }
             
             .content { 
