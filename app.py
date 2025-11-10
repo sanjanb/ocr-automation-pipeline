@@ -792,19 +792,24 @@ async def root():
                     const result = response.data;
                     
                     if (result.success) {
-                        resultDiv.className = 'result';
+                        // Complete progress
+                        updateProgress('storage', 100, 'Processing completed successfully! 🎉');
                         
-                        // Check if data was stored in MongoDB
-                        const mongoStored = result.metadata?.mongodb_stored;
-                        const studentId = result.metadata?.student_id;
-                        
-                        if (mongoStored) {
-                            showToast(`✅ Document processed and  to database for student: ${studentId}`, 'success');
-                        } else if (studentId) {
-                            showToast(`⚠️ Document processed but failed to save to database`, 'error');
-                        } else {
-                            showToast(`✅ Document processed successfully (not saved - no student ID provided)`, 'success');
-                        }
+                        // Wait a moment to show completion, then show results
+                        setTimeout(() => {
+                            resultDiv.className = 'result';
+                            
+                            // Check if data was stored in MongoDB
+                            const mongoStored = result.metadata?.mongodb_stored;
+                            const studentId = result.metadata?.student_id;
+                            
+                            if (mongoStored) {
+                                showToast(`✅ Document processed and saved to database for student: ${studentId}`, 'success');
+                            } else if (studentId) {
+                                showToast(`⚠️ Document processed but failed to save to database`, 'error');
+                            } else {
+                                showToast(`✅ Document processed successfully (not saved - no student ID provided)`, 'success');
+                            }
                         
                         resultDiv.innerHTML = `
                             <div class="metrics">
