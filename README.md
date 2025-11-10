@@ -65,12 +65,13 @@ docker-compose up -d
 ### **SLM Model Configuration**
 
 The system comes with a pre-configured Small Language Model that provides:
+
 - **Intelligent Document Processing**: Advanced AI-powered text extraction
-- **Multi-Format Support**: Handles images and PDFs seamlessly  
+- **Multi-Format Support**: Handles images and PDFs seamlessly
 - **Confidence Scoring**: Built-in accuracy assessment
 - **Auto Document Detection**: Smart document type identification
 
-*No additional setup required - the SLM model is ready to use out of the box*
+_No additional setup required - the SLM model is ready to use out of the box_
 
 ## **Architecture**
 
