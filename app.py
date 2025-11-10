@@ -388,61 +388,22 @@ async def root():
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { 
-                font-family: 'Orbitron', 'Courier New', monospace;
-                background: 
-                    radial-gradient(circle at 20% 80%, rgba(120, 255, 255, 0.1) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 120, 255, 0.1) 0%, transparent 50%),
-                    linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0f051d 100%);
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh; 
-                color: #00ffff; 
+                color: #333; 
                 padding: 20px;
-                position: relative;
-                overflow-x: hidden;
-            }
-            
-            body::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: 
-                    repeating-linear-gradient(
-                        90deg,
-                        transparent,
-                        transparent 100px,
-                        rgba(0, 255, 255, 0.03) 100px,
-                        rgba(0, 255, 255, 0.03) 101px
-                    );
-                pointer-events: none;
-                z-index: 1;
+                margin: 0;
             }
             
             .container { 
                 max-width: 1000px; 
                 margin: 0 auto; 
-                background: rgba(10, 10, 10, 0.9);
-                border: 2px solid rgba(0, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.95);
                 border-radius: 20px; 
-                box-shadow: 
-                    0 0 50px rgba(0, 255, 255, 0.2),
-                    inset 0 0 50px rgba(0, 255, 255, 0.05);
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
                 overflow: hidden;
                 backdrop-filter: blur(10px);
-                position: relative;
-                z-index: 2;
-            }
-            
-            .container::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 2px;
-                background: linear-gradient(90deg, transparent, #00ffff, transparent);
-                animation: scanline 3s linear infinite;
             }
             
             .header { 
