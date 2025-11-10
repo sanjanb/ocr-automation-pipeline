@@ -380,11 +380,10 @@ async def root():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Quantum Document Processor</title>
+        <title>Smart Document Processor</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { 
