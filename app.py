@@ -663,107 +663,242 @@ async def root():
                 margin: 20px 0;
             }
             
-            /* Progress Bar Styles */
+            /* Futuristic Progress Bar System */
             .progress-container {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 30px;
-                border-radius: 15px;
-                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-                margin: 20px 0;
-                color: white;
+                background: 
+                    radial-gradient(circle at 50% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                    linear-gradient(135deg, rgba(0, 20, 40, 0.9) 0%, rgba(10, 0, 30, 0.9) 100%);
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 
+                    0 0 50px rgba(0, 255, 255, 0.2),
+                    inset 0 0 30px rgba(0, 100, 200, 0.1);
+                margin: 30px 0;
+                color: #00ffff;
+                position: relative;
+                backdrop-filter: blur(10px);
+                overflow: hidden;
+            }
+            
+            .progress-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+                animation: scanner 4s linear infinite;
             }
             
             .progress-header {
                 text-align: center;
-                margin-bottom: 25px;
+                margin-bottom: 30px;
+                position: relative;
+                z-index: 2;
             }
             
             .progress-title {
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 8px;
+                font-family: 'Orbitron', monospace;
+                font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                background: linear-gradient(45deg, #00ffff, #ff00ff);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                animation: title-pulse 2s ease-in-out infinite alternate;
+                text-transform: uppercase;
+                letter-spacing: 3px;
             }
             
             .progress-subtitle {
-                font-size: 14px;
-                opacity: 0.9;
+                font-family: 'Exo 2', sans-serif;
+                font-size: 16px;
+                opacity: 0.8;
+                color: #00aaff;
+                letter-spacing: 1px;
             }
             
             .progress-stages {
                 display: flex;
                 justify-content: space-between;
-                margin-bottom: 20px;
+                margin-bottom: 30px;
                 position: relative;
+                z-index: 2;
+            }
+            
+            .progress-stages::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 10%;
+                right: 10%;
+                height: 2px;
+                background: linear-gradient(90deg, 
+                    rgba(0, 255, 255, 0.2), 
+                    rgba(0, 255, 255, 0.5), 
+                    rgba(0, 255, 255, 0.2)
+                );
+                z-index: 1;
+                border-radius: 1px;
             }
             
             .progress-stage {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                z-index: 2;
-                background: rgba(255, 255, 255, 0.1);
-                padding: 15px;
-                border-radius: 10px;
+                z-index: 3;
+                background: rgba(0, 30, 60, 0.8);
+                padding: 20px 15px;
+                border-radius: 15px;
                 min-width: 120px;
-                transition: all 0.3s ease;
+                transition: all 0.4s ease;
+                border: 2px solid rgba(0, 255, 255, 0.2);
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .progress-stage::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+                opacity: 0;
+                transition: opacity 0.4s;
             }
             
             .progress-stage.active {
-                background: rgba(255, 255, 255, 0.2);
-                transform: scale(1.05);
-                box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+                background: rgba(0, 100, 200, 0.3);
+                border-color: #00ffff;
+                transform: scale(1.05) translateY(-5px);
+                box-shadow: 
+                    0 10px 30px rgba(0, 255, 255, 0.3),
+                    inset 0 0 30px rgba(0, 255, 255, 0.1);
+            }
+            
+            .progress-stage.active::before {
+                opacity: 1;
+                animation: stage-scan 1.5s linear infinite;
             }
             
             .progress-stage.completed {
-                background: rgba(76, 175, 80, 0.3);
+                background: rgba(0, 200, 100, 0.3);
+                border-color: #00ff88;
+                box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
             }
             
             .stage-icon {
-                width: 40px;
-                height: 40px;
+                width: 50px;
+                height: 50px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 18px;
-                margin-bottom: 8px;
-                background: rgba(255, 255, 255, 0.2);
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                transition: all 0.3s ease;
+                font-size: 20px;
+                margin-bottom: 10px;
+                background: radial-gradient(circle, rgba(0, 255, 255, 0.2), rgba(0, 100, 200, 0.4));
+                border: 2px solid rgba(0, 255, 255, 0.4);
+                transition: all 0.4s ease;
+                position: relative;
+            }
+            
+            .stage-icon::before {
+                content: '';
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                border-radius: 50%;
+                background: conic-gradient(from 0deg, #00ffff, #0088ff, #00ffff);
+                z-index: -1;
+                opacity: 0;
+                animation: icon-rotate 2s linear infinite;
             }
             
             .progress-stage.active .stage-icon {
-                background: rgba(255, 255, 255, 0.3);
-                border-color: rgba(255, 255, 255, 0.6);
-                animation: pulse 1.5s infinite;
+                background: radial-gradient(circle, rgba(0, 255, 255, 0.4), rgba(0, 150, 255, 0.6));
+                border-color: #00ffff;
+                animation: icon-pulse 1.5s ease-in-out infinite;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            }
+            
+            .progress-stage.active .stage-icon::before {
+                opacity: 1;
             }
             
             .progress-stage.completed .stage-icon {
-                background: #4CAF50;
-                border-color: #4CAF50;
+                background: radial-gradient(circle, rgba(0, 255, 136, 0.4), rgba(0, 200, 100, 0.6));
+                border-color: #00ff88;
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
             }
             
             .stage-label {
-                font-size: 12px;
+                font-family: 'Exo 2', sans-serif;
+                font-size: 13px;
                 text-align: center;
-                font-weight: 500;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #00aaff;
+                transition: color 0.4s;
+            }
+            
+            .progress-stage.active .stage-label {
+                color: #00ffff;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+            }
+            
+            .progress-stage.completed .stage-label {
+                color: #00ff88;
             }
             
             .progress-bar {
                 width: 100%;
-                height: 8px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 4px;
+                height: 12px;
+                background: rgba(0, 50, 100, 0.4);
+                border-radius: 6px;
                 overflow: hidden;
-                margin: 20px 0;
+                margin: 25px 0;
+                position: relative;
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
             }
             
             .progress-fill {
                 height: 100%;
-                background: linear-gradient(90deg, #4CAF50, #66BB6A);
-                border-radius: 4px;
-                transition: width 0.5s ease;
+                background: linear-gradient(90deg, 
+                    #00ffff 0%, 
+                    #0088ff 50%, 
+                    #00ffff 100%
+                );
+                border-radius: 6px;
+                transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
                 position: relative;
+                overflow: hidden;
+                box-shadow: 
+                    0 0 20px rgba(0, 255, 255, 0.6),
+                    inset 0 0 10px rgba(255, 255, 255, 0.2);
+            }
+            
+            .progress-fill::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, 
+                    transparent, 
+                    rgba(255, 255, 255, 0.4), 
+                    transparent
+                );
+                animation: progress-shine 2s linear infinite;
             }
             
             .progress-fill::after {
@@ -773,27 +908,82 @@ async def root():
                 left: 0;
                 bottom: 0;
                 right: 0;
-                background-image: linear-gradient(45deg, rgba(255,255,255,.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.2) 50%, rgba(255,255,255,.2) 75%, transparent 75%, transparent);
-                background-size: 15px 15px;
-                animation: move 1s linear infinite;
+                background-image: repeating-linear-gradient(
+                    45deg,
+                    rgba(255,255,255,0.1) 0px,
+                    rgba(255,255,255,0.1) 10px,
+                    transparent 10px,
+                    transparent 20px
+                );
+                animation: progress-stripes 1s linear infinite;
             }
             
             .progress-text {
                 text-align: center;
-                font-size: 14px;
+                font-family: 'Exo 2', sans-serif;
+                font-size: 16px;
                 font-weight: 500;
-                margin-top: 10px;
+                margin-top: 15px;
+                color: #00aaff;
+                position: relative;
+                z-index: 2;
+                text-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
             }
             
-            @keyframes pulse {
-                0% { transform: scale(1); opacity: 1; }
-                50% { transform: scale(1.1); opacity: 0.8; }
-                100% { transform: scale(1); opacity: 1; }
+            /* Futuristic Animations */
+            @keyframes rainbow-text {
+                0%, 100% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
             }
             
-            @keyframes move {
+            @keyframes glow-line {
+                from { opacity: 0.5; }
+                to { opacity: 1; }
+            }
+            
+            @keyframes scanline {
+                0% { left: -100%; }
+                100% { left: 100%; }
+            }
+            
+            @keyframes scanner {
+                0% { left: -100%; }
+                100% { left: 100%; }
+            }
+            
+            @keyframes button-glow {
+                from { box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1); }
+                to { box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.2); }
+            }
+            
+            @keyframes title-pulse {
+                from { text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+                to { text-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(255, 0, 255, 0.3); }
+            }
+            
+            @keyframes stage-scan {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+            
+            @keyframes icon-pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+            
+            @keyframes icon-rotate {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            @keyframes progress-shine {
+                0% { left: -100%; }
+                100% { left: 100%; }
+            }
+            
+            @keyframes progress-stripes {
                 0% { background-position: 0 0; }
-                100% { background-position: 15px 15px; }
+                100% { background-position: 20px 0; }
             }
             .api-links { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; }
             .api-links h4 { margin-bottom: 15px; color: #333; }
