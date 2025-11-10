@@ -872,12 +872,12 @@ async def root():
                     });
                 };
                 
-                // Start progress simulation with cyberpunk text
-                updateProgress('upload', 10, '► Establishing quantum uplink...');
+                // Start progress with clean messages
+                updateProgress('upload', 15, 'Uploading document...');
                 
-                setTimeout(() => updateProgress('analysis', 25, '◉ Neural pattern recognition active...'), 600);
-                setTimeout(() => updateProgress('extraction', 60, '⟠ Decrypting data matrix with SLM protocol...'), 1400);
-                setTimeout(() => updateProgress('validation', 85, '◈ Cross-referencing cyber database...'), 2800);
+                setTimeout(() => updateProgress('analysis', 35, 'Analyzing document structure...'), 500);
+                setTimeout(() => updateProgress('extraction', 70, 'Extracting data with AI model...'), 1200);
+                setTimeout(() => updateProgress('validation', 90, 'Validating extracted data...'), 2200);
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -896,8 +896,8 @@ async def root():
                     const result = response.data;
                     
                     if (result.success) {
-                        // Complete progress with futuristic message
-                        updateProgress('storage', 100, '◇ Data successfully integrated into neural matrix! ⟨ SUCCESS ⟩');
+                        // Complete progress with success message
+                        updateProgress('storage', 100, 'Processing completed successfully!');
                         
                         // Wait a moment to show completion, then show results
                         setTimeout(() => {
