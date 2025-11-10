@@ -56,13 +56,19 @@ class DocumentProcessor:
         if not self.api_key:
             raise ValueError("Gemini API key required. Set GEMINI_API_KEY environment variable.")
         
+        # Get configuration from environment
+        self.max_retries = int(os.getenv("MAX_RETRIES", "3"))
+        self.retry_delay = int(os.getenv("RETRY_DELAY", "60"))
+        self.enable_fallback = os.getenv("ENABLE_FALLBACK_OCR", "true").lower() == "true"
+        
         # Configure Gemini
         genai.configure(api_key=self.api_key)
         
-        # Initialize model with fallbacks
+        # Initialize model with priority order
         model_options = [
             model_name,
-            'gemini-2.0-flash-exp',
+            os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),  # Use env variable
+            'gemini-1.5-flash',  # More stable fallback
             'gemini-1.5-flash',
             'gemini-1.5-pro',
             'gemini-pro-vision'

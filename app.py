@@ -707,7 +707,7 @@ async def root():
         <div class="container">
             <div class="header">
                 <h1> Smart Document Processor</h1>
-                <p>AI-powered document extraction using Local API</p>
+                <p>AI-powered document extraction using Local AI</p>
             </div>
             
             <div class="content">
@@ -1275,7 +1275,7 @@ async def process_document_from_cloudinary(request: ProcessDocumentRequest):
     
     Main endpoint for the document processing microservice:
     1. Downloads image from Cloudinary URL OR uses local file path
-    2. Processes with local API to extract structured data
+    2. Processes with PI to extract structured data
     3. Normalizes fields based on document type
     4. Stores/updates in MongoDB under student record
     
