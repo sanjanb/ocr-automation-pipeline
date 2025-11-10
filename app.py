@@ -700,11 +700,80 @@ async def root():
                     return;
                 }
                 
-                // Show loading
+                // Show progressive loading
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = '<div class="loading">Processing your document (image/PDF)...</div>';
+                
+                // Initialize progress bar
+                const progressContainer = `
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <div class="progress-title">🔄 Processing Document</div>
+                            <div class="progress-subtitle">AI-powered extraction in progress...</div>
+                        </div>
+                        
+                        <div class="progress-stages">
+                            <div class="progress-stage" id="stage-upload">
+                                <div class="stage-icon">📄</div>
+                                <div class="stage-label">Upload</div>
+                            </div>
+                            <div class="progress-stage" id="stage-analysis">
+                                <div class="stage-icon">🔍</div>
+                                <div class="stage-label">Analysis</div>
+                            </div>
+                            <div class="progress-stage" id="stage-extraction">
+                                <div class="stage-icon">⚡</div>
+                                <div class="stage-label">Extraction</div>
+                            </div>
+                            <div class="progress-stage" id="stage-validation">
+                                <div class="stage-icon">✅</div>
+                                <div class="stage-label">Validation</div>
+                            </div>
+                            <div class="progress-stage" id="stage-storage">
+                                <div class="stage-icon">💾</div>
+                                <div class="stage-label">Storage</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="progress-text" id="progress-text">Initializing processing pipeline...</div>
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = progressContainer;
+                
+                // Progress simulation function
+                const updateProgress = (stage, percentage, text) => {
+                    // Update progress bar
+                    document.getElementById('progress-fill').style.width = percentage + '%';
+                    document.getElementById('progress-text').textContent = text;
+                    
+                    // Update stage indicators
+                    const stages = ['upload', 'analysis', 'extraction', 'validation', 'storage'];
+                    const currentIndex = stages.indexOf(stage);
+                    
+                    stages.forEach((stageName, index) => {
+                        const stageElement = document.getElementById('stage-' + stageName);
+                        stageElement.classList.remove('active', 'completed');
+                        
+                        if (index < currentIndex) {
+                            stageElement.classList.add('completed');
+                        } else if (index === currentIndex) {
+                            stageElement.classList.add('active');
+                        }
+                    });
+                };
+                
+                // Start progress simulation
+                updateProgress('upload', 10, 'Uploading document...');
+                
+                setTimeout(() => updateProgress('analysis', 25, 'Analyzing document structure...'), 500);
+                setTimeout(() => updateProgress('extraction', 60, 'Extracting data with SLM model...'), 1200);
+                setTimeout(() => updateProgress('validation', 85, 'Validating extracted information...'), 2500);
                 
                 const formData = new FormData();
                 formData.append('file', fileInput.files[0]);
