@@ -49,8 +49,8 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Document Processor API...")
     try:
-        # Initialize document processor
-        processor = create_processor()
+        # Initialize document processor with configured model
+        processor = create_processor(model_name=settings.gemini_model)
         logger.info("Document processor initialized successfully")
         
         # Initialize database connection

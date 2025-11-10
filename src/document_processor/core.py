@@ -69,12 +69,11 @@ class DocumentProcessor:
             model_name,
             os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),  # Use env variable
             'gemini-1.5-flash',  # More stable fallback
-            'gemini-1.5-flash',
             'gemini-1.5-pro',
             'gemini-pro-vision'
         ] if model_name else [
-            'gemini-2.0-flash-exp',
-            'gemini-1.5-flash', 
+            os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),  # Use env variable first
+            'gemini-1.5-flash',  # Stable model
             'gemini-1.5-pro',
             'gemini-pro-vision'
         ]
