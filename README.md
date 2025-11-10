@@ -34,8 +34,7 @@ pip install -r requirements.txt
 
 # 3. Set up environment (copy from template and update)
 cp .env.example .env
-# Edit .env file with your SLM API key and MongoDB URL
-echo "GEMINI_API_KEY=your_slm_api_key_here" >> .env
+# Edit .env file with your MongoDB URL - SLM model is pre-configured
 echo "MONGODB_URL=your_mongodb_connection_string" >> .env
 
 # 4. Run the application
@@ -55,7 +54,7 @@ cd ocr-automation-pipeline
 
 # 2. Run with Docker Compose
 cp .env.example .env
-# Edit .env with your SLM API key
+# Edit .env with your MongoDB URL - SLM model is pre-configured
 docker-compose up -d
 
 # 3. Access application
@@ -63,18 +62,22 @@ docker-compose up -d
 # Health Check: http://localhost:8000/health
 ```
 
-### **Get SLM API Key**
+### **SLM Model Configuration**
 
-1. Obtain your SLM model API key from your provider
-2. Create new project and API key
-3. Copy key to your `.env` file
+The system comes with a pre-configured Small Language Model that provides:
+- **Intelligent Document Processing**: Advanced AI-powered text extraction
+- **Multi-Format Support**: Handles images and PDFs seamlessly  
+- **Confidence Scoring**: Built-in accuracy assessment
+- **Auto Document Detection**: Smart document type identification
+
+*No additional setup required - the SLM model is ready to use out of the box*
 
 ## **Architecture**
 
 ```mermaid
 graph TD
     A[Document Upload] --> B[FastAPI Microservice]
-    B --> C[SLM Model Processor]
+    B --> C[SLM Technology Processor]
     C --> D[Field Extraction & Validation]
     D --> E[MongoDB Storage]
     E --> F[Student Document Management]
@@ -104,7 +107,7 @@ graph TD
 
 ### **Core Processing**
 
-- **SLM Model Integration**: Direct image-to-JSON extraction with confidence scoring
+- **SLM Technology Integration**: Direct image-to-JSON extraction with confidence scoring using advanced Small Language Models
 - **Multi-format Support**: Images (JPG, PNG, WebP, GIF) and PDF documents
 - **Auto Document Detection**: AI-powered document type identification
 - **Field Validation**: Schema-based validation with custom rules per document type
@@ -294,7 +297,6 @@ docker build -t document-processor:latest .
 # 2. Run with production settings
 docker run -d \
   -p 8000:8000 \
-  -e GEMINI_API_KEY=your_slm_api_key \
   -e MONGODB_URL=your_mongodb_url \
   -e DEBUG=false \
   -e LOG_LEVEL=INFO \
@@ -330,7 +332,7 @@ curl http://localhost:8000/health
 ```
 ocr-automation-pipeline/
 ├── src/document_processor/     # Core processing logic
-│   ├── core.py                # SLM Model processor
+│   ├── core.py                # SLM Technology processor
 │   ├── schemas.py             # Document schemas & validation
 │   ├── models.py              # Pydantic models
 │   ├── database.py            # MongoDB integration
