@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # API Configuration
     gemini_api_key: str = Field(..., env="GEMINI_API_KEY", description="Gemini API key")
-    gemini_model: str = Field("gemini-2.0-flash-exp", env="GEMINI_MODEL", description="Gemini model to use")
+    gemini_model: str = Field("gemini-1.5-flash", env="GEMINI_MODEL", description="Gemini model to use")
     
     # Database Configuration
     mongodb_url: str = Field("DBLINK", env="MONGODB_URL", description="MongoDB connection string")
@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     # Validation Configuration
     min_confidence_threshold: float = Field(0.5, env="MIN_CONFIDENCE_THRESHOLD", description="Minimum confidence for valid extraction")
     enable_validation: bool = Field(True, env="ENABLE_VALIDATION", description="Enable data validation")
+    
+    # Retry and Fallback Configuration
+    max_retries: int = Field(3, env="MAX_RETRIES", description="Maximum retry attempts for quota exceeded")
+    retry_delay: int = Field(60, env="RETRY_DELAY", description="Base delay in seconds between retries")
+    enable_fallback_ocr: bool = Field(True, env="ENABLE_FALLBACK_OCR", description="Enable Tesseract fallback when quota exceeded")
     
     # Logging Configuration
     log_level: str = Field("INFO", env="LOG_LEVEL", description="Logging level")
