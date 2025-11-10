@@ -810,44 +810,45 @@ async def root():
                             } else {
                                 showToast(`✅ Document processed successfully (not saved - no student ID provided)`, 'success');
                             }
-                        
-                        resultDiv.innerHTML = `
-                            <div class="metrics">
-                                <div class="metric">
-                                    <div class="metric-value">${result.document_type.replace('_', ' ').replace(/\\b\\w/g, l => l.toUpperCase())}</div>
-                                    <div class="metric-label">Document Type</div>
-                                </div>
-                                <div class="metric">
-                                    <div class="metric-value">${(result.confidence_score * 100).toFixed(0)}%</div>
-                                    <div class="metric-label">Confidence</div>
-                                </div>
-                                <div class="metric">
-                                    <div class="metric-value">${result.processing_time.toFixed(2)}s</div>
-                                    <div class="metric-label">Processing Time</div>
-                                </div>
-                                <div class="metric">
-                                    <div class="metric-value">${mongoStored ? 'Saved' : '❌ Not Saved'}</div>
-                                    <div class="metric-label">Database Storage</div>
-                                </div>
-                            </div>
                             
-                            ${result.validation_issues && result.validation_issues.length > 0 ? `
-                            <div class="validation-issues">
-                                <h4>⚠️ Validation Issues:</h4>
-                                ${result.validation_issues.map(issue => `<div class="issue">${issue}</div>`).join('')}
-                            </div>
-                            ` : ''}
-                            
-                            <h4>Extracted Data:</h4>
-                            <div class="json-display">${JSON.stringify(result.extracted_data, null, 2)}</div>
-                            
-                            ${studentId && mongoStored ? `
-                            <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; border-left: 4px solid #4CAF50;">
-                                <strong>Success!</strong> Document has been stored in MongoDB for student <strong>${studentId}</strong>.
-                                <br><small>You can retrieve this data later using the student ID.</small>
-                            </div>
-                            ` : ''}
-                        `;
+                            resultDiv.innerHTML = `
+                                <div class="metrics">
+                                    <div class="metric">
+                                        <div class="metric-value">${result.document_type.replace('_', ' ').replace(/\\b\\w/g, l => l.toUpperCase())}</div>
+                                        <div class="metric-label">Document Type</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">${(result.confidence_score * 100).toFixed(0)}%</div>
+                                        <div class="metric-label">Confidence</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">${result.processing_time.toFixed(2)}s</div>
+                                        <div class="metric-label">Processing Time</div>
+                                    </div>
+                                    <div class="metric">
+                                        <div class="metric-value">${mongoStored ? 'Saved' : '❌ Not Saved'}</div>
+                                        <div class="metric-label">Database Storage</div>
+                                    </div>
+                                </div>
+                                
+                                ${result.validation_issues && result.validation_issues.length > 0 ? `
+                                <div class="validation-issues">
+                                    <h4>⚠️ Validation Issues:</h4>
+                                    ${result.validation_issues.map(issue => `<div class="issue">${issue}</div>`).join('')}
+                                </div>
+                                ` : ''}
+                                
+                                <h4>Extracted Data:</h4>
+                                <div class="json-display">${JSON.stringify(result.extracted_data, null, 2)}</div>
+                                
+                                ${studentId && mongoStored ? `
+                                <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                                    <strong>Success!</strong> Document has been stored in MongoDB for student <strong>${studentId}</strong>.
+                                    <br><small>You can retrieve this data later using the student ID.</small>
+                                </div>
+                                ` : ''}
+                            `;
+                        }, 1000); // Wait 1 second to show completion before results
                     } else {
                         resultDiv.className = 'result error';
                         resultDiv.innerHTML = `
