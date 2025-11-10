@@ -7,12 +7,12 @@
 
 ![Smart Document Processor Interface](assets/Screenshot%202025-09-29%20163803.png)
 
-> **AI-powered document processing microservice using SLM Model with FastAPI**  
+> **AI-powered document processing microservice using advanced SLM technology with FastAPI**  
 > Complete OCR automation pipeline with MongoDB storage, batch processing, and VTU approval workflows.
 
 ## **What This Does**
 
-- **SLM Model Integration**: Advanced AI processing with confidence scoring and validation
+- **SLM Technology Integration**: Advanced Small Language Model processing with confidence scoring and validation
 - **Lightning Fast**: 2-5 second processing with async FastAPI endpoints
 - **MongoDB Storage**: Complete student document management with VTU approval workflows
 - **Batch Processing**: Process multiple documents from URIs with callback support
