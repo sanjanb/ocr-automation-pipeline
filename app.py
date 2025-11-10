@@ -452,7 +452,148 @@ async def root():
                 padding: 10px; margin-bottom: 10px; color: #856404;
             }
             
-            .loading { text-align: center; color: #666; }
+            .loading { 
+                text-align: center; 
+                padding: 30px;
+                color: #666;
+                font-size: 16px;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                border-radius: 10px;
+                margin: 20px 0;
+            }
+            
+            /* Progress Bar Styles */
+            .progress-container {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+                margin: 20px 0;
+                color: white;
+            }
+            
+            .progress-header {
+                text-align: center;
+                margin-bottom: 25px;
+            }
+            
+            .progress-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+            
+            .progress-subtitle {
+                font-size: 14px;
+                opacity: 0.9;
+            }
+            
+            .progress-stages {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                position: relative;
+            }
+            
+            .progress-stage {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                z-index: 2;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                border-radius: 10px;
+                min-width: 120px;
+                transition: all 0.3s ease;
+            }
+            
+            .progress-stage.active {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+            }
+            
+            .progress-stage.completed {
+                background: rgba(76, 175, 80, 0.3);
+            }
+            
+            .stage-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                margin-bottom: 8px;
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                transition: all 0.3s ease;
+            }
+            
+            .progress-stage.active .stage-icon {
+                background: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.6);
+                animation: pulse 1.5s infinite;
+            }
+            
+            .progress-stage.completed .stage-icon {
+                background: #4CAF50;
+                border-color: #4CAF50;
+            }
+            
+            .stage-label {
+                font-size: 12px;
+                text-align: center;
+                font-weight: 500;
+            }
+            
+            .progress-bar {
+                width: 100%;
+                height: 8px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+                overflow: hidden;
+                margin: 20px 0;
+            }
+            
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #4CAF50, #66BB6A);
+                border-radius: 4px;
+                transition: width 0.5s ease;
+                position: relative;
+            }
+            
+            .progress-fill::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background-image: linear-gradient(45deg, rgba(255,255,255,.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.2) 50%, rgba(255,255,255,.2) 75%, transparent 75%, transparent);
+                background-size: 15px 15px;
+                animation: move 1s linear infinite;
+            }
+            
+            .progress-text {
+                text-align: center;
+                font-size: 14px;
+                font-weight: 500;
+                margin-top: 10px;
+            }
+            
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.1); opacity: 0.8; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            
+            @keyframes move {
+                0% { background-position: 0 0; }
+                100% { background-position: 15px 15px; }
+            }
             .api-links { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px; }
             .api-links h4 { margin-bottom: 15px; color: #333; }
             .api-links a { color: #4CAF50; text-decoration: none; margin-right: 20px; }
