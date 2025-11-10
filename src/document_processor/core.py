@@ -64,18 +64,20 @@ class DocumentProcessor:
         # Configure Gemini
         genai.configure(api_key=self.api_key)
         
-        # Initialize model with priority order
+        # Initialize model with priority order (using full model paths)
         model_options = [
             model_name,
-            os.getenv("GEMINI_MODEL", "gemini-pro"),  # Use env variable
-            'gemini-pro',  # Most stable and widely available
-            'gemini-pro-vision',
-            'gemini-1.5-pro'
+            os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash"),  # Use env variable
+            'models/gemini-2.5-flash',  # Latest stable model
+            'models/gemini-2.0-flash',
+            'models/gemini-1.5-pro',
+            'gemini-pro'
         ] if model_name else [
-            os.getenv("GEMINI_MODEL", "gemini-pro"),  # Use env variable first
-            'gemini-pro',  # Most stable model
-            'gemini-pro-vision',
-            'gemini-1.5-pro'
+            os.getenv("GEMINI_MODEL", "models/gemini-2.5-flash"),  # Use env variable first
+            'models/gemini-2.5-flash',  # Latest stable model
+            'models/gemini-2.0-flash',
+            'models/gemini-1.5-pro',
+            'gemini-pro'
         ]
         
         self.model = None
